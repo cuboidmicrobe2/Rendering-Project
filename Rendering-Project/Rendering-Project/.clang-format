@@ -1,0 +1,5 @@
+# Visual Studio generated .clang-format file
+
+BasedOnStyle: Google
+
+indentWidth: 4
