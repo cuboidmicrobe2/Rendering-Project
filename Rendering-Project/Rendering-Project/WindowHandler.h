@@ -8,14 +8,16 @@ private:
 	HWND window;
 	UINT width;
 	UINT height;
+    HINSTANCE instance;
 
-	static LRESULT CALLBACK _WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+    LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
 	Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow);
 	~Window();
 
-	LRESULT CALLBACK WindowProc();
+	void Show(int nCmdShow) const;
 };
 
 #endif

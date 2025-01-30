@@ -3,38 +3,66 @@
 #include <iostream>
 #include <string>
 
-LRESULT Window::_WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { 
+LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    if (message == WM_NCCREATE) {
+        CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+        Window* window = reinterpret_cast<Window*>(pCreate->lpCreateParams);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+        window->window = hWnd;
+        return window->WindowProc(hWnd, message, wParam, lParam);
+    }
+
+    Window* window = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    if (window) {
+        return window->WindowProc(hWnd, message, wParam, lParam);
+    }
+
+    return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
     case WM_DESTROY: {
         PostQuitMessage(0);
         return 0;
     }
     default:
-        break;
+        return DefWindowProc(hWnd, message, wParam, lParam);
     }
-
-    return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 Window::Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow)
-    : width(width), height(height) {
+    : instance(instance), width(width), height(height), window(nullptr) {
 
-    const wchar_t CLASS_NAME[] = L"WINDOW CLASS";
+    const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
 
-    WNDCLASS wc = {.lpfnWndProc = this->_WindowProc, .hInstance = instance, .lpszClassName = CLASS_NAME};
+    WNDCLASSEX wc = {.cbSize = sizeof(WNDCLASSEX),
+                     .lpfnWndProc = Window::StaticWindowProc,
+                     .hInstance = this->instance,
+                     .lpszClassName = CLASS_NAME};
 
-    RegisterClass(&wc);
-
-    this->window = CreateWindowEx(0, CLASS_NAME, L"Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, this->width,
-                                  this->height, nullptr, nullptr, instance, nullptr);
-
-    if (window == nullptr) {
-        throw std::runtime_error("window bad, last error: " + std::to_string(GetLastError()));
+    if (!RegisterClassEx(&wc)) {
+        throw std::runtime_error("Failed to register window class, error: " + std::to_string(GetLastError()));
     }
 
-    ShowWindow(this->window, nCmdShow);
+    this->window = CreateWindowEx(0, CLASS_NAME, L"Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, this->width,
+                                  this->height, nullptr, nullptr, this->instance, this);
+
+    if (!this->window) {
+        throw std::runtime_error("Failed to create window, error: " + std::to_string(GetLastError()));
+    }
+
+    this->Show(nCmdShow);
 }
 
-Window::~Window() {}
+Window::~Window() {
+    if (this->window) {
+        DestroyWindow(this->window);
+    }
+    UnregisterClass(L"WINDOW_CLASS", this->instance);
+}
 
-LRESULT Window::WindowProc() { return LRESULT(); }
+void Window::Show(int nCmdShow) const {
+    ShowWindow(this->window, nCmdShow);
+    UpdateWindow(this->window);
+}

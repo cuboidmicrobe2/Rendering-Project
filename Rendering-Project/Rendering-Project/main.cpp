@@ -1,9 +1,11 @@
 #include "WindowHandler.h"
 
-// Main : ) 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
 
-	Window window(hInstance, 1920, 1080, nCmdShow);
+	const UINT WIDTH = 1920;
+    const UINT HEIGHT = 1080;
+
+	Window window(hInstance, WIDTH, HEIGHT, nCmdShow);
 
 	MSG msg = {};
     while (msg.message != WM_QUIT) {
@@ -15,4 +17,3 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	return 0;
 }
-
