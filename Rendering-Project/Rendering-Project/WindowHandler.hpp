@@ -22,6 +22,8 @@ class Window {
     InputHandler inputHandler;
     // inline void resetKeyPressAndRelease() { this->inputHandler.clearKeyStates(); }
     HWND GetHWND() const;
+    UINT GetWidth() const;
+    UINT GetHeight() const;
     void Show(int nCmdShow) const;
 };
 

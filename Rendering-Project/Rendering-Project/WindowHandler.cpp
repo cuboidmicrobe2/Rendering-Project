@@ -1,4 +1,4 @@
-#include "WindowHandler.h"
+#include "WindowHandler.hpp"
 #include <exception>
 #include <iostream>
 #include <string>
@@ -7,7 +7,7 @@
 LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if (message == WM_NCCREATE) {
         CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-        Window* window = reinterpret_cast<Window*>(pCreate->lpCreateParams);
+        Window* window        = reinterpret_cast<Window*>(pCreate->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
         window->hWnd = hWnd;
         return window->WindowProc(hWnd, message, wParam, lParam);
@@ -24,53 +24,51 @@ LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
 
-     // Keyboard Input
-    case WM_KEYDOWN: {
-        const unsigned char key = static_cast<unsigned char>(wParam);
-        const bool wasPreviouslyDown = lParam & (1 << 30);
-        if (!wasPreviouslyDown)
-            this->inputHandler.setKeyState(key, InputHandler::DOWN | InputHandler::PRESSED);
-        return 0;
-    }
-    case WM_KEYUP: {
-        const unsigned char key = static_cast<unsigned char>(wParam);
-        this->inputHandler.setKeyState(key, InputHandler::RELEASED);
-        return 0;
-    }
-    // Mouse Input
-    case WM_MOUSEMOVE: {
-        const int xPos = GET_X_LPARAM(lParam);
-        const int yPos = GET_Y_LPARAM(lParam);
-        this->inputHandler.setMousePos(xPos, yPos);
-        return 0;
-    }
-    case WM_LBUTTONDOWN: {
-        if (!this->inputHandler.LMDowm())
-            this->inputHandler.setLMouseKeyState(InputHandler::DOWN | InputHandler::PRESSED);
-        return 0;
-    }
-    case WM_LBUTTONUP: {
-        this->inputHandler.setLMouseKeyState(InputHandler::RELEASED);
-        return 0;
-    }
-    case WM_RBUTTONDOWN: {
-        if (!this->inputHandler.RMDowm())
-            this->inputHandler.setRMouseKeyState(InputHandler::DOWN | InputHandler::PRESSED);
-        return 0;
+            // Keyboard Input
+        case WM_KEYDOWN: {
+            const unsigned char key      = static_cast<unsigned char>(wParam);
+            const bool wasPreviouslyDown = lParam & (1 << 30);
+            if (!wasPreviouslyDown) this->inputHandler.setKeyState(key, InputHandler::DOWN | InputHandler::PRESSED);
+            return 0;
+        }
+        case WM_KEYUP: {
+            const unsigned char key = static_cast<unsigned char>(wParam);
+            this->inputHandler.setKeyState(key, InputHandler::RELEASED);
+            return 0;
+        }
+        // Mouse Input
+        case WM_MOUSEMOVE: {
+            const int xPos = GET_X_LPARAM(lParam);
+            const int yPos = GET_Y_LPARAM(lParam);
+            this->inputHandler.setMousePos(xPos, yPos);
+            return 0;
+        }
+        case WM_LBUTTONDOWN: {
+            if (!this->inputHandler.LMDowm())
+                this->inputHandler.setLMouseKeyState(InputHandler::DOWN | InputHandler::PRESSED);
+            return 0;
+        }
+        case WM_LBUTTONUP: {
+            this->inputHandler.setLMouseKeyState(InputHandler::RELEASED);
+            return 0;
+        }
+        case WM_RBUTTONDOWN: {
+            if (!this->inputHandler.RMDowm())
+                this->inputHandler.setRMouseKeyState(InputHandler::DOWN | InputHandler::PRESSED);
+            return 0;
+        }
+        case WM_RBUTTONUP: {
+            this->inputHandler.setRMouseKeyState(InputHandler::RELEASED);
+            return 0;
+        }
 
-    }
-    case WM_RBUTTONUP: {
-        this->inputHandler.setRMouseKeyState(InputHandler::RELEASED);
-        return 0;
-    }
-
-    // On X
-    case WM_DESTROY: {
-        PostQuitMessage(0);
-        return 0;
-    }
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
+        // On X
+        case WM_DESTROY: {
+            PostQuitMessage(0);
+            return 0;
+        }
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
     }
 }
 
@@ -79,9 +77,9 @@ Window::Window(const HINSTANCE instance, const UINT width, const UINT height, in
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
 
-    WNDCLASSEX wc = {.cbSize = sizeof(WNDCLASSEX),
-                     .lpfnWndProc = Window::StaticWindowProc,
-                     .hInstance = this->instance,
+    WNDCLASSEX wc = {.cbSize        = sizeof(WNDCLASSEX),
+                     .lpfnWndProc   = Window::StaticWindowProc,
+                     .hInstance     = this->instance,
                      .lpszClassName = CLASS_NAME};
 
     if (!RegisterClassEx(&wc)) {
@@ -106,6 +104,10 @@ Window::~Window() {
 }
 
 HWND Window::GetHWND() const { return this->hWnd; }
+
+UINT Window::GetWidth() const { return this->width; }
+
+UINT Window::GetHeight() const { return this->height; }
 
 void Window::Show(int nCmdShow) const {
     ShowWindow(this->hWnd, nCmdShow);
