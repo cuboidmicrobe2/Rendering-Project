@@ -2,6 +2,7 @@
 #include <exception>
 #include <iostream>
 #include <string>
+#include <windowsx.h>
 
 LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if (message == WM_NCCREATE) {
@@ -22,6 +23,48 @@ LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
+
+     // Keyboard Input
+    case WM_KEYDOWN: {
+        const unsigned char key = static_cast<unsigned char>(wParam);
+        const bool wasPreviouslyDown = lParam & (1 << 30);
+        if (!wasPreviouslyDown)
+            this->inputHandler.setKeyState(key, InputHandler::DOWN | InputHandler::PRESSED);
+        return 0;
+    }
+    case WM_KEYUP: {
+        const unsigned char key = static_cast<unsigned char>(wParam);
+        this->inputHandler.setKeyState(key, InputHandler::RELEASED);
+        return 0;
+    }
+    // Mouse Input
+    case WM_MOUSEMOVE: {
+        const int xPos = GET_X_LPARAM(lParam);
+        const int yPos = GET_Y_LPARAM(lParam);
+        this->inputHandler.setMousePos(xPos, yPos);
+        return 0;
+    }
+    case WM_LBUTTONDOWN: {
+        if (!this->inputHandler.LMDowm())
+            this->inputHandler.setLMouseKeyState(InputHandler::DOWN | InputHandler::PRESSED);
+        return 0;
+    }
+    case WM_LBUTTONUP: {
+        this->inputHandler.setLMouseKeyState(InputHandler::RELEASED);
+        return 0;
+    }
+    case WM_RBUTTONDOWN: {
+        if (!this->inputHandler.RMDowm())
+            this->inputHandler.setRMouseKeyState(InputHandler::DOWN | InputHandler::PRESSED);
+        return 0;
+
+    }
+    case WM_RBUTTONUP: {
+        this->inputHandler.setRMouseKeyState(InputHandler::RELEASED);
+        return 0;
+    }
+
+    // On X
     case WM_DESTROY: {
         PostQuitMessage(0);
         return 0;

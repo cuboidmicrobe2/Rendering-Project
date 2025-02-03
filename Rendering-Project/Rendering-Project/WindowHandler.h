@@ -3,6 +3,8 @@
 
 #include <Windows.h>
 
+#include "InputHandler.hpp"
+
 class Window {
   private:
     HWND hWnd;
@@ -17,6 +19,8 @@ class Window {
     Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow);
     ~Window();
 
+    InputHandler inputHandler;
+    // inline void resetKeyPressAndRelease() { this->inputHandler.clearKeyStates(); }
     HWND GetHWND() const;
     void Show(int nCmdShow) const;
 };
