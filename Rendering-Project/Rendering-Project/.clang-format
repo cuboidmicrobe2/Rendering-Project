@@ -1,8 +1,36 @@
+# Use Google style as the base.
 BasedOnStyle: LLVM
-IndentWidth: 4
-ColumnLimit: 120
----
-Language: Cpp
-# Force pointers to the type for C++.
+
+# Indentation
+IndentWidth: 4           # Use 4 spaces for indentation.
+TabWidth: 4              # Width of a tab character.
+UseTab: Never            # Always use spaces instead of tabs.
+
+# Line Length
+ColumnLimit: 120         # Set maximum line length to 100 characters.
+
+# Braces
+BreakBeforeBraces: Attach  # Attach braces to the preceding line.
+
+# Spaces
+SpaceBeforeParens: ControlStatements  # Add space before parentheses in control statements.
+SpacesInParentheses: false           # No spaces inside parentheses.
+SpacesInSquareBrackets: false        # No spaces inside square brackets.
+SpaceAfterCStyleCast: true           # Add space after C-style casts.
+
+# Alignments
+AlignTrailingComments: true         # Align trailing comments.
+AlignConsecutiveAssignments: true   # Align assignments in consecutive lines.
+
+# Includes
+SortIncludes: true                  # Sort `#include` statements.
+
+# Pointer and Reference Alignment
 DerivePointerAlignment: false
-PointerAlignment: Left
+PointerAlignment: Left             # Place `*` or `&` to the right of variable names.
+
+# Other Options
+AllowShortFunctionsOnASingleLine: All  # Allow short functions to be written on one line.
+AlwaysBreakAfterReturnType: None         # Keep return type and function name on the same line.
+IndentCaseLabels: true                   # Indent `case` labels in `switch` statements.
+AllowShortIfStatementsOnASingleLine: true  # Allow short if statements to be written on one line.
