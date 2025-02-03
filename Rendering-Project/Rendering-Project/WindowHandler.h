@@ -4,20 +4,21 @@
 #include <Windows.h>
 
 class Window {
-private:
-	HWND window;
-	UINT width;
-	UINT height;
+  private:
+    HWND hWnd;
+    UINT width;
+    UINT height;
     HINSTANCE instance;
 
-	static LRESULT CALLBACK StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-public:
-	Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow);
-	~Window();
+  public:
+    Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow);
+    ~Window();
 
-	void Show(int nCmdShow) const;
+    HWND GetHWND() const;
+    void Show(int nCmdShow) const;
 };
 
 #endif
