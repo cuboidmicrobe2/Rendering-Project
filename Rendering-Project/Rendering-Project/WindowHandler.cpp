@@ -8,7 +8,7 @@ LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
         Window* window = reinterpret_cast<Window*>(pCreate->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
-        window->window = hWnd;
+        window->hWnd = hWnd;
         return window->WindowProc(hWnd, message, wParam, lParam);
     }
 
@@ -32,7 +32,7 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 }
 
 Window::Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow)
-    : instance(instance), width(width), height(height), window(nullptr) {
+    : instance(instance), width(width), height(height), hWnd(nullptr) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
 
@@ -45,10 +45,10 @@ Window::Window(const HINSTANCE instance, const UINT width, const UINT height, in
         throw std::runtime_error("Failed to register window class, error: " + std::to_string(GetLastError()));
     }
 
-    this->window = CreateWindowEx(0, CLASS_NAME, L"Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, this->width,
-                                  this->height, nullptr, nullptr, this->instance, this);
+    this->hWnd = CreateWindowEx(0, CLASS_NAME, L"Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, this->width,
+                                this->height, nullptr, nullptr, this->instance, this);
 
-    if (!this->window) {
+    if (!this->hWnd) {
         throw std::runtime_error("Failed to create window, error: " + std::to_string(GetLastError()));
     }
 
@@ -56,13 +56,15 @@ Window::Window(const HINSTANCE instance, const UINT width, const UINT height, in
 }
 
 Window::~Window() {
-    if (this->window) {
-        DestroyWindow(this->window);
+    if (this->hWnd) {
+        DestroyWindow(this->hWnd);
     }
     UnregisterClass(L"WINDOW_CLASS", this->instance);
 }
 
+HWND Window::GetHWND() const { return this->hWnd; }
+
 void Window::Show(int nCmdShow) const {
-    ShowWindow(this->window, nCmdShow);
-    UpdateWindow(this->window);
+    ShowWindow(this->hWnd, nCmdShow);
+    UpdateWindow(this->hWnd);
 }
