@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <d3d11.h>
 
 class InputHandler {
   public:
@@ -12,14 +13,8 @@ class InputHandler {
         RELEASED = 4,
     };
 
-    inline void setKeyState(const unsigned char key, const unsigned char state) { keyStates[key] = state; }
-    inline void setLMouseKeyState(const unsigned char state) { this->LMouseButton = state; }
-    inline void setRMouseKeyState(const unsigned char state) { this->RMouseButton = state; }
+    bool handleInputMessage(const UINT message, const WPARAM wParam, const LPARAM lParam);
 
-    inline void setMousePos(const unsigned int x, const unsigned int y) {
-        this->mouseMovement = {(int)x - this->mousePos.first, (int)y - this->mousePos.second};
-        this->mousePos = {x, y};
-    }
 
     void reset() {
         for (unsigned char& keyState : keyStates)
@@ -47,6 +42,16 @@ class InputHandler {
     inline std::pair<unsigned int, unsigned int> getMousePos() const { return this->mousePos; };
 
   private:
+
+    inline void setKeyState(const unsigned char key, const unsigned char state) { keyStates[key] = state; }
+    inline void setLMouseKeyState(const unsigned char state) { this->LMouseButton = state; }
+    inline void setRMouseKeyState(const unsigned char state) { this->RMouseButton = state; }
+
+    inline void setMousePos(const unsigned int x, const unsigned int y) {
+        this->mouseMovement = {(int)x - this->mousePos.first, (int)y - this->mousePos.second};
+        this->mousePos = {x, y};
+    }
+
     std::pair<unsigned int, unsigned int> mousePos;
     std::pair<int, int> mouseMovement;
     unsigned char LMouseButton;
