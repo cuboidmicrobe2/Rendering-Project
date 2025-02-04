@@ -133,13 +133,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.hpp" />
     <ClInclude Include="InputHandler.hpp" />
     <ClInclude Include="Renderer.hpp" />
+    <ClInclude Include="Scene.hpp" />
+    <ClInclude Include="SceneObject.hpp" />
+    <ClInclude Include="SimpleVertex.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

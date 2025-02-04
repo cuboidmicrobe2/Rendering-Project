@@ -1,3 +1,6 @@
+#ifndef INPUT_HANDLER_HPP
+#define INPUT_HANDLER_HPP
+
 #include <array>
 #include <iostream>
 
@@ -54,3 +57,5 @@ class InputHandler {
 
     std::array<unsigned char, 256> keyStates;
 };
+
+#endif
