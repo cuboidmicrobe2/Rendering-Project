@@ -35,7 +35,7 @@ struct MeshData
 	std::vector<SubMeshInfo> subMeshInfo;
 };
 
-class MeshD3D11
+class Mesh
 {
 private:
 	std::vector<SubMesh> subMeshes;
@@ -43,12 +43,12 @@ private:
 	IndexBuffer indexBuffer;
 
 public:
-	MeshD3D11() = default;
-	~MeshD3D11() = default;
-	MeshD3D11(const MeshD3D11 & other) = delete;
-	MeshD3D11& operator=(const MeshD3D11 & other) = delete;
-	MeshD3D11(MeshD3D11 && other) = delete;
-	MeshD3D11& operator=(MeshD3D11 && other) = delete;
+	Mesh() = default;
+	~Mesh() = default;
+	Mesh(const Mesh & other) = delete;
+	Mesh& operator=(const Mesh & other) = delete;
+	Mesh(Mesh && other) = delete;
+	Mesh& operator=(Mesh && other) = delete;
 
 	void Initialize(ID3D11Device* device, const MeshData& meshInfo);
 
