@@ -1,2 +1,2 @@
 # Rendering-Project
-## Deffered rendering
+## Deferred rendering
