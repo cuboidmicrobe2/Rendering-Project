@@ -154,6 +154,7 @@
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputHandler.hpp" />
     <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
