@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "SceneObject.hpp"
+#include "Camera.hpp"
 
 
 class Scene {
@@ -17,7 +18,7 @@ class Scene {
   private:
     std::vector<SceneObject> objects;
 
-    // Lights
+    std::vector<Camera> cameras;
 
     // Cameras
 
