@@ -10,7 +10,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Window window(hInstance, WIDTH, HEIGHT, nCmdShow);
 
     Renderer renderer(window);
-    renderer.Init();
+
+    if (FAILED(renderer.Init())) {
+        return -1;
+    }
 
     MSG msg = {};
     while (msg.message != WM_QUIT) {
@@ -21,7 +24,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             DispatchMessage(&msg);
         }
 
-        renderer.Present();
+        renderer.Render();
     }
 
     return 0;
