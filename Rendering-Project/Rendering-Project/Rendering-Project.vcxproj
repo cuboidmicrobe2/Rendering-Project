@@ -134,19 +134,33 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ConstantBuffer.cpp" />
+    <ClCompile Include="DepthBuffer.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="StructuredBuffer.cpp" />
+    <ClCompile Include="SubMesh.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="ConstantBuffer.hpp" />
+    <ClInclude Include="DepthBuffer.hpp" />
+    <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputHandler.hpp" />
+    <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
     <ClInclude Include="SimpleVertex.hpp" />
+    <ClInclude Include="StructuredBuffer.hpp" />
+    <ClInclude Include="SubMesh.hpp" />
+    <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

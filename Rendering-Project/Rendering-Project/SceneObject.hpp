@@ -5,13 +5,14 @@
 #include <array>
 #include <vector>
 #include "SimpleVertex.hpp"
+#include "Mesh.hpp"
+#include <DirectXMath.h>
 
 class SceneObject {
-    std::array<float, 3> position;
-    std::vector<SimpleVertex> mesh;
+    DirectX::XMVECTOR position;
+    Mesh* mesh;
 
-
-    SceneObject(std::array<float, 3> position, std::vector<SimpleVertex> mesh);
+    SceneObject(const DirectX::XMVECTOR& position, Mesh& mesh);
 
 };
 
