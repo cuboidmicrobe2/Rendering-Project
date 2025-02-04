@@ -11,7 +11,10 @@ ColumnLimit: 120         # Set maximum line length to 100 characters.
 
 # Braces
 BreakBeforeBraces: Attach  # Attach braces to the preceding line.
-
+BraceWrapping:
+  AfterStruct: true       # Place `}` on a new line for struct initializations.
+  AfterEnum: true         # Place `}` on a new line for enum initializations.
+  AfterClass: true        # Place `}` on a new line for class initializations.
 # Spaces
 SpaceBeforeParens: ControlStatements  # Add space before parentheses in control statements.
 SpacesInParentheses: false           # No spaces inside parentheses.
