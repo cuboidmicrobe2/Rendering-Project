@@ -1,8 +1,8 @@
 #include "Renderer.hpp"
+#include "ReadFile.hpp"
+#include <vector>
 
 Renderer::Renderer(Window& window) : window(&window), viewport({}) {}
-
-Renderer::~Renderer() { this->Reset(); }
 
 HRESULT Renderer::Init() {
     HRESULT result = this->CreateDeviceAndSwapChain();
@@ -15,18 +15,21 @@ HRESULT Renderer::Init() {
     if (FAILED(result)) return result;
 
     this->SetViewPort();
+
+    result = this->pipeline.Init(this->device, this->immediateContext);
+    if (FAILED(result)) return result;
+
     return S_OK;
 }
 
-void Renderer::Reset() {
-    if (this->renderTargetView) this->renderTargetView.Reset();
-    if (this->depthStencilView) this->depthStencilView.Reset();
-    if (this->swapChain) this->swapChain.Reset();
-    if (this->immediateContext) this->immediateContext.Reset();
-    if (this->device) this->device.Reset();
-}
+void Renderer::Present() {
+    UINT stride = sizeof(SimpleVertex);
+    UINT offset = 0;
+    this->immediateContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), &stride, &offset);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-void Renderer::Present() { this->swapChain->Present(1, 0); }
+    this->swapChain->Present(1, 0);
+}
 
 HRESULT Renderer::CreateDeviceAndSwapChain() {
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
@@ -86,4 +89,110 @@ void Renderer::SetViewPort() {
     this->viewport.TopLeftX = 0;
     this->viewport.TopLeftY = 0;
     immediateContext->RSSetViewports(1, &this->viewport);
+}
+
+Renderer::Pipeline::Pipeline() {}
+
+HRESULT Renderer::Pipeline::Init(Microsoft::WRL::ComPtr<ID3D11Device> device,
+                                 Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext) {
+    this->device           = device;
+    this->immediateContext = immediateContext;
+
+    HRESULT result = this->SetShaders();
+    if (FAILED(result)) return result;
+
+    result = this->SetInputLayout();
+    if (FAILED(result)) return result;
+
+    result = this->SetDepthStencilState();
+    if (FAILED(result)) return result;
+
+    result = this->SetShaderResources();
+    if (FAILED(result)) return result;
+
+    result = this->SetSamplers();
+    if (FAILED(result)) return result;
+
+    return S_OK;
+}
+
+HRESULT Renderer::Pipeline::SetShaders() {
+    std::string shaderData;
+
+    // Vertex Shader
+    if (!ReadFile("VertexShader.cso", shaderData)) {
+        std::cerr << "Failed to read vertex shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    HRESULT result = this->device->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr,
+                                                      this->vertexShader.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create vertex shader!" << std::endl;
+        return result;
+    }
+
+    this->byteCode = shaderData;
+    shaderData.clear();
+
+    // Pixel Shader
+    if (!ReadFile("PixelShader.cso", shaderData)) {
+        std::cerr << "Failed to read pixel shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    result = this->device->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr,
+                                             this->pixelShader.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create pixel shader!" << std::endl;
+        return result;
+    }
+
+    this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
+    this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
+
+    return S_OK;
+}
+
+HRESULT Renderer::Pipeline::SetInputLayout() {
+    D3D11_INPUT_ELEMENT_DESC layoutDesc[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}};
+
+    HRESULT result = this->device->CreateInputLayout(layoutDesc, ARRAYSIZE(layoutDesc), this->byteCode.data(),
+                                                     this->byteCode.size(), this->inputLayout.GetAddressOf());
+    if (FAILED(result)) {
+        return result;
+    }
+
+    this->immediateContext->IASetInputLayout(this->inputLayout.Get());
+
+    return S_OK;
+}
+
+HRESULT Renderer::Pipeline::SetDepthStencilState() { return S_OK; }
+
+HRESULT Renderer::Pipeline::SetShaderResources() { return S_OK; }
+
+HRESULT Renderer::Pipeline::SetSamplers() {
+    D3D11_SAMPLER_DESC samplerDesc = {.Filter         = D3D11_FILTER_ANISOTROPIC,
+                                      .AddressU       = D3D11_TEXTURE_ADDRESS_WRAP,
+                                      .AddressV       = D3D11_TEXTURE_ADDRESS_WRAP,
+                                      .AddressW       = D3D11_TEXTURE_ADDRESS_WRAP,
+                                      .MipLODBias     = 0,
+                                      .MaxAnisotropy  = 16,
+                                      .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+                                      .BorderColor    = {0, 0, 0, 0},
+                                      .MinLOD         = 0.0f,
+                                      .MaxLOD         = D3D11_FLOAT32_MAX};
+
+    HRESULT result = device->CreateSamplerState(&samplerDesc, this->samplerState.GetAddressOf());
+    if (FAILED(result)) {
+        return result;
+    }
+
+    this->immediateContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
+
+    return S_OK;
 }
