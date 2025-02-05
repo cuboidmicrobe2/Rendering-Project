@@ -28,7 +28,13 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         case WM_KEYDOWN: {
             const unsigned char key      = static_cast<unsigned char>(wParam);
             const bool wasPreviouslyDown = lParam & (1 << 30);
-            if (!wasPreviouslyDown) this->inputHandler.setKeyState(key, InputHandler::DOWN | InputHandler::PRESSED);
+            if (!wasPreviouslyDown) {
+                this->inputHandler.setKeyState(key, InputHandler::DOWN | InputHandler::PRESSED);
+            }
+            if (key == VK_F11) { // Toggle fullscreen on F11 key press
+                this->isFullscreen = !this->isFullscreen;
+                this->SetFullscreen(this->isFullscreen);
+            }
             return 0;
         }
         case WM_KEYUP: {
@@ -72,8 +78,8 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     }
 }
 
-Window::Window(const HINSTANCE instance, const UINT width, const UINT height, int nCmdShow)
-    : instance(instance), width(width), height(height), hWnd(nullptr) {
+Window::Window(const HINSTANCE instance, int nCmdShow, const UINT width, const UINT height)
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
 
@@ -86,11 +92,26 @@ Window::Window(const HINSTANCE instance, const UINT width, const UINT height, in
         throw std::runtime_error("Failed to register window class, error: " + std::to_string(GetLastError()));
     }
 
+    bool needsExtraHelp = false;
+    if (width == 0 && height == 0) {
+        needsExtraHelp = true;
+        MONITORINFO mi = {sizeof(mi)};
+        if (GetMonitorInfo(MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+            this->width  = mi.rcMonitor.right - mi.rcMonitor.left;
+            this->height = mi.rcMonitor.bottom - mi.rcMonitor.top;
+        }
+    }
+
     this->hWnd = CreateWindowEx(0, CLASS_NAME, L"Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, this->width,
                                 this->height, nullptr, nullptr, this->instance, this);
 
     if (!this->hWnd) {
         throw std::runtime_error("Failed to create window, error: " + std::to_string(GetLastError()));
+    }
+
+    if (needsExtraHelp) {
+        this->isFullscreen = !this->isFullscreen;
+        this->SetFullscreen(this->isFullscreen);
     }
 
     this->Show(nCmdShow);
@@ -112,4 +133,19 @@ UINT Window::GetHeight() const { return this->height; }
 void Window::Show(int nCmdShow) const {
     ShowWindow(this->hWnd, nCmdShow);
     UpdateWindow(this->hWnd);
+}
+
+void Window::SetFullscreen(bool fullscreen) const {
+    if (fullscreen) {
+        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+        MONITORINFO mi = {sizeof(mi)};
+        if (GetMonitorInfo(MonitorFromWindow(this->hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+            SetWindowPos(this->hWnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
+                         mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
+                         SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+        }
+    } else {
+        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    }
 }

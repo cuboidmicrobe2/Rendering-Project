@@ -3,11 +3,12 @@
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     const UINT WIDTH  = 1920;
     const UINT HEIGHT = 1080;
 
-    Window window(hInstance, WIDTH, HEIGHT, nCmdShow);
+    Window window(hInstance, nCmdShow);
 
     Renderer renderer(window);
 
@@ -23,7 +24,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
         renderer.Render();
     }
 

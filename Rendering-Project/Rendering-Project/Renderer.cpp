@@ -33,7 +33,7 @@ void Renderer::Render() {
 }
 
 void Renderer::Clear() {
-    float clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
+    float clearColor[] = {1.0f, 0.5f, 0.2f, 1.0f};
     this->immediateContext->ClearRenderTargetView(this->renderTargetView.Get(), clearColor);
     this->immediateContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
@@ -42,7 +42,10 @@ void Renderer::Present() {
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
     this->immediateContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), &stride, &offset);
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    this->immediateContext->OMSetRenderTargets(1, this->renderTargetView.GetAddressOf(), this->depthStencilView.Get());
+
+    this->immediateContext->Draw(4, 0);
 
     this->swapChain->Present(1, 0);
 }
@@ -98,9 +101,10 @@ HRESULT Renderer::CreateDepthStencil() {
 }
 
 HRESULT Renderer::CreateTriangle() {
-    SimpleVertex vertices[] = {{{0.0f, 0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.5f, 1.0f}},
-                               {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-                               {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}}};
+    SimpleVertex vertices[] = {{{-0.5f, 0.5f, 0.0f}, {0, 0, -1}, {0, 0}},
+                               {{0.5f, 0.5f, 0.0f}, {0, 0, -1}, {1, 0}},
+                               {{-0.5f, -0.5f, 0.0f}, {0, 0, -1}, {0, 1}},
+                               {{0.5f, -0.5f, 0.0f}, {0, 0, -1}, {1, 1}}};
 
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage             = D3D11_USAGE_DEFAULT;
@@ -163,7 +167,7 @@ HRESULT Renderer::Pipeline::SetShaders() {
         return E_FAIL;
     }
 
-    HRESULT result = this->device->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr,
+    HRESULT result = this->device->CreateVertexShader(shaderData.data(), shaderData.size(), nullptr,
                                                       this->vertexShader.GetAddressOf());
     if (FAILED(result)) {
         std::cerr << "Failed to create vertex shader!" << std::endl;
@@ -179,7 +183,7 @@ HRESULT Renderer::Pipeline::SetShaders() {
         return E_FAIL;
     }
 
-    result = this->device->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr,
+    result = this->device->CreatePixelShader(shaderData.data(), shaderData.size(), nullptr,
                                              this->pixelShader.GetAddressOf());
     if (FAILED(result)) {
         std::cerr << "Failed to create pixel shader!" << std::endl;
