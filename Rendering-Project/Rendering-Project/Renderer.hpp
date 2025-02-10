@@ -11,14 +11,14 @@ class Renderer {
     ~Renderer() = default;
 
     HRESULT Init();
-    void Render();
+    void Update();
     void Clear();
 
   private:
     HRESULT CreateDeviceAndSwapChain();
     HRESULT CreateRenderTarget();
     HRESULT CreateDepthStencil();
-    HRESULT CreateTriangle();
+    HRESULT CreateCube();
     void SetViewPort();
     void Present();
 
