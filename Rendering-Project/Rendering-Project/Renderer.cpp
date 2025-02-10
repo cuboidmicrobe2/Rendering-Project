@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include "ConstantBuffer.hpp"
 #include "ReadFile.hpp"
 #include "SimpleVertex.hpp"
 #include "VertexBuffer.hpp"
@@ -7,6 +8,7 @@
 Renderer::Renderer(Window& window) : window(&window), viewport({}) {}
 
 HRESULT Renderer::Init() {
+
     HRESULT result = this->CreateDeviceAndSwapChain();
     if (FAILED(result)) return result;
 
@@ -21,13 +23,13 @@ HRESULT Renderer::Init() {
     result = this->pipeline.Init(this->device, this->immediateContext);
     if (FAILED(result)) return result;
 
-    result = this->CreateTriangle();
+    result = this->CreateCube();
     if (FAILED(result)) return result;
 
     return S_OK;
 }
 
-void Renderer::Render() {
+void Renderer::Update() {
     this->Clear();
     this->Present();
 }
@@ -42,7 +44,8 @@ void Renderer::Present() {
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
     this->immediateContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), &stride, &offset);
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+    immediateContext->RSSetViewports(1, &this->viewport);
     this->immediateContext->OMSetRenderTargets(1, this->renderTargetView.GetAddressOf(), this->depthStencilView.Get());
 
     this->immediateContext->Draw(4, 0);
@@ -100,24 +103,20 @@ HRESULT Renderer::CreateDepthStencil() {
     return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
 }
 
-HRESULT Renderer::CreateTriangle() {
-    SimpleVertex vertices[] = {{{-0.5f, 0.5f, 0.0f}, {0, 0, -1}, {0, 0}},
-                               {{0.5f, 0.5f, 0.0f}, {0, 0, -1}, {1, 0}},
-                               {{-0.5f, -0.5f, 0.0f}, {0, 0, -1}, {0, 1}},
-                               {{0.5f, -0.5f, 0.0f}, {0, 0, -1}, {1, 1}}};
+HRESULT Renderer::CreateCube() {
 
-    D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage             = D3D11_USAGE_DEFAULT;
-    bufferDesc.ByteWidth         = sizeof(vertices);
-    bufferDesc.BindFlags         = D3D11_BIND_VERTEX_BUFFER;
-    bufferDesc.CPUAccessFlags    = 0;
+    SimpleVertex vertices[] = {
+        {{-0.5f, 0.5f, 0.0f}, {0, 0, -1}, {0, 0}},
+        {{0.5f, 0.5f, 0.0f}, {0, 0, -1}, {1, 0}},
+        {{-0.5f, -0.5f, 0.0f}, {0, 0, -1}, {0, 1}},
+        {{0.5f, -0.5f, 0.0f}, {0, 0, -1}, {1, 1}},
+    };
 
-    D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem                = vertices;
-
-    HRESULT result = this->device->CreateBuffer(&bufferDesc, &initData, this->vertexBuffer.GetAddressOf());
-    if (FAILED(result)) {
-        return result;
+    VertexBuffer vertexBuffer(this->device.Get(), sizeof(SimpleVertex), sizeof(vertices) / sizeof(SimpleVertex),
+                              vertices);
+    this->vertexBuffer = vertexBuffer.GetBuffer();
+    if (!this->vertexBuffer) {
+        return E_FAIL;
     }
 
     return S_OK;
@@ -130,7 +129,6 @@ void Renderer::SetViewPort() {
     this->viewport.MaxDepth = 1.0f;
     this->viewport.TopLeftX = 0;
     this->viewport.TopLeftY = 0;
-    immediateContext->RSSetViewports(1, &this->viewport);
 }
 
 Renderer::Pipeline::Pipeline() {}
@@ -209,6 +207,7 @@ HRESULT Renderer::Pipeline::SetInputLayout() {
     }
 
     this->immediateContext->IASetInputLayout(this->inputLayout.Get());
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
     return S_OK;
 }

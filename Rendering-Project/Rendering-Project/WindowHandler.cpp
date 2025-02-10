@@ -35,6 +35,10 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                 this->isFullscreen = !this->isFullscreen;
                 this->SetFullscreen(this->isFullscreen);
             }
+            if (key == VK_ESCAPE) { // Quit on ESC key press
+                PostQuitMessage(0);
+                return 0;
+            }
             return 0;
         }
         case WM_KEYUP: {
@@ -94,11 +98,11 @@ Window::Window(const HINSTANCE instance, int nCmdShow, const UINT width, const U
 
     bool needsExtraHelp = false;
     if (width == 0 && height == 0) {
-        needsExtraHelp = true;
-        MONITORINFO mi = {sizeof(mi)};
-        if (GetMonitorInfo(MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY), &mi)) {
-            this->width  = mi.rcMonitor.right - mi.rcMonitor.left;
-            this->height = mi.rcMonitor.bottom - mi.rcMonitor.top;
+        needsExtraHelp          = true;
+        MONITORINFO monitorInfo = {sizeof(monitorInfo)};
+        if (GetMonitorInfo(MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY), &monitorInfo)) {
+            this->width  = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+            this->height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
         }
     }
 

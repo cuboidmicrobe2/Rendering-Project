@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
@@ -25,58 +21,62 @@
     <Filter Include="Header Files\Rendering">
       <UniqueIdentifier>{d3ea11b6-980e-4a16-bf29-c2fc4c880a9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Buffers">
+    <Filter Include="Resource Files\Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files\Source Files\Buffers">
       <UniqueIdentifier>{b123170d-b3d5-4542-9d85-c698eecd45a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Meshes">
+    <Filter Include="Resource Files\Source Files\Meshes">
       <UniqueIdentifier>{fc16d37c-c448-4558-a05d-91d0437e2b21}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering">
+    <Filter Include="Resource Files\Source Files\Rendering">
       <UniqueIdentifier>{7a161882-d3d5-4cb0-b39e-25b3880b3301}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Scene">
+    <Filter Include="Resource Files\Source Files\Scene">
       <UniqueIdentifier>{25083945-3450-4689-8d23-d255515440be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files\Scene</Filter>
+      <Filter>Resource Files\Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="ConstantBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Resource Files\Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="DepthBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Resource Files\Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Resource Files\Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Meshes</Filter>
+      <Filter>Resource Files\Source Files\Meshes</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files\Rendering</Filter>
+      <Filter>Resource Files\Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>Source Files\Scene</Filter>
+      <Filter>Resource Files\Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="SceneObject.cpp">
-      <Filter>Source Files\Scene</Filter>
+      <Filter>Resource Files\Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="StructuredBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Resource Files\Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="SubMesh.cpp">
-      <Filter>Source Files\Meshes</Filter>
+      <Filter>Resource Files\Source Files\Meshes</Filter>
     </ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Resource Files\Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="WindowHandler.cpp">
-      <Filter>Source Files\Rendering</Filter>
+      <Filter>Resource Files\Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
