@@ -11,6 +11,7 @@ class Renderer {
     ~Renderer() = default;
 
     HRESULT Init();
+    ID3D11Device* GetDevice() const;
     void Update();
     void Clear();
 

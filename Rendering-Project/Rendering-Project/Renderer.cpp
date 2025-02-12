@@ -29,6 +29,8 @@ HRESULT Renderer::Init() {
     return S_OK;
 }
 
+ID3D11Device* Renderer::GetDevice() const { return this->device.Get(); }
+
 void Renderer::Update() {
     this->Clear();
     this->Present();

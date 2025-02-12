@@ -1,19 +1,20 @@
 #ifndef SCENE_OBJECT_HPP
 #define SCENE_OBJECT_HPP
 
-#include <d3d11.h>
-#include <array>
-#include <vector>
-#include "SimpleVertex.hpp"
 #include "Mesh.hpp"
+#include "SimpleVertex.hpp"
 #include <DirectXMath.h>
+#include <array>
+#include <d3d11.h>
+#include <vector>
 
 class SceneObject {
-    DirectX::XMVECTOR position;
-    Mesh* mesh;
-
+  public:
     SceneObject(const DirectX::XMVECTOR& position, Mesh& mesh);
 
+  private:
+    DirectX::XMVECTOR position;
+    Mesh* mesh;
 };
 
 #endif
