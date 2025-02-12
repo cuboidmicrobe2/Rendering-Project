@@ -37,10 +37,11 @@ void VertexBuffer::Initialize(ID3D11Device* device, UINT sizeOfVertex, UINT nrOf
         .StructureByteStride = 0,
     };
 
-    D3D11_SUBRESOURCE_DATA data;
-    data.pSysMem          = vertexData;
-    data.SysMemPitch      = 0;
-    data.SysMemSlicePitch = 0;
+    D3D11_SUBRESOURCE_DATA data{
+        .pSysMem          = vertexData,
+        .SysMemPitch      = 0,
+        .SysMemSlicePitch = 0,
+    };
 
     if(FAILED(device->CreateBuffer(&desc, &data, &this->buffer))) 
         throw std::runtime_error("Failed to create Vertex buffer");

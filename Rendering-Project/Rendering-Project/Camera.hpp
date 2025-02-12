@@ -1,37 +1,53 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
+#include "Transform.hpp"
 #include "directxmath.h"
 #include <array>
 #include <d3d11.h>
 
 class Camera {
   public:
-    Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
-           DirectX::XMVECTOR direction);
-    ~Camera() = default;
+    inline Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
+                  DirectX::XMVECTOR quaternion);
+    inline ~Camera() = default;
 
-    DirectX::XMMATRIX createViewMatrix() const;
-    DirectX::XMMATRIX createProjectionMatrix() const;
+    Transform transform;
 
-    inline void rotateCamera(float rotationX, float rotationY, float rotationZ = 0);
+    inline DirectX::XMMATRIX createViewMatrix() const;
+    inline DirectX::XMMATRIX createProjectionMatrix() const;
 
-    inline DirectX::XMVECTOR getPosition() const;
-    inline DirectX::XMVECTOR getDirection() const;
     inline float getAspectRatio() const;
     inline float getVerticalFOVRadians() const;
     inline float getNearZ() const;
     inline float getFarZ() const;
-
-    inline void setPosition(DirectX::XMVECTOR position) { this->position = position; };
-    inline void setDirection(float rotationX, float rotationY, float rotationZ);
 
   private:
     float verticalFOVRadians;
     float aspectRatio;
     float nearZ;
     float farZ;
-    DirectX::XMVECTOR position;
-    DirectX::XMVECTOR direction;
 };
+
+inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
+                      DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion)
+    : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {0, 0, 0}) {
+    this->verticalFOVRadians = DirectX::XMConvertToRadians(horizontalFOVDegrees / aspectRatio);
+}
+
+inline DirectX::XMMATRIX Camera::createViewMatrix() const {
+    return DirectX::XMMatrixLookToLH(this->transform.GetPosition(), this->transform.GetDirectionVector(), {0, 1, 0, 0});
+}
+
+inline DirectX::XMMATRIX Camera::createProjectionMatrix() const {
+    return DirectX::XMMatrixPerspectiveFovLH(this->verticalFOVRadians, this->aspectRatio, this->nearZ, this->farZ);
+}
+
+inline float Camera::getAspectRatio() const { return this->aspectRatio; }
+
+inline float Camera::getVerticalFOVRadians() const { return this->verticalFOVRadians; }
+
+inline float Camera::getNearZ() const { return this->nearZ; }
+
+inline float Camera::getFarZ() const { return this->farZ; }
 
 #endif

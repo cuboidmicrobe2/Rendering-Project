@@ -137,7 +137,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -157,6 +156,7 @@
     <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputHandler.hpp" />
+    <ClInclude Include="Light.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Renderer.hpp" />
@@ -165,6 +165,7 @@
     <ClInclude Include="SimpleVertex.hpp" />
     <ClInclude Include="StructuredBuffer.hpp" />
     <ClInclude Include="SubMesh.hpp" />
+    <ClInclude Include="Transform.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
   </ItemGroup>

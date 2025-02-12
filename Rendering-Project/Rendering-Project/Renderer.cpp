@@ -23,8 +23,8 @@ HRESULT Renderer::Init() {
     result = this->pipeline.Init(this->device, this->immediateContext);
     if (FAILED(result)) return result;
 
-    result = this->CreateCube();
-    if (FAILED(result)) return result;
+    //result = this->CreateCube();
+    //if (FAILED(result)) return result;
 
     return S_OK;
 }

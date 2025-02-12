@@ -1,3 +1,16 @@
+cbuffer ViewAndProjectionMatrix : register(b0)
+{
+    float4x4 viewMatrix;
+    float4x4 projectionMatrix;
+    float4x4 viewProjectionMatrix;
+};
+
+cbuffer WorldMatrix : register(b1)
+{
+    float4x4 world;
+};
+
+
 struct VertexShaderInput
 {
     float3 position : POSITION;

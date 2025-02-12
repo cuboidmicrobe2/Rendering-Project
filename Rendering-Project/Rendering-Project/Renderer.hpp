@@ -12,6 +12,7 @@ class Renderer {
 
     HRESULT Init();
     ID3D11Device* GetDevice() const;
+    ID3D11DeviceContext* GetContext() const { return this->immediateContext.Get(); }
     void Update();
     void Clear();
 

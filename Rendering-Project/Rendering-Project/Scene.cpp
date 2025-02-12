@@ -6,10 +6,33 @@ Scene::~Scene() {}
 
 HRESULT Scene::Init() { return this->renderer.Init(); }
 
-void Scene::addSceneObject(const SceneObject& sceneObject) { this->objects.emplace_back(sceneObject); }
+void Scene::AddSceneObject(const SceneObject& sceneObject) { this->objects.emplace_back(sceneObject); }
 
-void Scene::addCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
+void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
 
-void Scene::renderScene() const {
+void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light); }
 
+void Scene::RenderScene(ID3D11Device* device, ID3D11DeviceContext* context) const {
+    // Bind Lights
+    //ConstantBuffer PSMetaData;
+    //size_t nrOfLights = this->lights.size();
+    //PSMetaData.Initialize(device, sizeof(this->lights.size()), &nrOfLights);
+    //ConstantBuffer lights;
+    //lights.Initialize(device, this->lights.size() * sizeof(Light), (void*) &this->lights[0]);
+    //context->PSSetConstantBuffers(1, 1, lights.GetAdressOfBuffer());
+
+    // Create and Bind view and projection matrixes
+    ConstantBuffer viewAndProjectionMatrixes;
+    DirectX::XMFLOAT4X4 matrixes[3];
+    DirectX::XMMATRIX viewMatrix = this->cameras.front().createViewMatrix();
+    DirectX::XMMATRIX projectionMatrix = this->cameras.front().createProjectionMatrix();
+    DirectX::XMStoreFloat4x4(&matrixes[0], viewMatrix);
+    DirectX::XMStoreFloat4x4(&matrixes[1], projectionMatrix);
+    DirectX::XMStoreFloat4x4(&matrixes[2], DirectX::XMMatrixMultiplyTranspose(viewMatrix, projectionMatrix));
+    viewAndProjectionMatrixes.Initialize(device, sizeof(matrixes), matrixes);
+    context->VSSetConstantBuffers(0, 1, viewAndProjectionMatrixes.GetAdressOfBuffer());
+
+    for (const SceneObject& obj : this->objects){ 
+        obj.Draw(device, context);
+    }
 }
