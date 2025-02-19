@@ -15,6 +15,7 @@ class Renderer {
     ID3D11DeviceContext* GetContext() const { return this->immediateContext.Get(); }
     void Update();
     void Clear();
+    void Present();
 
   private:
     HRESULT CreateDeviceAndSwapChain();
@@ -22,7 +23,6 @@ class Renderer {
     HRESULT CreateDepthStencil();
     HRESULT CreateCube();
     void SetViewPort();
-    void Present();
 
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;

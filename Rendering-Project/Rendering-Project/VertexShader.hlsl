@@ -21,6 +21,7 @@ struct VertexShaderInput
 struct VertexShaderOutput
 {
     float4 position : SV_POSITION;
+    float4 worldPosition : WORLD_POSITION;
     float4 normal : NORMAL;
     float2 uv : UV;
 };
@@ -28,9 +29,9 @@ struct VertexShaderOutput
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    output.position = float4(input.position, 1.0f);
-    output.normal = float4(input.normal, 1.0f);
-    output.uv = input.uv;
-    
+    output.worldPosition = mul(float4(input.position, 1.0f), world);
+    output.position       = mul(output.worldPosition, viewProjectionMatrix);
+    output.normal         = normalize(float4(mul(float4(input.normal, 1.0f), world).xyz, 0));
+    output.uv             = input.uv;
     return output;
 }

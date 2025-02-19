@@ -23,8 +23,8 @@ HRESULT Renderer::Init() {
     result = this->pipeline.Init(this->device, this->immediateContext);
     if (FAILED(result)) return result;
 
-    //result = this->CreateCube();
-    //if (FAILED(result)) return result;
+    // result = this->CreateCube();
+    // if (FAILED(result)) return result;
 
     return S_OK;
 }
@@ -45,12 +45,12 @@ void Renderer::Clear() {
 void Renderer::Present() {
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
-    this->immediateContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), &stride, &offset);
+    //this->immediateContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), &stride, &offset);
 
     immediateContext->RSSetViewports(1, &this->viewport);
     this->immediateContext->OMSetRenderTargets(1, this->renderTargetView.GetAddressOf(), this->depthStencilView.Get());
 
-    this->immediateContext->Draw(4, 0);
+    //this->immediateContext->Draw(4, 0);
 
     this->swapChain->Present(1, 0);
 }
@@ -219,16 +219,18 @@ HRESULT Renderer::Pipeline::SetDepthStencilState() { return S_OK; }
 HRESULT Renderer::Pipeline::SetShaderResources() { return S_OK; }
 
 HRESULT Renderer::Pipeline::SetSamplers() {
-    D3D11_SAMPLER_DESC samplerDesc = {.Filter         = D3D11_FILTER_ANISOTROPIC,
-                                      .AddressU       = D3D11_TEXTURE_ADDRESS_WRAP,
-                                      .AddressV       = D3D11_TEXTURE_ADDRESS_WRAP,
-                                      .AddressW       = D3D11_TEXTURE_ADDRESS_WRAP,
-                                      .MipLODBias     = 0,
-                                      .MaxAnisotropy  = 16,
-                                      .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
-                                      .BorderColor    = {0, 0, 0, 0},
-                                      .MinLOD         = 0.0f,
-                                      .MaxLOD         = D3D11_FLOAT32_MAX};
+    D3D11_SAMPLER_DESC samplerDesc = {
+        .Filter         = D3D11_FILTER_ANISOTROPIC,
+        .AddressU       = D3D11_TEXTURE_ADDRESS_WRAP,
+        .AddressV       = D3D11_TEXTURE_ADDRESS_WRAP,
+        .AddressW       = D3D11_TEXTURE_ADDRESS_WRAP,
+        .MipLODBias     = 0,
+        .MaxAnisotropy  = 16,
+        .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+        .BorderColor    = {0, 0, 0, 0},
+        .MinLOD         = 0.0f,
+        .MaxLOD         = D3D11_FLOAT32_MAX,
+    };
 
     HRESULT result = device->CreateSamplerState(&samplerDesc, this->samplerState.GetAddressOf());
     if (FAILED(result)) {

@@ -42,10 +42,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     renderer.GetDevice()->CreateShaderResourceView(texture, nullptr, &srv);
 
-    unsigned indices[6]{1, 2, 3, 3, 2, 4};
+    unsigned indices[4]{0, 1, 2, 3};
     mesh.Initialize(renderer.GetDevice(), MeshData{MeshData::VertexInfo{sizeof(SimpleVertex), 4, vertices},
-                                                   MeshData::IndexInfo{6, indices},
-                                                   {MeshData::SubMeshInfo{0, 6, srv, srv, srv}}});
+                                                   MeshData::IndexInfo{4, indices},
+                                                   {MeshData::SubMeshInfo{0, 4, srv, srv, srv}}});
 
     Scene scene(window);
 
@@ -68,9 +68,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
+        renderer.Clear();
         scene.RenderScene(renderer.GetDevice(), renderer.GetContext());
-        //renderer.Update();
+        renderer.Present();
     }
 
     return 0;
