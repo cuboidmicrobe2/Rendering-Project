@@ -4,7 +4,7 @@
 IndexBuffer::IndexBuffer(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint32_t* indexData)
     : nrOfIndices(nrOfIndicesInBuffer) {
     D3D11_BUFFER_DESC desc{
-        .ByteWidth           = static_cast<UINT> (nrOfIndicesInBuffer * sizeof(*indexData)),
+        .ByteWidth           = static_cast<UINT>(nrOfIndicesInBuffer * sizeof(*indexData)),
         .Usage               = D3D11_USAGE_IMMUTABLE,
         .BindFlags           = D3D11_BIND_INDEX_BUFFER,
         .CPUAccessFlags      = 0,
@@ -22,7 +22,9 @@ IndexBuffer::IndexBuffer(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint3
 }
 
 // Pointer Train go Chu Chu!
-IndexBuffer::~IndexBuffer() { this->buffer->Release(); }
+IndexBuffer::~IndexBuffer() {
+    if (this->buffer) this->buffer->Release();
+}
 
 void IndexBuffer::Initialize(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint32_t* indexData) {}
 
