@@ -163,6 +163,7 @@
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
     <ClInclude Include="SimpleVertex.hpp" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="StructuredBuffer.hpp" />
     <ClInclude Include="SubMesh.hpp" />
     <ClInclude Include="Transform.hpp" />

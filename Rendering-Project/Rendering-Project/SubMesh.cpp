@@ -11,6 +11,9 @@ void SubMesh::Initialize(size_t startIndexValue, size_t nrOfIndicesInSubMesh,
 }
 
 void SubMesh::PerformDrawCall(ID3D11DeviceContext* context) const {
+
+    context->PSSetShaderResources(0, 1, &this->ambientTexture);
+
     context->DrawIndexed(this->nrOfIndices, this->startIndex, 0);
 }
 

@@ -30,7 +30,7 @@ class Camera {
 
 inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
                       DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion)
-    : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {0, 0, 0}) {
+    : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {1, 1, 1}) {
     this->verticalFOVRadians = DirectX::XMConvertToRadians(horizontalFOVDegrees / aspectRatio);
 }
 

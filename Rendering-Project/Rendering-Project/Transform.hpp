@@ -6,7 +6,7 @@
 class Transform {
   public:
     inline Transform();
-    inline Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion = {0, 0, 1},
+    inline Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion = DirectX::XMQuaternionIdentity(),
                      DirectX::XMVECTOR scale = {1, 1, 1});
 
     inline void SetPosition(DirectX::XMVECTOR position);
