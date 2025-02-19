@@ -57,13 +57,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     while (msg.message != WM_QUIT) {
         window.inputHandler.reset();
 
-        obj.transform.Rotate(0, 1, 0);
-
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
         renderer.Clear();
+        scene.UpdateScene();
         scene.RenderScene(renderer.GetDevice(), renderer.GetContext());
         renderer.Present();
     }

@@ -17,6 +17,8 @@ class SceneObject {
 
     void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const;
 
+    void Update();
+
   private:
 
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;

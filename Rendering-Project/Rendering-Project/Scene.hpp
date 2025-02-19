@@ -19,6 +19,8 @@ class Scene {
 
     void RenderScene(ID3D11Device* device, ID3D11DeviceContext* context) const;
 
+    void UpdateScene();
+
   private:
     Renderer renderer;
 

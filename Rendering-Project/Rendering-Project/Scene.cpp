@@ -36,3 +36,9 @@ void Scene::RenderScene(ID3D11Device* device, ID3D11DeviceContext* context) cons
         obj.Draw(device, context);
     }
 }
+
+void Scene::UpdateScene() {
+    for (SceneObject& obj : this->objects) {
+        obj.Update();
+    }
+}

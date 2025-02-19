@@ -57,7 +57,7 @@ inline void Transform::SetScale(DirectX::XMVECTOR scale) { this->scale = scale; 
 inline void Transform::Move(DirectX::XMVECTOR move) { this->position = DirectX::XMVectorAdd(this->position, move); }
 
 inline void Transform::Rotate(float x, float y, float z) {
-    this->RotateQuaternion(DirectX::XMQuaternionRotationRollPitchYaw(y, z, x));
+    this->RotateQuaternion(DirectX::XMQuaternionRotationRollPitchYaw(x, y, z));
 }
 
 inline void Transform::RotateQuaternion(DirectX::XMVECTOR quaternion) {
