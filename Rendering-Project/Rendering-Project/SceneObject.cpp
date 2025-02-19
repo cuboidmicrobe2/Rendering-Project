@@ -22,7 +22,13 @@ void SceneObject::Draw(ID3D11Device* device,  ID3D11DeviceContext* context) cons
     }
 }
 
-void SceneObject::Update() { this->transform.Rotate(0, 0.01, 0); }
+void SceneObject::Update() { 
+    static float scale = 1;
+    this->transform.Rotate(0, 0.01, 0);
+    this->transform.Move(DirectX::XMVectorScale(this->transform.GetDirectionVector(), 0.1));
+    this->transform.SetScale(DirectX::XMVectorSet(scale, scale, scale, 1));
+    scale += 0.001;
+}
 
 DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
     // Create the scaling, rotation, and translation matrices

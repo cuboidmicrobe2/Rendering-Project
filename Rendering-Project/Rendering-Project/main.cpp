@@ -6,6 +6,7 @@
 #include <WICTextureLoader.h>
 #include <chrono>
 
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -39,13 +40,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
                                                    {MeshData::SubMeshInfo{0, 4, srv, srv, srv}}});
 
     Scene scene(window);
+    SceneObject some(Transform({0, 0, 0, 0}), mesh);
+    scene.AddSceneObject(some);
 
-    SceneObject obj(Transform({0, 0, 0}), mesh);
-    SceneObject ob2(Transform({0.5, 0, 0}), mesh);
-    scene.AddSceneObject(obj);
-    scene.AddSceneObject(ob2);
-
-    Camera camera(90, 16.f / 9.f, 1, 1000, {0, 0, -5}, {0, 0, 1});
+    Camera camera(90, 16.f / 9.f, 1, 1000, {0, 0, -20}, {0, 0, 1});
     scene.AddCameraObject(camera);
 
     Light light(Transform({1, 0, -1}), {1, 1, 1}, 1);
