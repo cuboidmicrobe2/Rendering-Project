@@ -2,6 +2,7 @@
 #define TRANSFORM_HPP
 
 #include <DirectXMath.h>
+#include <iostream>
 
 class Transform {
   public:

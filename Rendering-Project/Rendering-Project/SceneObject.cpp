@@ -1,6 +1,7 @@
 #include "SceneObject.hpp"
 #include <DirectXMath.h>
 #include "ConstantBuffer.hpp"
+#include <iostream>
 namespace dx = DirectX;
 
 SceneObject::SceneObject(Transform transform, Mesh& mesh) : transform(transform), mesh(&mesh) {}
@@ -23,13 +24,17 @@ void SceneObject::Draw(ID3D11Device* device,  ID3D11DeviceContext* context) cons
 
 DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
     // Create the scaling, rotation, and translation matrices
-    DirectX::XMMATRIX scaleMatrix    = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
-    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(this->transform.GetRotationQuaternion());
+    DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
+    DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
     DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
 
-    // Combine the matrices to create the world matrix
-    DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixTranspose(scaleMatrix * rotationMatrix * translationMatrix);
+    // Combine the matrices to create the world matrix (scale * rotation * translation)
+    DirectX::XMMATRIX worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 
+    // Transpose the matrix if needed (depends on the target platform/GPU conventions)
+    worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+
+    // Store the result in a XMFLOAT4X4
     DirectX::XMFLOAT4X4 worldMatrixFloat4x4;
     DirectX::XMStoreFloat4x4(&worldMatrixFloat4x4, worldMatrix);
 
