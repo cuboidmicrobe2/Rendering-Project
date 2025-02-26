@@ -105,25 +105,6 @@ HRESULT Renderer::CreateDepthStencil() {
     return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
 }
 
-HRESULT Renderer::CreateCube() {
-
-    SimpleVertex vertices[] = {
-        {{-0.5f, 0.5f, 0.0f}, {0, 0, -1}, {0, 0}},
-        {{0.5f, 0.5f, 0.0f}, {0, 0, -1}, {1, 0}},
-        {{-0.5f, -0.5f, 0.0f}, {0, 0, -1}, {0, 1}},
-        {{0.5f, -0.5f, 0.0f}, {0, 0, -1}, {1, 1}},
-    };
-
-    VertexBuffer vertexBuffer(this->device.Get(), sizeof(SimpleVertex), sizeof(vertices) / sizeof(SimpleVertex),
-                              vertices);
-    this->vertexBuffer = vertexBuffer.GetBuffer();
-    if (!this->vertexBuffer) {
-        return E_FAIL;
-    }
-
-    return S_OK;
-}
-
 void Renderer::SetViewPort() {
     this->viewport.Width    = static_cast<FLOAT>(window->GetWidth());
     this->viewport.Height   = static_cast<FLOAT>(window->GetHeight());

@@ -158,6 +158,7 @@
     <ClInclude Include="InputHandler.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />

@@ -21,7 +21,6 @@ class Renderer {
     HRESULT CreateDeviceAndSwapChain();
     HRESULT CreateRenderTarget();
     HRESULT CreateDepthStencil();
-    HRESULT CreateCube();
     void SetViewPort();
 
     Microsoft::WRL::ComPtr<ID3D11Device> device;

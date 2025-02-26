@@ -19,25 +19,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         return -1;
     }
 
-    // Temp stuff
-    Mesh mesh;
-    SimpleVertex vertices[] = {
-        {{-0.5f, 0.5f, 0.0f}, {0, 0, -1}, {0, 0}},  {{0.5f, 0.5f, 0.0f}, {0, 0, -1}, {1, 0}},
-        {{-0.5f, -0.5f, 0.0f}, {0, 0, -1}, {0, 1}}, {{0.5f, -0.5f, 0.0f}, {0, 0, -1}, {1, 1}},
-    };
-
-    ID3D11Resource* texture;
-    ID3D11ShaderResourceView* srv;
-
-    HRESULT createShaderResult =
-        DirectX::CreateWICTextureFromFile(renderer.GetDevice(), L"slimepfp.jpg", &texture, &srv);
-
-    assert(!FAILED(createShaderResult), "texture creation failed");
-
-    unsigned indices[4]{0, 1, 2, 3};
-    mesh.Initialize(renderer.GetDevice(), MeshData{MeshData::VertexInfo{sizeof(SimpleVertex), 4, vertices},
-                                                   MeshData::IndexInfo{4, indices},
-                                                   {MeshData::SubMeshInfo{0, 4, srv, srv, srv}}});
+   Mesh mesh;
+    mesh.Initialize(renderer.GetDevice(), "./cottage");
 
     Scene scene(window);
     SceneObject some(Transform({0, 0, 0, 0}), mesh);
