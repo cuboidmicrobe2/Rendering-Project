@@ -2,7 +2,9 @@
 #define CAMERA_HPP
 #include "Transform.hpp"
 #include "directxmath.h"
+#include "InputHandler.hpp"
 #include <array>
+#include <algorithm>
 #include <d3d11.h>
 
 class Camera {
@@ -20,6 +22,8 @@ class Camera {
     inline float getVerticalFOVRadians() const;
     inline float getNearZ() const;
     inline float getFarZ() const;
+
+    inline void Update(InputHandler& input);
 
   private:
     float verticalFOVRadians;
@@ -49,5 +53,78 @@ inline float Camera::getVerticalFOVRadians() const { return this->verticalFOVRad
 inline float Camera::getNearZ() const { return this->nearZ; }
 
 inline float Camera::getFarZ() const { return this->farZ; }
+
+inline void Camera::Update(InputHandler& input) {
+    // WASD movement
+    const float speed = 0.069f;
+    if (input.isDown('W')) {
+        this->transform.Move(this->transform.GetDirectionVector(), speed);
+    }
+    if (input.isDown('A')) {
+        this->transform.Move(DirectX::XMVector3Cross(this->transform.GetDirectionVector(), {0, 1, 0, 0}), speed);
+    }
+    if (input.isDown('S')) {
+        this->transform.Move(DirectX::XMVectorNegate(this->transform.GetDirectionVector()), speed);
+    }
+    if (input.isDown('D')) {
+        this->transform.Move(DirectX::XMVector3Cross(this->transform.GetDirectionVector(), {0, -1, 0, 0}), speed);
+    }
+
+    // Up and Down movement
+    if (input.isDown(VK_SPACE)) {
+        this->transform.Move({0, 1, 0, 0}, speed);
+    }
+    if (input.isDown(VK_CONTROL)) {
+        this->transform.Move({0, -1, 0, 0}, speed);
+    }
+
+    // Hide cursor
+
+    ShowCursor(FALSE);
+
+    // Get screen center
+    POINT screenCenter{
+        .x = GetSystemMetrics(SM_CXSCREEN) / 2,
+        .y = GetSystemMetrics(SM_CYSCREEN) / 2,
+    };
+
+    // Get current cursor
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+
+    // Calculate mouse movement
+    int mouseDeltaX = cursorPos.x - screenCenter.x;
+    int mouseDeltaY = cursorPos.y - screenCenter.y;
+
+    // Reset cursor pos to center
+    SetCursorPos(screenCenter.x, screenCenter.y);
+
+    // Mouse movement
+    const float sensitivity = 0.001f;
+    float x                 = mouseDeltaX * sensitivity;
+    float y                 = mouseDeltaY * sensitivity;
+       
+
+
+    float deltaYawRad   = x;
+    float deltaPitchRad = y;
+
+    // Create yaw quaternion (rotation around Y-axis)
+    DirectX::XMVECTOR yawQuat = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0, 1, 0, 0), deltaYawRad);
+
+    // Create pitch quaternion (rotation around X-axis)
+    DirectX::XMVECTOR pitchQuat = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), deltaPitchRad);
+
+    // Multiply the current rotation quaternion by the new rotations (yaw then pitch)
+    this->transform.SetRotationQuaternion(
+        DirectX::XMQuaternionMultiply(this->transform.GetRotationQuaternion(), yawQuat)); // Apply yaw first
+
+    this->transform.SetRotationQuaternion(
+        DirectX::XMQuaternionMultiply(this->transform.GetRotationQuaternion(), pitchQuat)); // Then apply pitch
+
+    // Normalize the quaternion to avoid drift
+    this->transform.SetRotationQuaternion(DirectX::XMQuaternionNormalize(this->transform.GetRotationQuaternion()));
+
+}
 
 #endif

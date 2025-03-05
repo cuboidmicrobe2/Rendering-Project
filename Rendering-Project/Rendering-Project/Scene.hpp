@@ -6,6 +6,8 @@
 #include "Renderer.hpp"
 #include "SceneObject.hpp"
 #include <vector>
+#include "InputHandler.hpp"
+#include <memory>
 
 class Scene {
   public:
@@ -17,13 +19,17 @@ class Scene {
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
-    void RenderScene(ID3D11Device* device, ID3D11DeviceContext* context) const;
+    Mesh* LoadMesh(std::string path);
+
+    void RenderScene();
 
     void UpdateScene();
 
   private:
     Renderer renderer;
+    InputHandler& inputhandler;
 
+    std::vector<std::unique_ptr<Mesh>> meshes;
     std::vector<SceneObject> objects;
     std::vector<Camera> cameras;
     std::vector<Light> lights;

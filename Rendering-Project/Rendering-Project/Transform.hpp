@@ -18,6 +18,7 @@ class Transform {
     inline void SetScale(DirectX::XMVECTOR scale);
 
     inline void Move(DirectX::XMVECTOR move);
+    inline void Move(DirectX::XMVECTOR direction, float speed);
     inline void Rotate(float rotationX, float rotationY, float rotationZ = 0);
     inline void RotateQuaternion(DirectX::XMVECTOR quaternion);
 
@@ -55,6 +56,10 @@ inline void Transform::SetRotationQuaternion(DirectX::XMVECTOR quaternion) {
 inline void Transform::SetScale(DirectX::XMVECTOR scale) { this->scale = scale; }
 
 inline void Transform::Move(DirectX::XMVECTOR move) { this->position = DirectX::XMVectorAdd(this->position, move); }
+
+inline void Transform::Move(DirectX::XMVECTOR direction, float speed) {
+    this->Move(DirectX::XMVectorScale(direction, speed));
+}
 
 inline void Transform::Rotate(float x, float y, float z) {
     this->RotateQuaternion(DirectX::XMQuaternionRotationRollPitchYaw(x, y, z));

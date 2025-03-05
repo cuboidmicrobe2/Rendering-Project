@@ -1,4 +1,5 @@
 #include "SubMesh.hpp"
+#include <iostream>
 
 void SubMesh::Initialize(size_t startIndexValue, size_t nrOfIndicesInSubMesh,
                          ID3D11ShaderResourceView* ambientTextureSRV, ID3D11ShaderResourceView* diffuseTextureSRV,

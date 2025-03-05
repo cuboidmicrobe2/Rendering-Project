@@ -7,6 +7,10 @@
 
 namespace fs = std::filesystem;
 
+Mesh::Mesh(ID3D11Device* device, std::string texturepath) { 
+    this->Initialize(device, texturepath);
+}
+
 void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
     this->subMeshes.reserve(meshInfo.subMeshInfo.size());
     for (const MeshData::SubMeshInfo& subMeshInfo : meshInfo.subMeshInfo) {
@@ -67,10 +71,10 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
             this->subMeshes.emplace_back(submesh);
 
             // Add indices to temp index buffer
-            meshStartIndex += mesh.Indices.size();
             for (auto& indice : mesh.Indices) {
                 tempIndexBuffer.emplace_back(indice + meshStartIndex);
             }
+            meshStartIndex += mesh.Indices.size();
 
             // Add vertexes to temp vertex buffer
             tempIndexBuffer.reserve(mesh.Vertices.size());
@@ -78,6 +82,7 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
                 tempVertexBuffer.emplace_back(SimpleVertex(vertex));
             }
         }
+
         this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), tempVertexBuffer.size(), tempVertexBuffer.data());
         this->indexBuffer.Initialize(device, tempIndexBuffer.size(), tempIndexBuffer.data());
     } else {

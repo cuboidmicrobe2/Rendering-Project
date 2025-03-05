@@ -4,7 +4,7 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform, Mesh& mesh) : transform(transform), mesh(&mesh) {}
+SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {}
 
 void SceneObject::Draw(ID3D11Device* device,  ID3D11DeviceContext* context) const {
     // Write Object Worldmatrix to vertexShader
