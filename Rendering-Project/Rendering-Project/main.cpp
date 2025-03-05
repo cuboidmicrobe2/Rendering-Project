@@ -19,13 +19,34 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         return -1;
     }
 
+    Mesh mesh2;
+    SimpleVertex vertices[] = {
+        {{-0.5f, 0.5f, 0.0f}, {0, 0, -1}, {0, 0}},
+        {{0.5f, 0.5f, 0.0f}, {0, 0, -1}, {1, 0}},
+        {{-0.5f, -0.5f, 0.0f}, {0, 0, -1}, {0, 1}},
+        {{0.5f, -0.5f, 0.0f}, {0, 0, -1}, {1, 1}},
+    };
+
+    ID3D11ShaderResourceView* srv;
+    HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(renderer.GetDevice(), L"slimepfp.jpg", nullptr, &srv);
+
+    assert(!FAILED(createShaderResult), "quad texture creation failed");
+
+    unsigned indices[4]{0, 1, 2, 3};
+    mesh2.Initialize(renderer.GetDevice(), MeshData{MeshData::VertexInfo{sizeof(SimpleVertex), 4, vertices},
+                                                   MeshData::IndexInfo{4, indices},
+                                                   {MeshData::SubMeshInfo{0, 4, srv, srv, srv}}});
+
+    SceneObject obj(Transform({0, 0, 0, 0}), mesh2);
+
     Mesh mesh;
     mesh.Initialize(renderer.GetDevice(), "source/Cube.obj");
     Scene scene(window);
     SceneObject some(Transform({0, 0, 0, 0}), mesh);
+    scene.AddSceneObject(obj);
     scene.AddSceneObject(some);
 
-    Camera camera(90, 16.f / 9.f, 1, 1000, {0, 0, -40}, {0, 0, 1});
+    Camera camera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1});
     scene.AddCameraObject(camera);
 
     Light light(Transform({1, 0, -1}), {1, 1, 1}, 1);
