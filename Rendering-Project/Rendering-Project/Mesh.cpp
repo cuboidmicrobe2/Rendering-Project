@@ -1,9 +1,9 @@
 #include "Mesh.hpp"
 #include "OBJ_Loader.h"
+#include "SimpleVertex.hpp"
 #include <WICTextureLoader.h>
 #include <filesystem>
 #include <fstream>
-#include "SimpleVertex.hpp"
 
 namespace fs = std::filesystem;
 
@@ -38,26 +38,31 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
             ID3D11ShaderResourceView* diffuseSrv  = nullptr;
             ID3D11ShaderResourceView* specularSrv = nullptr;
 
-            if (!mesh.MeshMaterial.name.empty()) {
-                if (!mesh.MeshMaterial.map_Ka.empty()) {
-                    std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
-                    HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
-                        device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &ambientSrv);
-                    if (FAILED(createShaderResult)) throw std::runtime_error("failed to load ambient texture");
-                }
-                if (!mesh.MeshMaterial.map_Kd.empty()) {
-                    std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Kd;
-                    HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
-                        device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &diffuseSrv);
-                    if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
-                }
-                if (!mesh.MeshMaterial.map_Ka.empty()) {
-                    std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
-                    HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
-                        device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &specularSrv);
-                    if (FAILED(createShaderResult)) throw std::runtime_error("failed to load specular texture");
-                }
+            if (!mesh.MeshMaterial.map_Ka.empty()) {
+                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
+                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
+                    device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &ambientSrv);
+                if (FAILED(createShaderResult)) throw std::runtime_error("failed to load ambient texture");
+            } else {
+                DirectX::CreateWICTextureFromFile(device, L"slimepfp.jpg", nullptr, &ambientSrv);
             }
+            if (!mesh.MeshMaterial.map_Kd.empty()) {
+                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Kd;
+                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
+                    device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &diffuseSrv);
+                if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
+            } else {
+                DirectX::CreateWICTextureFromFile(device, L"slimepfp.jpg", nullptr, &diffuseSrv);
+            }
+            if (!mesh.MeshMaterial.map_Ka.empty()) {
+                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
+                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
+                    device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &specularSrv);
+                if (FAILED(createShaderResult)) throw std::runtime_error("failed to load specular texture");
+            } else {
+                DirectX::CreateWICTextureFromFile(device, L"slimepfp.jpg", nullptr, &specularSrv);
+            }
+            std::cout << ambientSrv << " " << diffuseSrv << " " << specularSrv << "\n";
             submesh.Initialize(meshStartIndex, mesh.Indices.size(), ambientSrv, diffuseSrv, specularSrv);
             this->subMeshes.emplace_back(submesh);
 
@@ -75,8 +80,9 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
         }
         this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), tempVertexBuffer.size(), tempVertexBuffer.data());
         this->indexBuffer.Initialize(device, tempIndexBuffer.size(), tempIndexBuffer.data());
+    } else {
+        throw std::runtime_error("Failed to load model");
     }
-    throw std::runtime_error("Failed to load model")
 }
 
 void Mesh::BindMeshBuffers(ID3D11DeviceContext* context) const {

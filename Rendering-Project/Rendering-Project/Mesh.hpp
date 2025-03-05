@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MESH_HPP
+#define MESH_HPP
 
 #include <vector>
 
@@ -61,3 +62,5 @@ public:
 	ID3D11ShaderResourceView* GetDiffuseSRV(size_t subMeshIndex) const;
 	ID3D11ShaderResourceView* GetSpecularSRV(size_t subMeshIndex) const;
 };
+
+#endif
