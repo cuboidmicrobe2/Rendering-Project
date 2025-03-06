@@ -105,25 +105,7 @@ inline void Camera::Update(InputHandler& input) {
     float y                 = mouseDeltaY * sensitivity;
        
 
-
-    float deltaYawRad   = x;
-    float deltaPitchRad = y;
-
-    // Create yaw quaternion (rotation around Y-axis)
-    DirectX::XMVECTOR yawQuat = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0, 1, 0, 0), deltaYawRad);
-
-    // Create pitch quaternion (rotation around X-axis)
-    DirectX::XMVECTOR pitchQuat = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), deltaPitchRad);
-
-    // Multiply the current rotation quaternion by the new rotations (yaw then pitch)
-    this->transform.SetRotationQuaternion(
-        DirectX::XMQuaternionMultiply(this->transform.GetRotationQuaternion(), yawQuat)); // Apply yaw first
-
-    this->transform.SetRotationQuaternion(
-        DirectX::XMQuaternionMultiply(this->transform.GetRotationQuaternion(), pitchQuat)); // Then apply pitch
-
-    // Normalize the quaternion to avoid drift
-    this->transform.SetRotationQuaternion(DirectX::XMQuaternionNormalize(this->transform.GetRotationQuaternion()));
+    this->transform.Rotate(y, x);
 
 }
 

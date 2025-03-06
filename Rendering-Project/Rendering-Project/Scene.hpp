@@ -3,7 +3,7 @@
 
 #include "Camera.hpp"
 #include "Light.hpp"
-#include "Renderer.hpp"
+#include "ForwardRenderer.hpp"
 #include "SceneObject.hpp"
 #include <vector>
 #include "InputHandler.hpp"
@@ -26,7 +26,7 @@ class Scene {
     void UpdateScene();
 
   private:
-    Renderer renderer;
+    DaddyRenderer* renderer;
     InputHandler& inputhandler;
 
     std::vector<std::unique_ptr<Mesh>> meshes;

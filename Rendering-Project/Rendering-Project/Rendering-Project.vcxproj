@@ -139,11 +139,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
+    <ClCompile Include="DaddyRenderer.cpp" />
+    <ClCompile Include="DeferredRendering.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
+    <ClCompile Include="ForwardRenderer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
@@ -154,14 +156,17 @@
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
+    <ClInclude Include="DaddyRenderer.hpp" />
+    <ClInclude Include="DeferredRendering.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
+    <ClInclude Include="ForwardRenderer.hpp" />
+    <ClInclude Include="Gbuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputHandler.hpp" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="ReadFile.hpp" />
-    <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
     <ClInclude Include="SimpleVertex.hpp" />
@@ -176,6 +181,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="deferredPS.hlsl" />
+    <FxCompile Include="deferredVS.hlsl" />
     <FxCompile Include="PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

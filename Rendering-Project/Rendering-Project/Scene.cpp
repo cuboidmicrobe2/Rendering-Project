@@ -1,12 +1,13 @@
 #include "Scene.hpp"
 
-Scene::Scene(Window& window) : renderer(window), inputhandler(window.inputHandler) {
-    if (FAILED(this->renderer.Init())) throw std::runtime_error("Failed to init renderer");
+Scene::Scene(Window& window) : inputhandler(window.inputHandler) {
+    this->renderer = new ForwardRenderer(window);
+    if (FAILED(this->renderer->Init())) throw std::runtime_error("Failed to init renderer");
 }
 
 Scene::~Scene() {}
 
-HRESULT Scene::Init() { return this->renderer.Init(); }
+HRESULT Scene::Init() { return this->renderer->Init(); }
 
 void Scene::AddSceneObject(const SceneObject& sceneObject) {
     this->objects.emplace_back(sceneObject);
@@ -17,12 +18,11 @@ void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(c
 void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light); }
 
 Mesh* Scene::LoadMesh(std::string path) { 
-    this->meshes.emplace_back(new Mesh(this->renderer.GetDevice(), path));
+    this->meshes.emplace_back(new Mesh(this->renderer->GetDevice(), path));
     return this->meshes.back().get();
 }
 
 void Scene::RenderScene() {
-    this->renderer.Clear();
     // Disable culling
 
     // Bind Lights
@@ -41,14 +41,14 @@ void Scene::RenderScene() {
     DirectX::XMStoreFloat4x4(&matrices[0], viewMatrix);
     DirectX::XMStoreFloat4x4(&matrices[1], projectionMatrix);
     DirectX::XMStoreFloat4x4(&matrices[2], DirectX::XMMatrixMultiplyTranspose(viewMatrix, projectionMatrix));
-    viewAndProjectionMatrices.Initialize(this->renderer.GetDevice(), sizeof(matrices), matrices);
-    this->renderer.GetContext()->VSSetConstantBuffers(0, 1, viewAndProjectionMatrices.GetAdressOfBuffer());
+    viewAndProjectionMatrices.Initialize(this->renderer->GetDevice(), sizeof(matrices), matrices);
+    this->renderer->GetContext()->VSSetConstantBuffers(0, 1, viewAndProjectionMatrices.GetAdressOfBuffer());
 
     for (const SceneObject& obj : this->objects){ 
-        obj.Draw(this->renderer.GetDevice(), this->renderer.GetContext());
+        obj.Draw(this->renderer->GetDevice(), this->renderer->GetContext());
     }
 
-    this->renderer.Present();
+    this->renderer->Update();
 }
 
 void Scene::UpdateScene() {
