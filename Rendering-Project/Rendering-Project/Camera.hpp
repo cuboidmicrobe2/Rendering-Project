@@ -1,37 +1,112 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
+#include "Transform.hpp"
 #include "directxmath.h"
+#include "InputHandler.hpp"
 #include <array>
+#include <algorithm>
 #include <d3d11.h>
 
 class Camera {
   public:
-    Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
-           DirectX::XMVECTOR direction);
-    ~Camera() = default;
+    inline Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
+                  DirectX::XMVECTOR quaternion);
+    inline ~Camera() = default;
 
-    DirectX::XMMATRIX createViewMatrix() const;
-    DirectX::XMMATRIX createProjectionMatrix() const;
+    Transform transform;
 
-    inline void rotateCamera(float rotationX, float rotationY, float rotationZ = 0);
+    inline DirectX::XMMATRIX createViewMatrix() const;
+    inline DirectX::XMMATRIX createProjectionMatrix() const;
 
-    inline DirectX::XMVECTOR getPosition() const;
-    inline DirectX::XMVECTOR getDirection() const;
     inline float getAspectRatio() const;
     inline float getVerticalFOVRadians() const;
     inline float getNearZ() const;
     inline float getFarZ() const;
 
-    inline void setPosition(DirectX::XMVECTOR position) { this->position = position; };
-    inline void setDirection(float rotationX, float rotationY, float rotationZ);
+    inline void Update(InputHandler& input);
 
   private:
     float verticalFOVRadians;
     float aspectRatio;
     float nearZ;
     float farZ;
-    DirectX::XMVECTOR position;
-    DirectX::XMVECTOR direction;
 };
+
+inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
+                      DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion)
+    : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {1, 1, 1}) {
+    this->verticalFOVRadians = DirectX::XMConvertToRadians(horizontalFOVDegrees / aspectRatio);
+}
+
+inline DirectX::XMMATRIX Camera::createViewMatrix() const {
+    return DirectX::XMMatrixLookToLH(this->transform.GetPosition(), this->transform.GetDirectionVector(), {0, 1, 0, 0});
+}
+
+inline DirectX::XMMATRIX Camera::createProjectionMatrix() const {
+    return DirectX::XMMatrixPerspectiveFovLH(this->verticalFOVRadians, this->aspectRatio, this->nearZ, this->farZ);
+}
+
+inline float Camera::getAspectRatio() const { return this->aspectRatio; }
+
+inline float Camera::getVerticalFOVRadians() const { return this->verticalFOVRadians; }
+
+inline float Camera::getNearZ() const { return this->nearZ; }
+
+inline float Camera::getFarZ() const { return this->farZ; }
+
+inline void Camera::Update(InputHandler& input) {
+    // WASD movement
+    const float speed = 0.069f;
+    if (input.isDown('W')) {
+        this->transform.Move(this->transform.GetDirectionVector(), speed);
+    }
+    if (input.isDown('A')) {
+        this->transform.Move(DirectX::XMVector3Cross(this->transform.GetDirectionVector(), {0, 1, 0, 0}), speed);
+    }
+    if (input.isDown('S')) {
+        this->transform.Move(DirectX::XMVectorNegate(this->transform.GetDirectionVector()), speed);
+    }
+    if (input.isDown('D')) {
+        this->transform.Move(DirectX::XMVector3Cross(this->transform.GetDirectionVector(), {0, -1, 0, 0}), speed);
+    }
+
+    // Up and Down movement
+    if (input.isDown(VK_SPACE)) {
+        this->transform.Move({0, 1, 0, 0}, speed);
+    }
+    if (input.isDown(VK_CONTROL)) {
+        this->transform.Move({0, -1, 0, 0}, speed);
+    }
+
+    // Hide cursor
+
+    ShowCursor(FALSE);
+
+    // Get screen center
+    POINT screenCenter{
+        .x = GetSystemMetrics(SM_CXSCREEN) / 2,
+        .y = GetSystemMetrics(SM_CYSCREEN) / 2,
+    };
+
+    // Get current cursor
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+
+    // Calculate mouse movement
+    int mouseDeltaX = cursorPos.x - screenCenter.x;
+    int mouseDeltaY = cursorPos.y - screenCenter.y;
+
+    // Reset cursor pos to center
+    SetCursorPos(screenCenter.x, screenCenter.y);
+
+    // Mouse movement
+    const float sensitivity = 0.001f;
+    float x                 = mouseDeltaX * sensitivity;
+    float y                 = mouseDeltaY * sensitivity;
+       
+
+    this->transform.Rotate(y, x);
+
+}
 
 #endif

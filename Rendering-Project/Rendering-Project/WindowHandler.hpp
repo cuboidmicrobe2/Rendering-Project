@@ -1,6 +1,6 @@
 #ifndef WINDOW_HANDLER_HPP
 #define WINDOW_HANDLER_HPP
-
+#define NOMINMAX
 #include <Windows.h>
 
 #include "InputHandler.hpp"

@@ -1,5 +1,9 @@
-#include "Renderer.hpp"
+#define NOMINMAX
+#include "Mesh.hpp"
+#include "Scene.hpp"
+#include "SimpleVertex.hpp"
 #include "WindowHandler.hpp"
+#include <WICTextureLoader.h>
 #include <chrono>
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
@@ -8,11 +12,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     Window window(hInstance, nCmdShow);
 
-    Renderer renderer(window);
+    Scene scene(window);
+    Mesh* mesh = scene.LoadMesh("source/Cube.obj");
+    SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
+    scene.AddSceneObject(some);
 
-    if (FAILED(renderer.Init())) {
-        return -1;
-    }
+    Camera camera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1});
+    scene.AddCameraObject(camera);
+
+    Light light(Transform({1, 0, -1}), {1, 1, 1}, 1);
+    scene.AddLightObject(light);
+
+    // tempstuff end
 
     MSG msg = {};
     while (msg.message != WM_QUIT) {
@@ -23,7 +34,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             DispatchMessage(&msg);
         }
 
-        renderer.Update();
+        scene.UpdateScene();
+        scene.RenderScene();
     }
 
     return 0;

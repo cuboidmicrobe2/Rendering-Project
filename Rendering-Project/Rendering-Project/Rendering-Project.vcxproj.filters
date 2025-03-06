@@ -21,62 +21,71 @@
     <Filter Include="Header Files\Rendering">
       <UniqueIdentifier>{d3ea11b6-980e-4a16-bf29-c2fc4c880a9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Source Files">
+    <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Resource Files\Source Files\Buffers">
+    <Filter Include="Source Files\Buffers">
       <UniqueIdentifier>{b123170d-b3d5-4542-9d85-c698eecd45a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Source Files\Meshes">
+    <Filter Include="Source Files\Meshes">
       <UniqueIdentifier>{fc16d37c-c448-4558-a05d-91d0437e2b21}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Source Files\Rendering">
+    <Filter Include="Source Files\Rendering">
       <UniqueIdentifier>{7a161882-d3d5-4cb0-b39e-25b3880b3301}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Source Files\Scene">
+    <Filter Include="Source Files\Scene">
       <UniqueIdentifier>{25083945-3450-4689-8d23-d255515440be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering\ForwardRendering">
+      <UniqueIdentifier>{a12c0a17-3eb0-4edc-a61f-63593bd999ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering\DeferredRendering">
+      <UniqueIdentifier>{cf102c6d-1dc1-4890-ac86-07996de2e10e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Resource Files\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Resource Files\Source Files\Scene</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConstantBuffer.cpp">
-      <Filter>Resource Files\Source Files\Buffers</Filter>
+      <Filter>Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="DepthBuffer.cpp">
-      <Filter>Resource Files\Source Files\Buffers</Filter>
+      <Filter>Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
-      <Filter>Resource Files\Source Files\Buffers</Filter>
+      <Filter>Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>Resource Files\Source Files\Meshes</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Resource Files\Source Files\Rendering</Filter>
+      <Filter>Source Files\Meshes</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>Resource Files\Source Files\Scene</Filter>
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="SceneObject.cpp">
-      <Filter>Resource Files\Source Files\Scene</Filter>
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="StructuredBuffer.cpp">
-      <Filter>Resource Files\Source Files\Buffers</Filter>
+      <Filter>Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="SubMesh.cpp">
-      <Filter>Resource Files\Source Files\Meshes</Filter>
+      <Filter>Source Files\Meshes</Filter>
     </ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
-      <Filter>Resource Files\Source Files\Buffers</Filter>
+      <Filter>Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="WindowHandler.cpp">
-      <Filter>Resource Files\Source Files\Rendering</Filter>
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ForwardRenderer.cpp">
+      <Filter>Source Files\Rendering\ForwardRendering</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredRendering.cpp">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </ClCompile>
+    <ClCompile Include="DaddyRenderer.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,9 +116,6 @@
     <ClInclude Include="Camera.hpp">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Scene.hpp">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
@@ -125,16 +131,51 @@
     <ClInclude Include="InputHandler.hpp">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Light.hpp">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.hpp">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJ_Loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DaddyRenderer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRendering.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ForwardRenderer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Gbuffer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="PixelShader.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\Rendering\ForwardRendering</Filter>
     </FxCompile>
+    <FxCompile Include="deferredPS.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="deferredVS.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Source Files\Rendering\ForwardRendering</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="slimepfp.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -65,6 +65,8 @@ size_t ConstantBuffer::GetSize() const { return this->bufferSize; }
 
 ID3D11Buffer* ConstantBuffer::GetBuffer() const { return this->buffer; }
 
+ID3D11Buffer** ConstantBuffer::GetAdressOfBuffer() { return &this->buffer; }
+
 void ConstantBuffer::UpdateBuffer(ID3D11DeviceContext* context, void* data) {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     ZeroMemory(&mappedResource, sizeof(mappedResource));
