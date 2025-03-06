@@ -1,13 +1,19 @@
 #include "DeferredRendering.hpp"
 #include "ReadFile.hpp"
 
-DeferredRendering::DeferredRendering(Window& window) : DaddyRenderer(window) {}
+DeferredRendering::DeferredRendering(Window& window) : DaddyRenderer(window) {
+    
+}
 
 DeferredRendering::~DeferredRendering() {}
 
 HRESULT DeferredRendering::Init() {
     HRESULT result = this->CreateDeviceAndSwapChain();
     if (FAILED(result)) return result;
+
+    this->position.Init(this->GetDevice(), this->window->GetWidth(), this->window->GetHeight());
+    this->normal.Init(this->GetDevice(), this->window->GetWidth(), this->window->GetHeight());
+    this->color.Init(this->GetDevice(), this->window->GetWidth(), this->window->GetHeight());
 
     result = this->CreateRenderTarget();
     if (FAILED(result)) return result;

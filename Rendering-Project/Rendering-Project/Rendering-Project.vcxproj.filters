@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Scene">
       <UniqueIdentifier>{25083945-3450-4689-8d23-d255515440be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Rendering\ForwardRendering">
+      <UniqueIdentifier>{a12c0a17-3eb0-4edc-a61f-63593bd999ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering\DeferredRendering">
+      <UniqueIdentifier>{cf102c6d-1dc1-4890-ac86-07996de2e10e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -54,9 +60,6 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files\Meshes</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
@@ -73,6 +76,15 @@
       <Filter>Source Files\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="WindowHandler.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ForwardRenderer.cpp">
+      <Filter>Source Files\Rendering\ForwardRendering</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredRendering.cpp">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </ClCompile>
+    <ClCompile Include="DaddyRenderer.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,9 +116,6 @@
     <ClInclude Include="Camera.hpp">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Scene.hpp">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
@@ -134,16 +143,34 @@
     <ClInclude Include="OBJ_Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DaddyRenderer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRendering.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ForwardRenderer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Gbuffer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="PixelShader.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\Rendering\ForwardRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="deferredPS.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="deferredVS.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Source Files\Rendering\ForwardRendering</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

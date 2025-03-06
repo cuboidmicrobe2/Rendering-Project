@@ -1,6 +1,5 @@
 #define NOMINMAX
 #include "Mesh.hpp"
-#include "Renderer.hpp"
 #include "Scene.hpp"
 #include "SimpleVertex.hpp"
 #include "WindowHandler.hpp"
