@@ -7,9 +7,7 @@
 
 namespace fs = std::filesystem;
 
-Mesh::Mesh(ID3D11Device* device, std::string texturepath) { 
-    this->Initialize(device, texturepath);
-}
+Mesh::Mesh(ID3D11Device* device, std::string texturepath) { this->Initialize(device, texturepath); }
 
 void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
     this->subMeshes.reserve(meshInfo.subMeshInfo.size());
@@ -46,26 +44,35 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
                 std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
                 HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
                     device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &ambientSrv);
+
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load ambient texture");
+
             } else {
-                DirectX::CreateWICTextureFromFile(device, L"slimepfp.jpg", nullptr, &ambientSrv);
+                DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &ambientSrv);
             }
+
             if (!mesh.MeshMaterial.map_Kd.empty()) {
                 std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Kd;
                 HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
                     device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &diffuseSrv);
+
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
+
             } else {
-                DirectX::CreateWICTextureFromFile(device, L"slimepfp.jpg", nullptr, &diffuseSrv);
+                DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &diffuseSrv);
             }
-            if (!mesh.MeshMaterial.map_Ka.empty()) {
-                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
+
+            if (!mesh.MeshMaterial.map_Ks.empty()) {
+                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ks;
                 HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
                     device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &specularSrv);
+
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load specular texture");
+
             } else {
-                DirectX::CreateWICTextureFromFile(device, L"slimepfp.jpg", nullptr, &specularSrv);
+                DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &specularSrv);
             }
+
             std::cout << ambientSrv << " " << diffuseSrv << " " << specularSrv << "\n";
             submesh.Initialize(meshStartIndex, mesh.Indices.size(), ambientSrv, diffuseSrv, specularSrv);
             this->subMeshes.emplace_back(submesh);

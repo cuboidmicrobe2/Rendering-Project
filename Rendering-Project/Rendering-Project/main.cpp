@@ -3,8 +3,6 @@
 #include "Scene.hpp"
 #include "SimpleVertex.hpp"
 #include "WindowHandler.hpp"
-#include <WICTextureLoader.h>
-#include <chrono>
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
@@ -13,7 +11,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Window window(hInstance, nCmdShow);
 
     Scene scene(window);
-    Mesh* mesh = scene.LoadMesh("source/Cube.obj");
+    Mesh* mesh = scene.LoadMesh("boat.obj");
     SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
     scene.AddSceneObject(some);
 
