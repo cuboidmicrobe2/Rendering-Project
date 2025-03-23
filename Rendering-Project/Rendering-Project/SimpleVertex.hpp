@@ -12,7 +12,7 @@ struct SimpleVertex {
     SimpleVertex(const objl::Vertex& vertex)
         : position({vertex.Position.X, vertex.Position.Y, vertex.Position.Z}),
           normal({vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z}),
-          uv({vertex.TextureCoordinate.X, vertex.TextureCoordinate.Y}) {}
+          uv({vertex.TextureCoordinate.X, 1.0f - vertex.TextureCoordinate.Y}) {}
 
     SimpleVertex(std::array<float, 3> position, std::array<float, 3> normal, std::array<float, 2> uv)
         : position(position), normal(normal), uv(uv) {}

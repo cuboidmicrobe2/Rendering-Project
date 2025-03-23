@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 Scene::Scene(Window& window) : input(window.inputHandler) {
-    this->renderer = std::make_unique<DeferredRenderer>(window);
+    this->renderer = std::make_unique<ForwardRenderer>(window);
     if (FAILED(this->renderer->Init())) throw std::runtime_error("Failed to init renderer");
 }
 
@@ -15,8 +15,8 @@ void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(c
 
 void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light); }
 
-Mesh* Scene::LoadMesh(std::string path) {
-    this->meshes.emplace_back(new Mesh(this->renderer->GetDevice(), path));
+Mesh* Scene::LoadMesh(const std::filesystem::path& folder, const std::string& objname) {
+    this->meshes.emplace_back(new Mesh(this->renderer->GetDevice(), folder, objname));
     return this->meshes.back().get();
 }
 

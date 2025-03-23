@@ -8,6 +8,7 @@
 #include "IndexBuffer.hpp"
 #include "SubMesh.hpp"
 #include "VertexBuffer.hpp"
+#include <filesystem>
 
 struct MeshData {
     struct VertexInfo {
@@ -40,7 +41,7 @@ class Mesh {
 
   public:
     Mesh() = default;
-    Mesh(ID3D11Device* device, std::string texturepath);
+    Mesh(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname);
     ~Mesh()                            = default;
     Mesh(const Mesh& other)            = delete;
     Mesh& operator=(const Mesh& other) = delete;
@@ -48,7 +49,7 @@ class Mesh {
     Mesh& operator=(Mesh&& other)      = delete;
 
     void Initialize(ID3D11Device* device, const MeshData& meshInfo);
-    void Initialize(ID3D11Device* device, std::string texturepath);
+    void Initialize(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname);
 
     void BindMeshBuffers(ID3D11DeviceContext* context) const;
     void PerformSubMeshDrawCall(ID3D11DeviceContext* context, size_t subMeshIndex) const;
