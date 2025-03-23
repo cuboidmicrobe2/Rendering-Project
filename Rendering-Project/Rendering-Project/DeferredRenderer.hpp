@@ -1,15 +1,13 @@
-#ifndef DEFERRED_RENDERING_HPP
-#define DEFERRED_RENDERING_HPP
+#ifndef DEFERRED_RENDERER_HPP
+#define DEFERRED_RENDERER_HPP
 
 #include "DaddyRenderer.hpp"
 #include "Gbuffer.hpp"
 
-
-#pragma once
-class DeferredRendering : public DaddyRenderer {
+class DeferredRenderer : public DaddyRenderer {
   public:
-    DeferredRendering(Window& window);
-    ~DeferredRendering();
+    DeferredRenderer(Window& window);
+    ~DeferredRenderer();
 
     HRESULT Init() override;
     void Update() override;
@@ -26,4 +24,5 @@ class DeferredRendering : public DaddyRenderer {
     GBuffer color;
     GBuffer normal;
 };
+
 #endif // !DEFERRED_RENDERING_HPP

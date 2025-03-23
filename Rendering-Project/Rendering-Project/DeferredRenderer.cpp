@@ -1,11 +1,11 @@
-#include "DeferredRendering.hpp"
+#include "DeferredRenderer.hpp"
 #include "ReadFile.hpp"
 
-DeferredRendering::DeferredRendering(Window& window) : DaddyRenderer(window) {}
+DeferredRenderer::DeferredRenderer(Window& window) : DaddyRenderer(window) {}
 
-DeferredRendering::~DeferredRendering() {}
+DeferredRenderer::~DeferredRenderer() {}
 
-HRESULT DeferredRendering::Init() {
+HRESULT DeferredRenderer::Init() {
     HRESULT result = this->CreateDeviceAndSwapChain();
     if (FAILED(result)) return result;
 
@@ -41,7 +41,7 @@ HRESULT DeferredRendering::Init() {
     return S_OK;
 }
 
-void DeferredRendering::Update() {
+void DeferredRenderer::Update() {
     // do de deferred rendering : )
     // run compute shader, However that is done
     this->SecondPass();
@@ -49,7 +49,7 @@ void DeferredRendering::Update() {
     this->Clear();
 }
 
-void DeferredRendering::SecondPass() {
+void DeferredRenderer::SecondPass() {
     // Unbind GBuffers from writing
     this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr); // ?
     ID3D11ShaderResourceView* SRVs[3] = {
@@ -70,7 +70,7 @@ void DeferredRendering::SecondPass() {
     this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
 }
 
-HRESULT DeferredRendering::SetShaders(std::string& byteDataOutput) {
+HRESULT DeferredRenderer::SetShaders(std::string& byteDataOutput) {
     // Vertex Shader
     if (!CM::ReadFile("deferredVS.cso", byteDataOutput)) {
         std::cerr << "Failed to read vertex shader file!" << std::endl;

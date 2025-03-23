@@ -21,8 +21,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Light light(Transform({1, 0, -1}), {1, 1, 1}, 1);
     scene.AddLightObject(light);
 
-    // tempstuff end
-
     MSG msg = {};
     while (msg.message != WM_QUIT) {
         window.inputHandler.reset();
