@@ -20,7 +20,7 @@ class Scene {
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
-    Mesh* LoadMesh(std::string path);
+    Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname);
 
     void RenderScene();
 

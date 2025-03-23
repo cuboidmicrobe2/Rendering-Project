@@ -11,7 +11,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Window window(hInstance, nCmdShow);
 
     Scene scene(window);
-    Mesh* mesh = scene.LoadMesh("boat.obj");
+    Mesh* mesh = scene.LoadMesh(".", "boat.obj");
     SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
     scene.AddSceneObject(some);
 

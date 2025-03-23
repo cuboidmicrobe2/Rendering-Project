@@ -7,7 +7,9 @@
 
 namespace fs = std::filesystem;
 
-Mesh::Mesh(ID3D11Device* device, std::string texturepath) { this->Initialize(device, texturepath); }
+Mesh::Mesh(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname) {
+    this->Initialize(device, folderpath, objname);
+}
 
 void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
     this->subMeshes.reserve(meshInfo.subMeshInfo.size());
@@ -26,9 +28,12 @@ void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
     this->indexBuffer.Initialize(device, meshInfo.indexInfo.nrOfIndicesInBuffer, meshInfo.indexInfo.indexData);
 }
 
-void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
+void Mesh::Initialize(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname) {
     objl::Loader loader;
-    bool loaded = loader.LoadFile(texturepath);
+        
+    fs::path objpath = folderpath / objname;
+
+    bool loaded = loader.LoadFile(objpath.string());
 
     if (loaded) {
         size_t meshStartIndex = 0;
@@ -40,37 +45,41 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
             ID3D11ShaderResourceView* diffuseSrv  = nullptr;
             ID3D11ShaderResourceView* specularSrv = nullptr;
 
+            std::cout << mesh.MeshMaterial.map_Ka << "\n";
+
             if (!mesh.MeshMaterial.map_Ka.empty()) {
-                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ka;
-                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
-                    device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &ambientSrv);
+                std::cout << "Trying to bind map_Ka\n";
+                std::wstring path              = (folderpath / mesh.MeshMaterial.map_Ka).wstring();
+                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(device, path.c_str(), nullptr, &ambientSrv);
 
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load ambient texture");
 
             } else {
-                DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &ambientSrv);
+                DirectX::CreateWICTextureFromFile(device, L"stone-man\\diffuso.tif", nullptr, &ambientSrv);
             }
 
             if (!mesh.MeshMaterial.map_Kd.empty()) {
-                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Kd;
-                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
-                    device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &diffuseSrv);
+                std::cout << "Trying to bind map_Kd\n";
+                std::wstring path = (folderpath / mesh.MeshMaterial.map_Kd).wstring();
+                HRESULT createShaderResult =
+                    DirectX::CreateWICTextureFromFile(device, path.c_str(), nullptr, &ambientSrv);
 
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
 
             } else {
-                DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &diffuseSrv);
+                DirectX::CreateWICTextureFromFile(device, L"stone-man\\diffuso.tif", nullptr, &diffuseSrv);
             }
 
             if (!mesh.MeshMaterial.map_Ks.empty()) {
-                std::string path           = texturepath + "/" + mesh.MeshMaterial.map_Ks;
-                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
-                    device, std::wstring(path.begin(), path.end()).c_str(), nullptr, &specularSrv);
+                std::cout << "Trying to bind map_Ks\n";
+                std::wstring path = (folderpath / mesh.MeshMaterial.map_Ks).wstring();
+                HRESULT createShaderResult =
+                    DirectX::CreateWICTextureFromFile(device, path.c_str(), nullptr, &ambientSrv);
 
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load specular texture");
 
             } else {
-                DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &specularSrv);
+                // DirectX::CreateWICTextureFromFile(device, L"boatUV.png", nullptr, &specularSrv);
             }
 
             std::cout << ambientSrv << " " << diffuseSrv << " " << specularSrv << "\n";
@@ -78,15 +87,16 @@ void Mesh::Initialize(ID3D11Device* device, std::string texturepath) {
             this->subMeshes.emplace_back(submesh);
 
             // Add indices to temp index buffer
+            tempIndexBuffer.reserve(mesh.Indices.size());
             for (auto& indice : mesh.Indices) {
                 tempIndexBuffer.emplace_back(indice + meshStartIndex);
             }
             meshStartIndex += mesh.Indices.size();
 
             // Add vertexes to temp vertex buffer
-            tempIndexBuffer.reserve(mesh.Vertices.size());
+            tempVertexBuffer.reserve(mesh.Vertices.size());
             for (const auto& vertex : mesh.Vertices) {
-                tempVertexBuffer.emplace_back(SimpleVertex(vertex));
+                tempVertexBuffer.emplace_back(vertex);
             }
         }
 
