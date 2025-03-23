@@ -1,10 +1,10 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
+#include "InputHandler.hpp"
 #include "Transform.hpp"
 #include "directxmath.h"
-#include "InputHandler.hpp"
-#include <array>
 #include <algorithm>
+#include <array>
 #include <d3d11.h>
 
 class Camera {
@@ -30,11 +30,14 @@ class Camera {
     float aspectRatio;
     float nearZ;
     float farZ;
+    float xRotation;
+    float yRotation;
 };
 
 inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
                       DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion)
-    : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {1, 1, 1}) {
+    : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {1, 1, 1}), xRotation(0.0f),
+      yRotation(0.0f) {
     this->verticalFOVRadians = DirectX::XMConvertToRadians(horizontalFOVDegrees / aspectRatio);
 }
 
@@ -55,6 +58,7 @@ inline float Camera::getNearZ() const { return this->nearZ; }
 inline float Camera::getFarZ() const { return this->farZ; }
 
 inline void Camera::Update(InputHandler& input) {
+
     // WASD movement
     const float speed = 0.069f;
     if (input.isDown('W')) {
@@ -103,10 +107,16 @@ inline void Camera::Update(InputHandler& input) {
     const float sensitivity = 0.001f;
     float x                 = mouseDeltaX * sensitivity;
     float y                 = mouseDeltaY * sensitivity;
-       
 
-    this->transform.Rotate(y, x);
+    // Rotate rotations
+    this->xRotation += y;
+    this->xRotation = std::clamp(this->xRotation, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
 
+    this->yRotation += x;
+
+    // Apply rotations
+    DirectX::XMVECTOR rotationQuat = DirectX::XMQuaternionRotationRollPitchYaw(this->xRotation, this->yRotation, 0);
+    this->transform.SetRotationQuaternion(rotationQuat);
 }
 
 #endif
