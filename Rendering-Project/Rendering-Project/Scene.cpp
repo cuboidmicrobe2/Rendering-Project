@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 Scene::Scene(Window& window) : input(window.inputHandler) {
-    this->renderer = std::make_unique<ForwardRenderer>(window);
+    this->renderer = std::make_unique<DeferredRenderer>(window);
     if (FAILED(this->renderer->Init())) throw std::runtime_error("Failed to init renderer");
 }
 
