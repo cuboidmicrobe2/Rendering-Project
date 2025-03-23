@@ -81,7 +81,7 @@
     <ClCompile Include="ForwardRenderer.cpp">
       <Filter>Source Files\Rendering\ForwardRendering</Filter>
     </ClCompile>
-    <ClCompile Include="DeferredRendering.cpp">
+    <ClCompile Include="DeferredRenderer.cpp">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </ClCompile>
     <ClCompile Include="DaddyRenderer.cpp">
@@ -146,7 +146,7 @@
     <ClInclude Include="DaddyRenderer.hpp">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="DeferredRendering.hpp">
+    <ClInclude Include="DeferredRenderer.hpp">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="ForwardRenderer.hpp">

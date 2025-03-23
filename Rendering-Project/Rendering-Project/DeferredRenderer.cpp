@@ -1,13 +1,11 @@
-#include "DeferredRendering.hpp"
+#include "DeferredRenderer.hpp"
 #include "ReadFile.hpp"
 
-DeferredRendering::DeferredRendering(Window& window) : DaddyRenderer(window) {
-    
-}
+DeferredRenderer::DeferredRenderer(Window& window) : DaddyRenderer(window) {}
 
-DeferredRendering::~DeferredRendering() {}
+DeferredRenderer::~DeferredRenderer() {}
 
-HRESULT DeferredRendering::Init() {
+HRESULT DeferredRenderer::Init() {
     HRESULT result = this->CreateDeviceAndSwapChain();
     if (FAILED(result)) return result;
 
@@ -40,10 +38,10 @@ HRESULT DeferredRendering::Init() {
     };
     this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
 
-        return S_OK;
+    return S_OK;
 }
 
-void DeferredRendering::Update() {
+void DeferredRenderer::Update() {
     // do de deferred rendering : )
     // run compute shader, However that is done
     this->SecondPass();
@@ -51,7 +49,7 @@ void DeferredRendering::Update() {
     this->Clear();
 }
 
-void DeferredRendering::SecondPass() {
+void DeferredRenderer::SecondPass() {
     // Unbind GBuffers from writing
     this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr); // ?
     ID3D11ShaderResourceView* SRVs[3] = {
@@ -59,7 +57,7 @@ void DeferredRendering::SecondPass() {
         this->color.GetSRV(),
         this->normal.GetSRV(),
     };
-   
+
     // We still need a compute shader somewhere?
     this->immediateContext->CSSetShaderResources(0, 3, SRVs);
 
@@ -72,9 +70,9 @@ void DeferredRendering::SecondPass() {
     this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
 }
 
-HRESULT DeferredRendering::SetShaders(std::string& byteDataOutput) {
+HRESULT DeferredRenderer::SetShaders(std::string& byteDataOutput) {
     // Vertex Shader
-    if (!ReadFile("deferredVS.cso", byteDataOutput)) {
+    if (!CM::ReadFile("deferredVS.cso", byteDataOutput)) {
         std::cerr << "Failed to read vertex shader file!" << std::endl;
         return E_FAIL;
     }
@@ -89,7 +87,7 @@ HRESULT DeferredRendering::SetShaders(std::string& byteDataOutput) {
     std::string shaderData;
 
     // Pixel Shader
-    if (!ReadFile("deferredPS.cso", shaderData)) {
+    if (!CM::ReadFile("deferredPS.cso", shaderData)) {
         std::cerr << "Failed to read pixel shader file!" << std::endl;
         return E_FAIL;
     }

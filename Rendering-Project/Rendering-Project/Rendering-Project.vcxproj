@@ -140,7 +140,7 @@
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DaddyRenderer.cpp" />
-    <ClCompile Include="DeferredRendering.cpp" />
+    <ClCompile Include="DeferredRenderer.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="ForwardRenderer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -157,7 +157,7 @@
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DaddyRenderer.hpp" />
-    <ClInclude Include="DeferredRendering.hpp" />
+    <ClInclude Include="DeferredRenderer.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="ForwardRenderer.hpp" />
     <ClInclude Include="Gbuffer.hpp" />

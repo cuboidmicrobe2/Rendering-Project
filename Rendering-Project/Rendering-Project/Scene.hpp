@@ -2,12 +2,13 @@
 #define SCENE_HPP
 
 #include "Camera.hpp"
-#include "Light.hpp"
+#include "DeferredRenderer.hpp"
 #include "ForwardRenderer.hpp"
-#include "SceneObject.hpp"
-#include <vector>
 #include "InputHandler.hpp"
+#include "Light.hpp"
+#include "SceneObject.hpp"
 #include <memory>
+#include <vector>
 
 class Scene {
   public:
@@ -26,8 +27,8 @@ class Scene {
     void UpdateScene();
 
   private:
-    DaddyRenderer* renderer;
-    InputHandler& inputhandler;
+    std::unique_ptr<DaddyRenderer> renderer;
+    InputHandler& input;
 
     std::vector<std::unique_ptr<Mesh>> meshes;
     std::vector<SceneObject> objects;

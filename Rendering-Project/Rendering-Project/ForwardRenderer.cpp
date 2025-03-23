@@ -37,7 +37,7 @@ void ForwardRenderer::Update() {
 
 HRESULT ForwardRenderer::SetShaders(std::string& byteDataOutput) {
     // Vertex Shader
-    if (!ReadFile("VertexShader.cso", byteDataOutput)) {
+    if (!CM::ReadFile("VertexShader.cso", byteDataOutput)) {
         std::cerr << "Failed to read vertex shader file!" << std::endl;
         return E_FAIL;
     }
@@ -52,7 +52,7 @@ HRESULT ForwardRenderer::SetShaders(std::string& byteDataOutput) {
     std::string shaderData;
 
     // Pixel Shader
-    if (!ReadFile("PixelShader.cso", shaderData)) {
+    if (!CM::ReadFile("PixelShader.cso", shaderData)) {
         std::cerr << "Failed to read pixel shader file!" << std::endl;
         return E_FAIL;
     }
