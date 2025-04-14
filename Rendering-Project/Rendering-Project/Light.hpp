@@ -7,7 +7,8 @@ class Light {
   public:
     inline Light(Transform transform, DirectX::XMVECTOR color, float intensity);
     ~Light() {};
-
+    inline float GetIntesity() { return this->intensity; }
+    inline DirectX::XMVECTOR GetColor() { return this->color; }
     Transform transform;
 
   private:
