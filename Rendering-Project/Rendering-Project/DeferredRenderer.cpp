@@ -46,9 +46,6 @@ HRESULT DeferredRenderer::Init() {
 }
 
 void DeferredRenderer::Update() {
-    // do de deferred rendering : )
-    // run compute shader, However that is done
-
     // Present
     this->SecondPass();
     UINT stride = sizeof(SimpleVertex);
