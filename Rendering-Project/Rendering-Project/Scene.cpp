@@ -11,11 +11,22 @@ void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(c
 
 void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light); }
 
+HRESULT Scene::Init(ID3D11Device* device) {
+    HRESULT result = this->particleSystem.Initialize(device, 64, 1000, true, true, true);
+    if (FAILED(result)) {
+        return result;
+    }
+
+    return this->particleSystem.LoadShaders();
+}
+
 std::vector<Camera>& Scene::getCameras() { return this->cameras; }
 
 const std::vector<Light>& Scene::getLights() { return this->lights; }
 
 const std::vector<SceneObject>& Scene::getObjects() { return this->objects; }
+
+ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
 Mesh* Scene::LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device) {
     this->meshes.emplace_back(new Mesh(device, folder, objname));

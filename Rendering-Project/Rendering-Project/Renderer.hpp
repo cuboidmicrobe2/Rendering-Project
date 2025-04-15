@@ -1,10 +1,10 @@
 #ifndef RENDERER
 #define RENDERER
-#include "WindowHandler.hpp"
 #include "Camera.hpp"
-#include "Scene.hpp"
-#include <d3d11_4.h>
 #include "Gbuffer.hpp"
+#include "Scene.hpp"
+#include "WindowHandler.hpp"
+#include <d3d11_4.h>
 class Renderer {
   public:
     Renderer();
@@ -16,7 +16,6 @@ class Renderer {
     ID3D11Device* GetDevice();
 
   private:
-
     void Clear();
 
     void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV);
@@ -31,6 +30,7 @@ class Renderer {
     void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights);
+    void RenderParticles(ParticleSystem& particleSystem);
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
@@ -38,7 +38,6 @@ class Renderer {
     const uint32_t renderPasses = 1;
     D3D11_VIEWPORT viewport;
 
-    
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
     Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;

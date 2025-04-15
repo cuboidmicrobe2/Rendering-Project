@@ -13,8 +13,12 @@ class ParticleSystem {
     HRESULT Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, UINT size, UINT nrOf, bool dynamic, bool hasSRV,
                        bool hasUAV);
     HRESULT LoadShaders();
+    ID3D11VertexShader* GetVertexShader() const;
+    ID3D11PixelShader* GetPixelShader() const;
+    ID3D11GeometryShader* GetGeometryShader() const;
     ID3D11ShaderResourceView* GetSRV() const;
     ID3D11UnorderedAccessView* GetUAV() const;
+    UINT GetParticleCount() const;
 
   private:
     ParticleBuffer particleBuffer;

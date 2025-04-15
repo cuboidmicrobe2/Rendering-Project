@@ -65,6 +65,14 @@ HRESULT ParticleSystem::LoadShaders() {
     return S_OK;
 }
 
+ID3D11VertexShader* ParticleSystem::GetVertexShader() const { return this->vertexShader.Get(); }
+
+ID3D11PixelShader* ParticleSystem::GetPixelShader() const { return this->pixelShader.Get(); }
+
+ID3D11GeometryShader* ParticleSystem::GetGeometryShader() const { return this->geometryShader.Get(); }
+
 ID3D11ShaderResourceView* ParticleSystem::GetSRV() const { return this->particleBuffer.GetSRV(); }
 
 ID3D11UnorderedAccessView* ParticleSystem::GetUAV() const { return this->particleBuffer.GetUAV(); }
+
+UINT ParticleSystem::GetParticleCount() const { return this->particleBuffer.GetNrOfElements(); }

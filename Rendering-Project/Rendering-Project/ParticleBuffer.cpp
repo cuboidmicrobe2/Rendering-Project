@@ -1,6 +1,6 @@
 #include "ParticleBuffer.hpp"
 
-ParticleBuffer::ParticleBuffer() : device(nullptr), size(0), nrOf(0), dynamic(false), hasSRV(false), hasUAV(false) {}
+ParticleBuffer::ParticleBuffer() : device(nullptr), size(32), nrOf(1000), dynamic(true), hasSRV(true), hasUAV(true) {}
 
 UINT ParticleBuffer::GetNrOfElements() const { return this->nrOf; }
 
@@ -8,8 +8,8 @@ ID3D11ShaderResourceView* ParticleBuffer::GetSRV() const { return this->srv.Get(
 
 ID3D11UnorderedAccessView* ParticleBuffer::GetUAV() const { return this->uav.Get(); }
 
-HRESULT ParticleBuffer::Create(Microsoft::WRL::ComPtr<ID3D11Device> device, UINT size, UINT nrOf, bool dynamic,
-                               bool hasSRV, bool hasUAV) {
+HRESULT ParticleBuffer::Create(Microsoft::WRL::ComPtr<ID3D11Device> device, UINT size = 32, UINT nrOf = 100,
+                               bool dynamic = true, bool hasSRV = true, bool hasUAV = true) {
     // Store the parameters
     this->device  = device;
     this->size    = size;

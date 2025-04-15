@@ -54,25 +54,31 @@ void Renderer::Render(Scene& scene) {
     this->immediateContext->RSSetViewports(1, &this->viewport);
     this->swapChain->Present(1, 0);
 }
+
 ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
+
 void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV) {
+    // Render particles using the particle system
+    this->RenderParticles(scene.GetParticleSystem());
+
     this->BindViewAndProjMatrixes(cam);
 
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
+
+    // this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
+    // this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
 
     // Draw objects / Bind objects
     for (auto obj : scene.getObjects()) {
         obj.Draw(this->device.Get(), this->immediateContext.Get());
     }
-    
+
     // Do lighting pass
     this->LightingPass(UAV);
 
     // clear
     this->Clear();
 }
-
-
 
 void Renderer::Clear() {
     float clearColor[] = {1.0f, 0.5f, 0.2f, 1.0f};
@@ -84,7 +90,7 @@ void Renderer::Clear() {
     this->immediateContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) { 
+HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
     swapChainDesc.BufferCount                        = 1;
     swapChainDesc.BufferDesc.Width                   = 0;
@@ -245,9 +251,8 @@ HRESULT Renderer::SetSamplers() {
 }
 
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV) {
-// Unbind GBuffers from writing
+    // Unbind GBuffers from writing
     this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr); // ?
-
 
     // Bind gbuffers to Compute
     ID3D11ShaderResourceView* SRVs[3] = {
@@ -318,6 +323,24 @@ void Renderer::BindLightMetaData(const Camera& cam, int nrOfLights) {
     ConstantBuffer CSMetaData;
     CSMetaData.Initialize(this->device.Get(), sizeof(metaData), &metaData);
     this->immediateContext.Get()->CSSetConstantBuffers(0, 1, CSMetaData.GetAdressOfBuffer());
+}
+
+void Renderer::RenderParticles(ParticleSystem& particleSystem) {
+    this->immediateContext->VSSetShader(particleSystem.GetVertexShader(), nullptr, 0);
+    this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
+    this->immediateContext->GSSetShader(particleSystem.GetGeometryShader(), nullptr, 0);
+
+    ID3D11ShaderResourceView* srv = particleSystem.GetSRV();
+    this->immediateContext->VSSetShaderResources(0, 1, &srv);
+
+    this->immediateContext->IASetInputLayout(this->inputLayout.Get());
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+    UINT nrOfParticles = particleSystem.GetParticleCount();
+    this->immediateContext->Draw(nrOfParticles, 0);
+
+    ID3D11ShaderResourceView* nullSRV[1] = {nullptr};
+    this->immediateContext->VSSetShaderResources(0, 1, nullSRV);
 }
 
 void Renderer::BindViewAndProjMatrixes(const Camera& cam) {
