@@ -18,7 +18,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Camera camera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1});
     scene.AddCameraObject(camera);
 
-    Light light(Transform({1, 0, -1}), {1, 1, 1}, 1);
+    Light light(Transform({10, 0, -10}), {1, 1, 1}, 1);
     scene.AddLightObject(light);
 
     MSG msg = {};

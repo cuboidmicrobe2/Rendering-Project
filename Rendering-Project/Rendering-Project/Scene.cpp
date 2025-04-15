@@ -44,7 +44,7 @@ void Scene::RenderScene() {
          lightData.emplace_back(l);
      }
      struct CSMetadata {
-         int nrofLights = nrofLights;
+         int nrofLights;
          float cameraPos[3];
      };
 
