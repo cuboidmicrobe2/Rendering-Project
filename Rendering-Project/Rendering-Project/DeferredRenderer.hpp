@@ -16,9 +16,14 @@ class DeferredRenderer : public DaddyRenderer {
     void SecondPass();
 
     HRESULT SetShaders(std::string& byteDataOutput);
+    HRESULT CreateUAV();
+    HRESULT CreateDeviceAndSwapChain() override;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
+    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
+
 
     GBuffer position;
     GBuffer color;

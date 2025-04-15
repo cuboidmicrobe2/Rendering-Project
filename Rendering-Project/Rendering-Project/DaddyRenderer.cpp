@@ -19,27 +19,6 @@ void DaddyRenderer::Present() {
     this->swapChain->Present(1, 0);
 }
 
-HRESULT DaddyRenderer::CreateDeviceAndSwapChain() {
-    DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
-    swapChainDesc.BufferCount                        = 1;
-    swapChainDesc.BufferDesc.Width                   = 0;
-    swapChainDesc.BufferDesc.Height                  = 0;
-    swapChainDesc.BufferDesc.Format                  = DXGI_FORMAT_R8G8B8A8_UNORM;
-    swapChainDesc.BufferDesc.RefreshRate.Numerator   = 60;
-    swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-    swapChainDesc.SampleDesc.Count                   = 1;
-    swapChainDesc.SampleDesc.Quality                 = 0;
-    swapChainDesc.BufferUsage                        = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.OutputWindow                       = this->window->GetHWND();
-    swapChainDesc.Windowed                           = TRUE;
-    swapChainDesc.SwapEffect                         = DXGI_SWAP_EFFECT_DISCARD;
-    swapChainDesc.Flags                              = 0;
-
-    return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION,
-                                         &swapChainDesc, this->swapChain.GetAddressOf(), this->device.GetAddressOf(),
-                                         nullptr, this->immediateContext.GetAddressOf());
-}
-
 HRESULT DaddyRenderer::CreateRenderTarget() {
     Microsoft::WRL::ComPtr<ID3D11Texture2D> backbuffer;
     HRESULT result =

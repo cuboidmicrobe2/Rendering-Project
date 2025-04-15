@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 Scene::Scene(Window& window) : input(window.inputHandler) {
-    this->renderer = std::make_unique<ForwardRenderer>(window);
+    this->renderer = std::make_unique<DeferredRenderer>(window);
     if (FAILED(this->renderer->Init())) throw std::runtime_error("Failed to init renderer");
 }
 
@@ -24,12 +24,38 @@ void Scene::RenderScene() {
     // Disable culling
 
     // Bind Lights
-    // ConstantBuffer PSMetaData;
-    // size_t nrOfLights = this->lights.size();
-    // PSMetaData.Initialize(device, sizeof(this->lights.size()), &nrOfLights);
-    // ConstantBuffer lights;
-    // lights.Initialize(device, this->lights.size() * sizeof(Light), (void*) &this->lights[0]);
-    // context->PSSetConstantBuffers(1, 1, lights.GetAdressOfBuffer());
+     ConstantBuffer lights;
+     int32_t nrOfLights = this->lights.size();
+     struct LightData {
+         float pos[3];
+         float intensity;
+         float color[4];
+     };
+     std::vector<LightData> lightData;
+     for (auto light : this->lights) {
+         float* tempPos = light.transform.GetPosition().m128_f32;
+         float* tempColor = light.GetColor().m128_f32;
+
+         LightData l{
+             .pos{tempPos[0], tempPos[1], tempPos[2]},
+             .intensity = light.GetIntesity(),
+             .color     = {tempColor[0], tempColor[1], tempColor[2], tempColor[3]},
+         };
+         lightData.emplace_back(l);
+     }
+     struct CSMetadata {
+         int nrofLights = nrofLights;
+         float cameraPos[3];
+     };
+
+     float* t = this->cameras[0].transform.GetPosition().m128_f32;
+     CSMetadata metaData{.nrofLights = nrOfLights, .cameraPos = {t[0], t[1], t[2]}};
+
+     lights.Initialize(this->renderer->GetDevice(), lightData.size() * sizeof(LightData), lightData.data());
+     ConstantBuffer CSMetaData;
+     CSMetaData.Initialize(this->renderer->GetDevice(), sizeof(metaData), &metaData);
+     this->renderer->GetContext()->CSSetConstantBuffers(0, 1, CSMetaData.GetAdressOfBuffer());
+     this->renderer->GetContext()->CSSetConstantBuffers(1, 1, lights.GetAdressOfBuffer());
 
     // Create and Bind view and projection matrixes
     ConstantBuffer viewAndProjectionMatrices;

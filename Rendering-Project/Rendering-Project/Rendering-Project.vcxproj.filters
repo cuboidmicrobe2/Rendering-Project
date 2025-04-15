@@ -172,6 +172,9 @@
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Source Files\Rendering\ForwardRendering</Filter>
     </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg">

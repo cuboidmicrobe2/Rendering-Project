@@ -14,6 +14,7 @@ class ForwardRenderer : public DaddyRenderer {
 
   private:
     HRESULT SetShaders(std::string& byteDataOutput);
+    HRESULT CreateDeviceAndSwapChain() override;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
