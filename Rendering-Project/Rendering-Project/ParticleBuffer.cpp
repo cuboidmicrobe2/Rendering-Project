@@ -23,31 +23,38 @@ HRESULT ParticleBuffer::Create() {
     }
 
     // Create the SRV
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {
-        .Format        = DXGI_FORMAT_UNKNOWN,
-        .ViewDimension = D3D11_SRV_DIMENSION_BUFFER,
-        .Buffer{
-            .ElementWidth = this->nrOf,
-        },
-    };
+    if (this->hasSRV) {
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {
+            .Format        = DXGI_FORMAT_UNKNOWN,
+            .ViewDimension = D3D11_SRV_DIMENSION_BUFFER,
+            .Buffer{
+                .FirstElement = 0,
+                .ElementWidth = this->nrOf,
+            },
+        };
 
-    result = this->device->CreateShaderResourceView(this->buffer.Get(), &srvDesc, this->srv.GetAddressOf());
-    if (FAILED(result)) {
-        return result;
+        result = this->device->CreateShaderResourceView(this->buffer.Get(), &srvDesc, this->srv.GetAddressOf());
+        if (FAILED(result)) {
+            return result;
+        }
     }
 
     // Create the UAV
-    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {
-        .Format        = DXGI_FORMAT_UNKNOWN,
-        .ViewDimension = D3D11_UAV_DIMENSION_BUFFER,
-        .Buffer{
-            .NumElements = this->nrOf,
-        },
-    };
+    if (this->hasUAV) {
+        D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {
+            .Format        = DXGI_FORMAT_UNKNOWN,
+            .ViewDimension = D3D11_UAV_DIMENSION_BUFFER,
+            .Buffer{
+                .FirstElement = 0,
+                .NumElements  = this->nrOf,
+                .Flags        = 0,
+            },
+        };
 
-    result = this->device->CreateUnorderedAccessView(this->buffer.Get(), &uavDesc, this->uav.GetAddressOf());
-    if (FAILED(result)) {
-        return result;
+        result = this->device->CreateUnorderedAccessView(this->buffer.Get(), &uavDesc, this->uav.GetAddressOf());
+        if (FAILED(result)) {
+            return result;
+        }
     }
 
     return S_OK;
