@@ -2,9 +2,8 @@
 #define SCENE_HPP
 
 #include "Camera.hpp"
-#include "DeferredRenderer.hpp"
-#include "ForwardRenderer.hpp"
 #include "InputHandler.hpp"
+#include "WindowHandler.hpp"
 #include "Light.hpp"
 #include "SceneObject.hpp"
 #include <memory>
@@ -14,20 +13,23 @@ class Scene {
   public:
     Scene(Window& window);
     ~Scene();
-    HRESULT Init();
 
     void AddSceneObject(const SceneObject& sceneObject);
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
-    Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname);
+    std::vector<Camera>& getCameras();
+    const std::vector<Light>& getLights();
+    const std::vector<SceneObject>& getObjects();
 
-    void RenderScene();
+    Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device);
+
+    Camera& getMainCam();
 
     void UpdateScene();
 
   private:
-    std::unique_ptr<DaddyRenderer> renderer;
+    Camera mainCamera;
     InputHandler& input;
 
     std::vector<std::unique_ptr<Mesh>> meshes;
