@@ -83,7 +83,6 @@ inline void Camera::Update(InputHandler& input) {
     }
 
     // Hide cursor
-
     ShowCursor(FALSE);
 
     // Get screen center
@@ -105,12 +104,14 @@ inline void Camera::Update(InputHandler& input) {
 
     // Mouse movement
     const float sensitivity = 0.001f;
+    const float clampMargin = 0.3f;
     float x                 = mouseDeltaX * sensitivity;
     float y                 = mouseDeltaY * sensitivity;
 
     // Rotate rotations
     this->xRotation += y;
-    this->xRotation = std::clamp(this->xRotation, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
+    this->xRotation =
+        std::clamp(this->xRotation, (-DirectX::XM_PIDIV2) + clampMargin, DirectX::XM_PIDIV2 - clampMargin);
 
     this->yRotation += x;
 
