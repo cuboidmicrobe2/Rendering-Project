@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
+    <ClCompile Include="DCEM.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -154,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
+    <ClInclude Include="DCEM.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="Gbuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
@@ -165,6 +167,7 @@
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
+    <ClInclude Include="SimpleObject.hpp" />
     <ClInclude Include="SimpleVertex.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="StructuredBuffer.hpp" />

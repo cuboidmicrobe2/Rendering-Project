@@ -4,6 +4,7 @@
 #include "SimpleVertex.hpp"
 #include "WindowHandler.hpp"
 #include "Renderer.hpp"
+#include "SimpleObject.hpp"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
@@ -15,8 +16,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     Scene scene(window);
     Mesh* mesh = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
-    SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
-    scene.AddSceneObject(some);
+    SimpleObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
+    scene.AddSceneObject(&some);
 
     Light light(Transform({10, 0, -10}), {1, 1, 1}, 1);
     scene.AddLightObject(light);

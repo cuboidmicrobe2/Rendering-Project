@@ -44,25 +44,26 @@ void Renderer::Render(Scene& scene) {
 
     // Render all extra cameras to their texures
     for (auto& cam : scene.getCameras()) {
-        this->Render(scene, cam, cam.GetAdressOfUAV());
+        this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetViewPort());
     }
 
     // Render to backbuffer
-    this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf());
+    this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf(), this->viewport);
 
     // Present
-    this->immediateContext->RSSetViewports(1, &this->viewport);
     this->swapChain->Present(1, 0);
 }
 ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
-void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV) {
+void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT& viewport) {
+    this->immediateContext->RSSetViewports(1, &viewport);
+
     this->BindViewAndProjMatrixes(cam);
 
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
     // Draw objects / Bind objects
     for (auto obj : scene.getObjects()) {
-        obj.Draw(this->device.Get(), this->immediateContext.Get());
+        obj->Draw(this->device.Get(), this->immediateContext.Get());
     }
     
     // Do lighting pass

@@ -19,7 +19,7 @@ class Renderer {
 
     void Clear();
 
-    void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV);
+    void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT& viewport);
 
     HRESULT CreateDeviceAndSwapChain(const Window& window);
     HRESULT CreateDepthStencil(const Window& window);

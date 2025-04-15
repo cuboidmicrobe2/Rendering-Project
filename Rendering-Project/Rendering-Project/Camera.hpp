@@ -11,7 +11,7 @@
 class Camera {
   public:
     inline Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
-                  DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV);
+                  DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV, D3D11_VIEWPORT viewport = {});
     inline ~Camera() = default;
 
     Transform transform;
@@ -23,12 +23,15 @@ class Camera {
     inline float getVerticalFOVRadians() const;
     inline float getNearZ() const;
     inline float getFarZ() const;
+    inline D3D11_VIEWPORT& GetViewPort();
 
     inline void Update(InputHandler& input);
 
     inline ID3D11UnorderedAccessView** GetAdressOfUAV();
 
+
   private:
+    D3D11_VIEWPORT viewport;
     ID3D11UnorderedAccessView* UAV;
 
     float verticalFOVRadians;
@@ -40,9 +43,10 @@ class Camera {
 };
 
 inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
-                      DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV)
+                      DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV,
+                      D3D11_VIEWPORT viewport)
     : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {1, 1, 1}), xRotation(0.0f),
-      yRotation(0.0f), UAV(UAV) {
+      yRotation(0.0f), UAV(UAV), viewport(viewport) {
     this->verticalFOVRadians = DirectX::XMConvertToRadians(horizontalFOVDegrees / aspectRatio);
 }
 
@@ -61,6 +65,8 @@ inline float Camera::getVerticalFOVRadians() const { return this->verticalFOVRad
 inline float Camera::getNearZ() const { return this->nearZ; }
 
 inline float Camera::getFarZ() const { return this->farZ; }
+
+inline D3D11_VIEWPORT& Camera::GetViewPort() { return this->viewport; }
 
 inline ID3D11UnorderedAccessView** Camera::GetAdressOfUAV() { return &this->UAV; }
 

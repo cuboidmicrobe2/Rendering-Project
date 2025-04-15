@@ -13,17 +13,17 @@ class SceneObject {
   public:
     Transform transform;
 
-    SceneObject(Transform transform, Mesh* mesh);
+    SceneObject(Transform transform/*, Mesh* mesh*/);
     ~SceneObject() {};
 
-    void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const;
+    virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const = 0;
 
-    void Update();
+    virtual void Update();
 
-  private:
+  protected:
 
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;
-    Mesh* mesh;
+    //Mesh* mesh;
 };
 
 #endif
