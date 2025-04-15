@@ -21,7 +21,7 @@ class DaddyRenderer {
     void Clear();
     void Present();
 
-    HRESULT CreateDeviceAndSwapChain();
+    virtual HRESULT CreateDeviceAndSwapChain() = 0;
     HRESULT CreateRenderTarget();
     HRESULT CreateDepthStencil();
     HRESULT SetInputLayout(const std::string& byteCode);

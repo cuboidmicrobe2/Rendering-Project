@@ -22,7 +22,7 @@ PixelShaderOutput main(PixelShaderInput input)
 
     PixelShaderOutput output;
 
-    output.colour = shaderTexture.Sample(samplerState, input.uv);;
+    output.colour = shaderTexture.Sample(samplerState, input.uv);
     output.normal = input.normal;
     output.position = input.worldPosition;
 
