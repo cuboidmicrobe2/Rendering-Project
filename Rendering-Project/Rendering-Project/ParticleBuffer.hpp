@@ -8,6 +8,10 @@ class ParticleBuffer {
     ParticleBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device);
     ~ParticleBuffer() = default;
 
+    UINT GetNrOfElements() const;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV() const;
+    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> GetUAV() const;
+
   private:
     HRESULT Create();
 

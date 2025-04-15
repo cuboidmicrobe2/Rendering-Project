@@ -5,6 +5,12 @@ ParticleBuffer::ParticleBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device) {
     this->Create();
 }
 
+UINT ParticleBuffer::GetNrOfElements() const { return this->nrOf; }
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ParticleBuffer::GetSRV() const { return this->srv; }
+
+Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> ParticleBuffer::GetUAV() const { return this->uav; }
+
 HRESULT ParticleBuffer::Create() {
     D3D11_BUFFER_DESC desc = {
         .ByteWidth = this->size * this->nrOf,
