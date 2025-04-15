@@ -2,9 +2,8 @@
 #define SCENE_HPP
 
 #include "Camera.hpp"
-#include "DeferredRenderer.hpp"
-#include "ForwardRenderer.hpp"
 #include "InputHandler.hpp"
+#include "WindowHandler.hpp"
 #include "Light.hpp"
 #include "ParticleBuffer.hpp"
 #include "SceneObject.hpp"
@@ -15,24 +14,28 @@ class Scene {
   public:
     Scene(Window& window);
     ~Scene();
-    HRESULT Init();
 
     void AddSceneObject(const SceneObject& sceneObject);
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
-    Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname);
+    std::vector<Camera>& getCameras();
+    const std::vector<Light>& getLights();
+    const std::vector<SceneObject>& getObjects();
 
     void RenderParticles(ParticleBuffer& particleBuffer, ID3D11VertexShader* vertexShader,
                          ID3D11GeometryShader* geometryShader, ID3D11PixelShader* pixelShader,
                          ID3D11ShaderResourceView* smokeTexture);
     void UpdateParticles(ParticleBuffer& particleBuffer, ID3D11ComputeShader*& computeShader);
+    Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device);
+
+    Camera& getMainCam();
 
     void RenderScene();
     void UpdateScene();
 
   private:
-    std::unique_ptr<DaddyRenderer> renderer;
+    Camera mainCamera;
     InputHandler& input;
 
     std::vector<std::unique_ptr<Mesh>> meshes;
