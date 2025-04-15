@@ -3,10 +3,9 @@
 
 #include "Camera.hpp"
 #include "InputHandler.hpp"
-#include "WindowHandler.hpp"
 #include "Light.hpp"
-#include "ParticleBuffer.hpp"
 #include "SceneObject.hpp"
+#include "WindowHandler.hpp"
 #include <memory>
 #include <vector>
 
@@ -23,15 +22,10 @@ class Scene {
     const std::vector<Light>& getLights();
     const std::vector<SceneObject>& getObjects();
 
-    void RenderParticles(ParticleBuffer& particleBuffer, ID3D11VertexShader* vertexShader,
-                         ID3D11GeometryShader* geometryShader, ID3D11PixelShader* pixelShader,
-                         ID3D11ShaderResourceView* smokeTexture);
-    void UpdateParticles(ParticleBuffer& particleBuffer, ID3D11ComputeShader*& computeShader);
     Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device);
 
     Camera& getMainCam();
 
-    void RenderScene();
     void UpdateScene();
 
   private:
@@ -42,13 +36,6 @@ class Scene {
     std::vector<SceneObject> objects;
     std::vector<Camera> cameras;
     std::vector<Light> lights;
-
-    ParticleBuffer particleBuffer;
-    ID3D11VertexShader* vertexShader;
-    ID3D11GeometryShader* geometryShader;
-    ID3D11PixelShader* pixelShader;
-    ID3D11ComputeShader* computeShader;
-    ID3D11ShaderResourceView* srv;
 };
 
 #endif
