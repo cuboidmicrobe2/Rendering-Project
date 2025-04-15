@@ -6,7 +6,7 @@
 class ParticleBuffer {
   public:
     ParticleBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device);
-    ~ParticleBuffer();
+    ~ParticleBuffer() = default;
 
   private:
     HRESULT Create();
@@ -17,6 +17,9 @@ class ParticleBuffer {
     bool hasSRV;
     bool hasUAV;
     Microsoft::WRL::ComPtr<ID3D11Device> device;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> uav;
 };
 
 #endif
