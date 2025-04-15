@@ -146,6 +146,7 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="ParticleBuffer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="OBJ_Loader.h" />
+    <ClInclude Include="ParticleBuffer.hpp" />
     <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
