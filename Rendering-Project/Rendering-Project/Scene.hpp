@@ -6,6 +6,7 @@
 #include "ForwardRenderer.hpp"
 #include "InputHandler.hpp"
 #include "Light.hpp"
+#include "ParticleBuffer.hpp"
 #include "SceneObject.hpp"
 #include <memory>
 #include <vector>
@@ -22,8 +23,12 @@ class Scene {
 
     Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname);
 
-    void RenderScene();
+    void RenderParticles(ParticleBuffer& particleBuffer, ID3D11VertexShader* vertexShader,
+                         ID3D11GeometryShader* geometryShader, ID3D11PixelShader* pixelShader,
+                         ID3D11ShaderResourceView* smokeTexture);
+    void UpdateParticles(ParticleBuffer& particleBuffer, ID3D11ComputeShader*& computeShader);
 
+    void RenderScene();
     void UpdateScene();
 
   private:
@@ -34,6 +39,13 @@ class Scene {
     std::vector<SceneObject> objects;
     std::vector<Camera> cameras;
     std::vector<Light> lights;
+
+    ParticleBuffer particleBuffer;
+    ID3D11VertexShader* vertexShader;
+    ID3D11GeometryShader* geometryShader;
+    ID3D11PixelShader* pixelShader;
+    ID3D11ComputeShader* computeShader;
+    ID3D11ShaderResourceView* srv;
 };
 
 #endif

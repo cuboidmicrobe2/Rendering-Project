@@ -1,20 +1,26 @@
 #include "ParticleBuffer.hpp"
 
-ParticleBuffer::ParticleBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device) {
-    device = this->device;
-    this->Create();
-}
+ParticleBuffer::ParticleBuffer() : device(nullptr), size(0), nrOf(0), dynamic(false), hasSRV(false), hasUAV(false) {}
 
 UINT ParticleBuffer::GetNrOfElements() const { return this->nrOf; }
 
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ParticleBuffer::GetSRV() const { return this->srv; }
+ID3D11ShaderResourceView* ParticleBuffer::GetSRV() const { return this->srv.Get(); }
 
-Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> ParticleBuffer::GetUAV() const { return this->uav; }
+ID3D11UnorderedAccessView* ParticleBuffer::GetUAV() const { return this->uav.Get(); }
 
-HRESULT ParticleBuffer::Create() {
+HRESULT ParticleBuffer::Create(Microsoft::WRL::ComPtr<ID3D11Device> device, UINT size, UINT nrOf, bool dynamic,
+                               bool hasSRV, bool hasUAV) {
+    // Store the parameters
+    this->device  = device;
+    this->size    = size;
+    this->nrOf    = nrOf;
+    this->dynamic = dynamic;
+    this->hasSRV  = hasSRV;
+    this->hasUAV  = hasUAV;
+
     D3D11_BUFFER_DESC desc = {
         .ByteWidth = this->size * this->nrOf,
-        .Usage     = this->dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE,
+        .Usage     = this->dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT,
         .BindFlags = (this->hasSRV ? D3D11_BIND_SHADER_RESOURCE : static_cast<UINT>(0)) |
                      (this->hasUAV ? D3D11_BIND_UNORDERED_ACCESS : static_cast<UINT>(0)),
         .CPUAccessFlags      = this->dynamic ? D3D11_CPU_ACCESS_WRITE : static_cast<UINT>(0),
@@ -35,7 +41,7 @@ HRESULT ParticleBuffer::Create() {
             .ViewDimension = D3D11_SRV_DIMENSION_BUFFER,
             .Buffer{
                 .FirstElement = 0,
-                .ElementWidth = this->nrOf,
+                .NumElements  = this->nrOf,
             },
         };
 

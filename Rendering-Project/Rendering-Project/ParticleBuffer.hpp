@@ -5,16 +5,16 @@
 
 class ParticleBuffer {
   public:
-    ParticleBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device);
+    ParticleBuffer();
     ~ParticleBuffer() = default;
 
     UINT GetNrOfElements() const;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV() const;
-    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> GetUAV() const;
+    ID3D11ShaderResourceView* GetSRV() const;
+    ID3D11UnorderedAccessView* GetUAV() const;
+    HRESULT Create(Microsoft::WRL::ComPtr<ID3D11Device> device, UINT size, UINT nrOf, bool dynamic, bool hasSRV,
+                   bool hasUAV);
 
   private:
-    HRESULT Create();
-
     UINT size;
     UINT nrOf;
     bool dynamic;
