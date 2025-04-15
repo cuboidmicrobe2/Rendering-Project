@@ -27,8 +27,8 @@ cbuffer metadata : register(b0)
 [numthreads(8, 8, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
-    float3 position = positionGBuffer[DTid.xy].xyz;
-    float3 color = colorGBuffer[DTid.xy].xyz;
+    float4 position = float4(positionGBuffer[DTid.xy].xyz, 0);
+    float4 color = float4(colorGBuffer[DTid.xy].xyz, 0);
     float4 normal = float4(normalize(normalGBuffer[DTid.xy].xyz), 0);
     
     float4 result;
@@ -38,14 +38,14 @@ void main(uint3 DTid : SV_DispatchThreadID)
         
         float4 ambientComponent = cl.color * 0.05;
     
-        float4 lightDirection = float4(normalize(cl.pos - position), 0);
+        float4 lightDirection = normalize(float4(cl.pos, 0) - position);
         float intensity = max(0, dot(normal, lightDirection)) * cl.intensity;
-        float4 diffuseComponent = float4(color * intensity, 1);
+        float4 diffuseComponent = color * intensity;
     
         float4 reflection = reflect(-lightDirection, normal);
-        float4 pixelToCamera = float4(normalize(cameraPos - position), 0);
-        float specular = pow(max(0, dot(reflection, pixelToCamera)), 1);
-        float4 specularComponent = float4(color * specular, 1);
+        float4 pixelToCamera = normalize(float4(cameraPos, 0) - position);
+        float specular = pow(max(0, dot(reflection, pixelToCamera)), 100);
+        float4 specularComponent = color * specular;
         
         result += specularComponent + (ambientComponent + diffuseComponent) * colorGBuffer[DTid.xy];
     }
