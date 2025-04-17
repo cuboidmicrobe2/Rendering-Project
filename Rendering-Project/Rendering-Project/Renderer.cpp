@@ -36,6 +36,11 @@ HRESULT Renderer::Init(const Window& window) {
     };
     this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
 
+    this->metadataBuffer.Initialize(this->device.Get(), sizeof(CSMetadata), nullptr);
+    this->viewProjBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4) * 3, nullptr);
+    this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
+    this->lightBuffer.Initialize(this->device.Get(), sizeof(LightData) * MAX_LIGHTS, nullptr);
+
     return S_OK;
 }
 
@@ -54,25 +59,33 @@ void Renderer::Render(Scene& scene) {
     this->immediateContext->RSSetViewports(1, &this->viewport);
     this->swapChain->Present(1, 0);
 }
+
 ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
+
+ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
+
 void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV) {
+    // Render particles using the particle system
+    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
+    this->RenderParticles(scene.GetParticleSystem(), cam);
+
+    this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
+
     this->BindViewAndProjMatrixes(cam);
 
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
     // Draw objects / Bind objects
-    for (auto obj : scene.getObjects()) {
-        obj.Draw(this->device.Get(), this->immediateContext.Get());
+    for (auto& obj : scene.getObjects()) {
+        obj->Draw(this->device.Get(), this->immediateContext.Get());
     }
-    
+
     // Do lighting pass
     this->LightingPass(UAV);
 
     // clear
     this->Clear();
 }
-
-
 
 void Renderer::Clear() {
     float clearColor[] = {1.0f, 0.5f, 0.2f, 1.0f};
@@ -84,7 +97,7 @@ void Renderer::Clear() {
     this->immediateContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) { 
+HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
     swapChainDesc.BufferCount                        = 1;
     swapChainDesc.BufferDesc.Width                   = 0;
@@ -94,15 +107,15 @@ HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.SampleDesc.Count                   = 1;
     swapChainDesc.SampleDesc.Quality                 = 0;
-    swapChainDesc.BufferUsage                        = DXGI_USAGE_UNORDERED_ACCESS;
+    swapChainDesc.BufferUsage                        = DXGI_USAGE_UNORDERED_ACCESS | DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.OutputWindow                       = window.GetHWND();
     swapChainDesc.Windowed                           = TRUE;
     swapChainDesc.SwapEffect                         = DXGI_SWAP_EFFECT_DISCARD;
     swapChainDesc.Flags                              = 0;
 
-    return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION,
-                                         &swapChainDesc, this->swapChain.GetAddressOf(), this->device.GetAddressOf(),
-                                         nullptr, this->immediateContext.GetAddressOf());
+    return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr,
+                                         0, D3D11_SDK_VERSION, &swapChainDesc, this->swapChain.GetAddressOf(),
+                                         this->device.GetAddressOf(), nullptr, this->immediateContext.GetAddressOf());
 }
 
 HRESULT Renderer::SetShaders(std::string& byteDataOutput) {
@@ -167,6 +180,11 @@ HRESULT Renderer::CreateUAV() { // Vertex Shader
             .MipSlice = 0,
         },
     };
+
+    result = this->device->CreateRenderTargetView(backbuffer.Get(), nullptr, this->rtv.GetAddressOf());
+    if (FAILED(result)) {
+        return result;
+    }
 
     return this->device->CreateUnorderedAccessView(backbuffer.Get(), &desc, this->UAV.GetAddressOf());
 }
@@ -245,9 +263,8 @@ HRESULT Renderer::SetSamplers() {
 }
 
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV) {
-// Unbind GBuffers from writing
+    // Unbind GBuffers from writing
     this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr); // ?
-
 
     // Bind gbuffers to Compute
     ID3D11ShaderResourceView* SRVs[3] = {
@@ -261,7 +278,7 @@ void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV) {
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
 
     // Do Compute
-    this->immediateContext->Dispatch(240, 135, 1);
+    this->immediateContext->Dispatch(this->viewport.Width / 8, this->viewport.Height / 8, 1);
 
     ID3D11UnorderedAccessView* resetter[1] = {nullptr};
 
@@ -282,53 +299,78 @@ void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV) {
 }
 
 void Renderer::BindLights(const std::vector<Light>& lights) {
-    // Bind Lights
-    ConstantBuffer lightBuffer;
-    int nrOfLights = static_cast<int>(lights.size());
-    struct LightData {
-        float pos[3];
-        float intensity;
-        float color[4];
-    };
-    std::vector<LightData> lightData;
-    for (auto light : lights) {
-        float* tempPos   = light.transform.GetPosition().m128_f32;
-        float* tempColor = light.GetColor().m128_f32;
+    std::array<LightData, MAX_LIGHTS> lightData{};
+    for (int i = 0; i < lights.size(); i++) {
+        float* tempPos   = lights[i].transform.GetPosition().m128_f32;
+        float* tempColor = lights[i].GetColor().m128_f32;
 
         LightData l{
             .pos{tempPos[0], tempPos[1], tempPos[2]},
-            .intensity = light.GetIntesity(),
+            .intensity = lights[i].GetIntesity(),
             .color     = {tempColor[0], tempColor[1], tempColor[2], tempColor[3]},
         };
-        lightData.emplace_back(l);
+        lightData[i] = l;
     }
-    lightBuffer.Initialize(this->device.Get(), lightData.size() * sizeof(LightData), lightData.data());
-    this->immediateContext.Get()->CSSetConstantBuffers(1, 1, lightBuffer.GetAdressOfBuffer());
+
+    this->lightBuffer.UpdateBuffer(this->immediateContext.Get(), lightData.data());
+    this->immediateContext.Get()->CSSetConstantBuffers(1, 1, this->lightBuffer.GetAdressOfBuffer());
 }
 
 void Renderer::BindLightMetaData(const Camera& cam, int nrOfLights) {
-    struct CSMetadata {
-        int nrofLights;
-        float cameraPos[3];
-    };
-
     float* t = cam.transform.GetPosition().m128_f32;
     CSMetadata metaData{.nrofLights = nrOfLights, .cameraPos = {t[0], t[1], t[2]}};
 
-    ConstantBuffer CSMetaData;
-    CSMetaData.Initialize(this->device.Get(), sizeof(metaData), &metaData);
-    this->immediateContext.Get()->CSSetConstantBuffers(0, 1, CSMetaData.GetAdressOfBuffer());
+    this->metadataBuffer.UpdateBuffer(this->immediateContext.Get(), &metaData);
+    this->immediateContext.Get()->CSSetConstantBuffers(0, 1, this->metadataBuffer.GetAdressOfBuffer());
+}
+
+void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
+    this->immediateContext->IASetInputLayout(nullptr);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+    this->immediateContext->VSSetShader(particleSystem.GetVertexShader(), nullptr, 0);
+    this->immediateContext->VSSetShaderResources(0, 1, particleSystem.GetAddressOfSRV());
+
+    CameraBufferData cameraData;
+    DirectX::XMStoreFloat4x4(&cameraData.viewProjection,
+                             DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
+    DirectX::XMFLOAT3 camPos;
+    DirectX::XMStoreFloat3(&camPos, cam.transform.GetPosition());
+    cameraData.cameraPosition = camPos;
+    cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &cameraData);
+    this->immediateContext->GSSetShader(particleSystem.GetGeometryShader(), nullptr, 0);
+    this->immediateContext->GSSetConstantBuffers(1, 1, cameraBuffer.GetAdressOfBuffer());
+
+    this->immediateContext->RSSetViewports(1, &this->viewport);
+    this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
+
+    this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->depthStencilView.Get());
+    this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
+
+    ID3D11RenderTargetView* rendertargets[3] = {
+        this->position.GetRTV(),
+        this->color.GetRTV(),
+        this->normal.GetRTV(),
+    };
+    this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
+    this->immediateContext->GSSetShader(nullptr, nullptr, 0);
+    this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
+    this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->IASetInputLayout(this->inputLayout.Get());
+
+    ID3D11ShaderResourceView* nullSRV[1] = {nullptr};
+    this->immediateContext->VSSetShaderResources(0, 1, nullSRV);
 }
 
 void Renderer::BindViewAndProjMatrixes(const Camera& cam) {
     // Create and Bind view and projection matrixes
-    ConstantBuffer viewAndProjectionMatrices;
     DirectX::XMFLOAT4X4 matrices[3];
     DirectX::XMMATRIX viewMatrix       = cam.createViewMatrix();
     DirectX::XMMATRIX projectionMatrix = cam.createProjectionMatrix();
     DirectX::XMStoreFloat4x4(&matrices[0], viewMatrix);
     DirectX::XMStoreFloat4x4(&matrices[1], projectionMatrix);
     DirectX::XMStoreFloat4x4(&matrices[2], DirectX::XMMatrixMultiplyTranspose(viewMatrix, projectionMatrix));
-    viewAndProjectionMatrices.Initialize(this->device.Get(), sizeof(matrices), matrices);
-    this->immediateContext.Get()->VSSetConstantBuffers(0, 1, viewAndProjectionMatrices.GetAdressOfBuffer());
+
+    this->viewProjBuffer.UpdateBuffer(this->immediateContext.Get(), matrices);
+    this->immediateContext.Get()->VSSetConstantBuffers(0, 1, this->viewProjBuffer.GetAdressOfBuffer());
 }

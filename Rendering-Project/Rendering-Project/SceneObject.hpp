@@ -1,6 +1,7 @@
 #ifndef SCENE_OBJECT_HPP
 #define SCENE_OBJECT_HPP
 
+#include "ConstantBuffer.hpp"
 #include "Mesh.hpp"
 #include "SimpleVertex.hpp"
 #include "Transform.hpp"
@@ -14,16 +15,19 @@ class SceneObject {
     Transform transform;
 
     SceneObject(Transform transform, Mesh* mesh);
+    SceneObject(SceneObject&) = delete;
     ~SceneObject() {};
 
-    void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const;
+    void InitBuffer(ID3D11Device* device);
+
+    void Draw(ID3D11Device* device, ID3D11DeviceContext* context);
 
     void Update();
 
   private:
-
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;
     Mesh* mesh;
+    ConstantBuffer matrixBuffer;
 };
 
 #endif

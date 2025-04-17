@@ -1,10 +1,10 @@
 #ifndef RENDERER
 #define RENDERER
-#include "WindowHandler.hpp"
 #include "Camera.hpp"
-#include "Scene.hpp"
-#include <d3d11_4.h>
 #include "Gbuffer.hpp"
+#include "Scene.hpp"
+#include "WindowHandler.hpp"
+#include <d3d11_4.h>
 class Renderer {
   public:
     Renderer();
@@ -14,9 +14,9 @@ class Renderer {
     void Render(Scene& scene);
 
     ID3D11Device* GetDevice();
+    ID3D11DeviceContext* GetDeviceContext() const;
 
   private:
-
     void Clear();
 
     void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV);
@@ -31,6 +31,7 @@ class Renderer {
     void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights);
+    void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
@@ -38,7 +39,6 @@ class Renderer {
     const uint32_t renderPasses = 1;
     D3D11_VIEWPORT viewport;
 
-    
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
     Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
@@ -50,10 +50,35 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
 
     GBuffer position;
     GBuffer color;
     GBuffer normal;
+
+    static constexpr int MAX_LIGHTS = 16;
+
+    struct LightData {
+        float pos[3];
+        float intensity;
+        float color[4];
+    };
+
+    struct CSMetadata {
+        int nrofLights;
+        float cameraPos[3];
+    };
+
+    struct CameraBufferData {
+        DirectX::XMFLOAT4X4 viewProjection;
+        DirectX::XMFLOAT3 cameraPosition;
+        float padding;
+    };
+
+    ConstantBuffer lightBuffer;
+    ConstantBuffer metadataBuffer;
+    ConstantBuffer viewProjBuffer;
+    ConstantBuffer cameraBuffer;
 };
 
 #endif
