@@ -1,6 +1,7 @@
 #include "Scene.hpp"
 
-Scene::Scene(Window& window) : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr) {}
+Scene::Scene(Window& window)
+    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr) {}
 
 Scene::~Scene() {}
 
@@ -10,11 +11,32 @@ void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(c
 
 void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light); }
 
+HRESULT Scene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
+    // Load the particle shaders
+    HRESULT result = this->particleSystem.LoadShaders(device, immediateContext);
+    if (FAILED(result)) {
+        std::cerr << "Particle system shaders failed\n";
+        return result;
+    }
+
+    // Initialize particles with random values
+    result =
+        this->particleSystem.InitializeParticles(device, immediateContext, sizeof(Particle), 100, false, true, true);
+    if (FAILED(result)) {
+        std::cerr << "Particle system particles failed\n";
+        return result;
+    }
+
+    return S_OK;
+}
+
 std::vector<Camera>& Scene::getCameras() { return this->cameras; }
 
 const std::vector<Light>& Scene::getLights() { return this->lights; }
 
-const std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
+std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
+
+ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
 Mesh* Scene::LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device) {
     this->meshes.emplace_back(new Mesh(device, folder, objname));

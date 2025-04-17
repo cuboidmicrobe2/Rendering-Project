@@ -37,9 +37,6 @@
     <Filter Include="Source Files\Scene">
       <UniqueIdentifier>{25083945-3450-4689-8d23-d255515440be}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering\ForwardRendering">
-      <UniqueIdentifier>{a12c0a17-3eb0-4edc-a61f-63593bd999ff}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Rendering\DeferredRendering">
       <UniqueIdentifier>{cf102c6d-1dc1-4890-ac86-07996de2e10e}</UniqueIdentifier>
     </Filter>
@@ -79,6 +76,12 @@
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="DCEM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
@@ -154,6 +157,14 @@
     </ClInclude>
     <ClInclude Include="Renderer.hpp">
       <Filter>Header Files\Rendering</Filter>
+    <ClInclude Include="ParticleBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +180,10 @@
     <FxCompile Include="ComputeShader.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </FxCompile>
+    <FxCompile Include="ParticleGS.hlsl" />
+    <FxCompile Include="ParticlePS.hlsl" />
+    <FxCompile Include="ParticleVS.hlsl" />
+    <FxCompile Include="ParticleCS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg">

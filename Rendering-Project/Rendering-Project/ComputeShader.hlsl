@@ -27,6 +27,8 @@ cbuffer metadata : register(b0)
 [numthreads(8, 8, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
+    //backBufferUAV[DTid.xy] = float4(0, 0, 0, 0);
+    //return;
     float4 position = float4(positionGBuffer[DTid.xy].xyz, 0);
     float4 color = float4(colorGBuffer[DTid.xy].xyz, 0);
     float4 normal = float4(normalize(normalGBuffer[DTid.xy].xyz), 0);

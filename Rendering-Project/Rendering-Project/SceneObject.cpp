@@ -1,12 +1,31 @@
 #include "SceneObject.hpp"
 #include <DirectXMath.h>
-#include "ConstantBuffer.hpp"
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform) : transform(transform) {}
+SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {}
 
-void SceneObject::Update() { 
+void SceneObject::InitBuffer(ID3D11Device* device) {
+    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
+    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
+}
+
+void SceneObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
+    // Write Object Worldmatrix to vertexShader
+    DirectX::XMFLOAT4X4 worldMatrix = this->GetWorldMatrix();
+    this->matrixBuffer.UpdateBuffer(context, &worldMatrix);
+    context->VSSetConstantBuffers(1, 1, this->matrixBuffer.GetAdressOfBuffer());
+
+    // Bind verticies to VertexShader
+    this->mesh->BindMeshBuffers(context);
+
+    // Draw all submeshes
+    for (size_t i = 0; i < this->mesh->GetNrOfSubMeshes(); i++) {
+        this->mesh->PerformSubMeshDrawCall(context, i);
+    }
+}
+
+void SceneObject::Update() {
     // static float scale = 1;
     // this->transform.Rotate(0, 0.01, 0);
     // this->transform.Move(DirectX::XMVectorScale(this->transform.GetDirectionVector(), 0.1));
