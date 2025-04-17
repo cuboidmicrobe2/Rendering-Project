@@ -24,11 +24,9 @@ cbuffer CameraBuffer : register(b1)
 // Creates a billboard quad for each particle
 [maxvertexcount(6)]
 void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> output)
-
 {
-    
     // Create color based on lifetime
-    float4 particleColor = float4(0, 0, 0, 1);
+    float4 particleColor = float4(0, 1, 0, 1);
     
     // Calculate billboard vectors
     float3 particlePos = input[0].position;
@@ -39,6 +37,7 @@ void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> outp
     
     // Get view space directions
     float3 look = normalize(cameraPosition - particlePos);
+    
     right = normalize(cross(up, look));
     up = cross(look, right);
     

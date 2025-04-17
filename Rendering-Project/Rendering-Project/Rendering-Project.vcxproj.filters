@@ -166,10 +166,10 @@
     <FxCompile Include="ComputeShader.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </FxCompile>
-    <FxCompile Include="ParticleCS.hlsl" />
     <FxCompile Include="ParticleGS.hlsl" />
     <FxCompile Include="ParticlePS.hlsl" />
     <FxCompile Include="ParticleVS.hlsl" />
+    <FxCompile Include="ParticleCS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg">

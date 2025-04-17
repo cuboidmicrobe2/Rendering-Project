@@ -17,7 +17,6 @@ class ParticleSystem {
     ParticleSystem();
     ~ParticleSystem() = default;
 
-    HRESULT Initialize(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV);
     HRESULT InitializeParticles(ID3D11Device* device, ID3D11DeviceContext* immediateContext, UINT size, UINT nrOf,
                                 bool dynamic, bool hasSRV, bool hasUAV);
 

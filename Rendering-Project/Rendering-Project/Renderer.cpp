@@ -114,9 +114,8 @@ HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     swapChainDesc.Flags                              = 0;
 
     return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr,
-                                         0, D3D11_SDK_VERSION,
-                                         &swapChainDesc, this->swapChain.GetAddressOf(), this->device.GetAddressOf(),
-                                         nullptr, this->immediateContext.GetAddressOf());
+                                         0, D3D11_SDK_VERSION, &swapChainDesc, this->swapChain.GetAddressOf(),
+                                         this->device.GetAddressOf(), nullptr, this->immediateContext.GetAddressOf());
 }
 
 HRESULT Renderer::SetShaders(std::string& byteDataOutput) {
@@ -279,7 +278,7 @@ void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV) {
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
 
     // Do Compute
-    this->immediateContext->Dispatch(240, 135, 1);
+    this->immediateContext->Dispatch(this->viewport.Width / 8, this->viewport.Height / 8, 1);
 
     ID3D11UnorderedAccessView* resetter[1] = {nullptr};
 

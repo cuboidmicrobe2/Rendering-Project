@@ -11,27 +11,22 @@ ParticleSystem::ParticleSystem() : isInitialized(false) {
         {"PixelShader", "ParticlePS.cso"},
     };
 }
-
-HRESULT ParticleSystem::Initialize(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
-
-    return S_OK;
-}
-
 HRESULT ParticleSystem::InitializeParticles(ID3D11Device* device, ID3D11DeviceContext* immediateContext, UINT size,
                                             UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
     std::vector<Particle> particles(nrOf);
 
     for (UINT i = 0; i < nrOf; i++) {
-        particles[i].position[0] = (float) ((rand() % 200) - 100) / 10.0f;
-        particles[i].position[1] = (float) ((rand() % 200) - 100) / 10.0f;
-        particles[i].position[2] = (float) ((rand() % 200) - 100) / 10.0f;
+        particles[i].position[0] = 1;
+        particles[i].position[1] = sin(i) + 10;
+        particles[i].position[2] = 1;
 
-        particles[i].velocity[0] = (float) ((rand() % 200) - 100) / 10.0f;
-        particles[i].velocity[1] = (float) ((rand() % 200) - 100) / 10.0f;
-        particles[i].velocity[2] = (float) ((rand() % 200) - 100) / 10.0f;
+        particles[i].velocity[0] = 1;
+        particles[i].velocity[1] = 1;
+        particles[i].velocity[2] = 1;
 
-        particles[i].maxLifetime = 1.0f + (float) (rand() % 9);
-        particles[i].lifetime    = particles[i].maxLifetime;
+        // Varied lifetimes for natural effect
+        particles[i].maxLifetime = 50;
+        particles[i].lifetime    = particles[i].maxLifetime * 0.8f; // Start at 80% to create a staggered effect
     }
 
     HRESULT result = this->particleBuffer.Create(device, size, nrOf, dynamic, hasSRV, hasUAV, particles.data());
@@ -53,12 +48,11 @@ HRESULT ParticleSystem::LoadShaders(ID3D11Device* device, ID3D11DeviceContext* i
             return E_FAIL;
         }
 
-
         HRESULT result = E_FAIL;
         if (shaderType == "PixelShader") {
-            result = device->CreatePixelShader(byteData.data(), byteData.size(), nullptr, this->pixelShader.GetAddressOf());
-        }
-        else if (shaderType == "VertexShader") {
+            result =
+                device->CreatePixelShader(byteData.data(), byteData.size(), nullptr, this->pixelShader.GetAddressOf());
+        } else if (shaderType == "VertexShader") {
             result = device->CreateVertexShader(byteData.data(), byteData.size(), nullptr,
                                                 this->vertexShader.GetAddressOf());
         } else if (shaderType == "GeometryShader") {
