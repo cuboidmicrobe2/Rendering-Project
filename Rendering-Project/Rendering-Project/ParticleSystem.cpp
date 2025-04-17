@@ -5,27 +5,23 @@
 
 ParticleSystem::ParticleSystem() : isInitialized(false) {
     this->shaderPaths = {
-        {"VertexShader", L"ParticleVS.cso"},
-        {"PixelShader", L"ParticlePS.cso"},
-        {"GeometryShader", L"ParticleGS.cso"},
-        {"ComputeShader", L"ParticleCS.cso"},
+        {"VertexShader", "ParticleVS.cso"},
+        {"GeometryShader", "ParticleGS.cso"},
+        {"ComputeShader", "ParticleCS.cso"},
+        {"PixelShader", "ParticlePS.cso"},
     };
 }
 
 HRESULT ParticleSystem::Initialize(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
 
-    HRESULT result = this->particleBuffer.Create(device, size, nrOf, dynamic, hasSRV, hasUAV);
-    if (FAILED(result)) {
-        return result;
-    }
-
     return S_OK;
 }
 
-HRESULT ParticleSystem::InitializeParticles(ID3D11DeviceContext* immediateContext, UINT count) {
-    std::vector<Particle> particles(count);
+HRESULT ParticleSystem::InitializeParticles(ID3D11Device* device, ID3D11DeviceContext* immediateContext, UINT size,
+                                            UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
+    std::vector<Particle> particles(nrOf);
 
-    for (UINT i = 0; i < count; i++) {
+    for (UINT i = 0; i < nrOf; i++) {
         particles[i].position[0] = (float) ((rand() % 200) - 100) / 10.0f;
         particles[i].position[1] = (float) ((rand() % 200) - 100) / 10.0f;
         particles[i].position[2] = (float) ((rand() % 200) - 100) / 10.0f;
@@ -38,7 +34,10 @@ HRESULT ParticleSystem::InitializeParticles(ID3D11DeviceContext* immediateContex
         particles[i].lifetime    = particles[i].maxLifetime;
     }
 
-    HRESULT result = this->particleBuffer.Update(immediateContext, particles.data());
+    HRESULT result = this->particleBuffer.Create(device, size, nrOf, dynamic, hasSRV, hasUAV, particles.data());
+    if (FAILED(result)) {
+        return result;
+    }
     if (SUCCEEDED(result)) {
         this->isInitialized = true;
     }
@@ -49,31 +48,19 @@ HRESULT ParticleSystem::InitializeParticles(ID3D11DeviceContext* immediateContex
 HRESULT ParticleSystem::LoadShaders(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
     for (const auto& [shaderType, filePath] : this->shaderPaths) {
         std::string byteData;
-        if (!CM::ReadFile(std::string(filePath.begin(), filePath.end()), byteData)) {
+        if (!CM::ReadFile(filePath, byteData)) {
             std::cerr << "Failed to read shader file: " << std::string(filePath.begin(), filePath.end()) << std::endl;
             return E_FAIL;
         }
 
+
         HRESULT result = E_FAIL;
-        if (shaderType == "VertexShader") {
+        if (shaderType == "PixelShader") {
+            result = device->CreatePixelShader(byteData.data(), byteData.size(), nullptr, this->pixelShader.GetAddressOf());
+        }
+        else if (shaderType == "VertexShader") {
             result = device->CreateVertexShader(byteData.data(), byteData.size(), nullptr,
                                                 this->vertexShader.GetAddressOf());
-
-            D3D11_INPUT_ELEMENT_DESC layoutDesc[4] = {
-                {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-                {"VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-                {"LIFETIME", 0, DXGI_FORMAT_D32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-                {"MAX_LIFETIME", 0, DXGI_FORMAT_D32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}};
-
-            HRESULT result = device->CreateInputLayout(layoutDesc, ARRAYSIZE(layoutDesc), byteData.data(),
-                                                       byteData.size(), this->inputLayout.GetAddressOf());
-            if (FAILED(result)) {
-                return result;
-            }
-
-        } else if (shaderType == "PixelShader") {
-            result =
-                device->CreatePixelShader(byteData.data(), byteData.size(), nullptr, this->pixelShader.GetAddressOf());
         } else if (shaderType == "GeometryShader") {
             result = device->CreateGeometryShader(byteData.data(), byteData.size(), nullptr,
                                                   this->geometryShader.GetAddressOf());
@@ -83,7 +70,7 @@ HRESULT ParticleSystem::LoadShaders(ID3D11Device* device, ID3D11DeviceContext* i
         }
 
         if (FAILED(result)) {
-            std::cerr << "Failed to create " << shaderType << "!\n";
+            std::cerr << "Failed to create " << shaderType << "! Error: " << result << "\n";
             return result;
         }
     }

@@ -18,6 +18,7 @@ StructuredBuffer<Particle> Particles : register(t0);
 
 VSOutput main(uint vertexID : SV_VertexID)
 {
+    
     VSOutput output;
     
     // Get the particle data

@@ -113,7 +113,8 @@ HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     swapChainDesc.SwapEffect                         = DXGI_SWAP_EFFECT_DISCARD;
     swapChainDesc.Flags                              = 0;
 
-    return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION,
+    return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr,
+                                         0, D3D11_SDK_VERSION,
                                          &swapChainDesc, this->swapChain.GetAddressOf(), this->device.GetAddressOf(),
                                          nullptr, this->immediateContext.GetAddressOf());
 }
@@ -344,7 +345,7 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
     this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
 
     this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->depthStencilView.Get());
-     this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
+    this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
 
     ID3D11RenderTargetView* rendertargets[3] = {
         this->position.GetRTV(),

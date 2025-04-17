@@ -8,7 +8,6 @@
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
     Window window(hInstance, nCmdShow);
     Renderer renderer;
     HRESULT result = renderer.Init(window);
@@ -17,7 +16,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     }
 
     Scene scene(window);
-    scene.Init(renderer.GetDevice(), renderer.GetDeviceContext());
+    if (FAILED(scene.Init(renderer.GetDevice(), renderer.GetDeviceContext()))) return -1;
     Mesh* mesh = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
 
     SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
@@ -37,7 +36,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
         scene.UpdateScene();
         renderer.Render(scene);
-        std::cout << "Not Exception :))))\n";
     }
 
     return 0;

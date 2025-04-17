@@ -24,7 +24,12 @@ cbuffer CameraBuffer : register(b1)
 // Creates a billboard quad for each particle
 [maxvertexcount(6)]
 void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> output)
+
 {
+    
+    // Create color based on lifetime
+    float4 particleColor = float4(0, 0, 0, 1);
+    
     // Calculate billboard vectors
     float3 particlePos = input[0].position;
     float halfSize = input[0].size * 0.5f;
@@ -43,9 +48,6 @@ void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> outp
     
     // Calculate normalized lifetime for color
     float normalizedLife = input[0].lifetime.x / input[0].lifetime.y;
-    
-    // Create color based on lifetime
-    float4 particleColor = float4(0, 0, 0, 0);
     
     GSOutput vertices[4];
     

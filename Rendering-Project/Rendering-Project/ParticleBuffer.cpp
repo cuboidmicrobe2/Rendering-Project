@@ -1,4 +1,6 @@
 #include "ParticleBuffer.hpp"
+#include <assert.h>
+#include <iostream>
 
 ParticleBuffer::ParticleBuffer() : size(0), nrOf(0), dynamic(false), buffer(nullptr), srv(nullptr), uav(nullptr) {}
 
@@ -14,11 +16,16 @@ ID3D11UnorderedAccessView* ParticleBuffer::GetUAV() const { return this->uav.Get
 
 ID3D11UnorderedAccessView** ParticleBuffer::GetUAVAddress() { return this->uav.GetAddressOf(); }
 
-HRESULT ParticleBuffer::Create(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
+HRESULT ParticleBuffer::Create(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV,
+                               void* initData) {
     // Store the parameters
     this->size    = size;
     this->nrOf    = nrOf;
     this->dynamic = dynamic;
+
+    assert(nrOf != 0);
+    assert(hasSRV | hasUAV != 0);
+    assert(size >= 4 && size % 4 == 0);
 
     D3D11_BUFFER_DESC desc = {
         .ByteWidth = this->size * this->nrOf,
@@ -30,9 +37,19 @@ HRESULT ParticleBuffer::Create(ID3D11Device* device, UINT size, UINT nrOf, bool 
         .StructureByteStride = this->size,
     };
 
+    D3D11_SUBRESOURCE_DATA desc2{
+        .pSysMem          = initData,
+        .SysMemPitch      = 0,
+        .SysMemSlicePitch = 0,
+    };
+
+    assert(desc.ByteWidth > 0);
+    assert(desc.ByteWidth % desc.StructureByteStride == 0);
+
     // Create buffer
-    HRESULT result = device->CreateBuffer(&desc, nullptr, this->buffer.GetAddressOf());
+    HRESULT result = device->CreateBuffer(&desc, &desc2, this->buffer.GetAddressOf());
     if (FAILED(result)) {
+        std::cerr << __LINE__ << result << "\n";
         return result;
     }
 
@@ -49,6 +66,7 @@ HRESULT ParticleBuffer::Create(ID3D11Device* device, UINT size, UINT nrOf, bool 
 
         result = device->CreateShaderResourceView(this->buffer.Get(), &srvDesc, this->srv.GetAddressOf());
         if (FAILED(result)) {
+            std::cerr << __LINE__ << "\n";
             return result;
         }
     }
@@ -67,27 +85,10 @@ HRESULT ParticleBuffer::Create(ID3D11Device* device, UINT size, UINT nrOf, bool 
 
         result = device->CreateUnorderedAccessView(this->buffer.Get(), &uavDesc, this->uav.GetAddressOf());
         if (FAILED(result)) {
+            std::cerr << __LINE__ << "\n";
             return result;
         }
     }
-
-    return S_OK;
-}
-
-HRESULT ParticleBuffer::Update(ID3D11DeviceContext* immediateContext, void* data) {
-    if (!this->dynamic || !this->buffer) {
-        return E_FAIL;
-    }
-
-    // D3D11_MAPPED_SUBRESOURCE mappedSource;
-    //  HRESULT result = immediateContext->Map(this->buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSource);
-    /*if (FAILED(result)) {
-        return result;
-    }*/
-    immediateContext->CSSetUnorderedAccessViews(0, 1, this->GetUAVAddress(), nullptr);
-
-    // memcpy(mappedSource.pData, data, this->size * this->nrOf);
-    // immediateContext->Unmap(this->buffer.Get(), 0);
 
     return S_OK;
 }

@@ -13,20 +13,23 @@ void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light
 
 HRESULT Scene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
     // Initialize system framework
-    HRESULT result = this->particleSystem.Initialize(device, sizeof(Particle), 100, true, true, true);
+    HRESULT result = this->particleSystem.Initialize(device, sizeof(Particle), 100, false, true, true);
     if (FAILED(result)) {
+        std::cerr << "Particle system init failed\n";
         return result;
     }
 
     // Load the particle shaders
     result = this->particleSystem.LoadShaders(device, immediateContext);
     if (FAILED(result)) {
+        std::cerr << "Particle system shaders failed\n";
         return result;
     }
 
     // Initialize particles with random values
-    result = this->particleSystem.InitializeParticles(immediateContext, 100);
+    result = this->particleSystem.InitializeParticles(device, immediateContext, sizeof(Particle), 100, false, true, true);
     if (FAILED(result)) {
+        std::cerr << "Particle system particles failed\n";
         return result;
     }
 

@@ -15,8 +15,7 @@ class ParticleBuffer {
     ID3D11UnorderedAccessView* GetUAV() const;
     ID3D11UnorderedAccessView** GetUAVAddress();
 
-    HRESULT Create(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV);
-    HRESULT Update(ID3D11DeviceContext* immediateContext, void* data);
+    HRESULT Create(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV, void* initData);
 
   private:
     UINT size;

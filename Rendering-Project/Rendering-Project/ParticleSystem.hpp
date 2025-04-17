@@ -18,7 +18,8 @@ class ParticleSystem {
     ~ParticleSystem() = default;
 
     HRESULT Initialize(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV);
-    HRESULT InitializeParticles(ID3D11DeviceContext* immediateContext, UINT count = 100);
+    HRESULT InitializeParticles(ID3D11Device* device, ID3D11DeviceContext* immediateContext, UINT size, UINT nrOf,
+                                bool dynamic, bool hasSRV, bool hasUAV);
 
     HRESULT LoadShaders(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
     void UpdateParticles(ID3D11Device* device, ID3D11DeviceContext* immediateContext, float deltaTime);
@@ -36,7 +37,7 @@ class ParticleSystem {
 
   private:
     ParticleBuffer particleBuffer;
-    std::unordered_map<std::string, std::wstring> shaderPaths;
+    std::unordered_map<std::string, std::string> shaderPaths;
     bool isInitialized;
 
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
