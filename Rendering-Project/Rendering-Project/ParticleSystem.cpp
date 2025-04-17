@@ -15,18 +15,21 @@ HRESULT ParticleSystem::InitializeParticles(ID3D11Device* device, ID3D11DeviceCo
                                             UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
     std::vector<Particle> particles(nrOf);
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(15.0f, 25.0f);
+
     for (UINT i = 0; i < nrOf; i++) {
-        particles[i].position[0] = 1;
-        particles[i].position[1] = sin(i) + 10;
-        particles[i].position[2] = 1;
+        particles[i].position[0] = 0;
+        particles[i].position[1] = 0;
+        particles[i].position[2] = 0;
 
-        particles[i].velocity[0] = 1;
-        particles[i].velocity[1] = 1;
-        particles[i].velocity[2] = 1;
+        particles[i].velocity[0] = 0;
+        particles[i].velocity[1] = 0;
+        particles[i].velocity[2] = 0;
 
-        // Varied lifetimes for natural effect
-        particles[i].maxLifetime = 50;
-        particles[i].lifetime    = particles[i].maxLifetime * 0.8f; // Start at 80% to create a staggered effect
+        particles[i].maxLifetime = dist(gen);
+        particles[i].lifetime    = 0;
     }
 
     HRESULT result = this->particleBuffer.Create(device, size, nrOf, dynamic, hasSRV, hasUAV, particles.data());
