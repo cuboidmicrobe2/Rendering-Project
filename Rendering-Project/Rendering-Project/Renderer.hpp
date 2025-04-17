@@ -14,6 +14,7 @@ class Renderer {
     void Render(Scene& scene);
 
     ID3D11Device* GetDevice();
+    ID3D11DeviceContext* GetDeviceContext() const;
 
   private:
     void Clear();
@@ -30,7 +31,7 @@ class Renderer {
     void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights);
-    void RenderParticles(ParticleSystem& particleSystem);
+    void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();

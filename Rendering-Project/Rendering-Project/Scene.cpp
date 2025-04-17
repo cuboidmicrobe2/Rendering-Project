@@ -11,13 +11,26 @@ void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(c
 
 void Scene::AddLightObject(const Light& light) { this->lights.emplace_back(light); }
 
-HRESULT Scene::Init(ID3D11Device* device) {
-    HRESULT result = this->particleSystem.Initialize(device, 64, 1000, true, true, true);
+HRESULT Scene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
+    // Initialize system framework
+    HRESULT result = this->particleSystem.Initialize(device, sizeof(Particle), 100, true, true, true);
     if (FAILED(result)) {
         return result;
     }
 
-    return this->particleSystem.LoadShaders();
+    // Load the particle shaders
+    result = this->particleSystem.LoadShaders(device, immediateContext);
+    if (FAILED(result)) {
+        return result;
+    }
+
+    // Initialize particles with random values
+    result = this->particleSystem.InitializeParticles(immediateContext, 100);
+    if (FAILED(result)) {
+        return result;
+    }
+
+    return S_OK;
 }
 
 std::vector<Camera>& Scene::getCameras() { return this->cameras; }

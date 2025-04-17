@@ -14,7 +14,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     renderer.Init(window);
 
     Scene scene(window);
-    scene.Init(renderer.GetDevice());
+    scene.Init(renderer.GetDevice(), renderer.GetDeviceContext());
     Mesh* mesh = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
     SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
     scene.AddSceneObject(some);

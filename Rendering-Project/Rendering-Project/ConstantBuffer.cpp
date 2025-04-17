@@ -43,7 +43,7 @@ ConstantBuffer& ConstantBuffer::operator=(ConstantBuffer&& other) noexcept {
 void ConstantBuffer::Initialize(ID3D11Device* device, size_t byteSize, void* initialData) {
     this->bufferSize = byteSize;
     D3D11_BUFFER_DESC desc{
-        .ByteWidth           = static_cast<UINT> (byteSize),
+        .ByteWidth           = static_cast<UINT>(byteSize),
         .Usage               = D3D11_USAGE_DYNAMIC,
         .BindFlags           = D3D11_BIND_CONSTANT_BUFFER,
         .CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE,
@@ -59,8 +59,7 @@ void ConstantBuffer::Initialize(ID3D11Device* device, size_t byteSize, void* ini
     };
     if (FAILED(device->CreateBuffer(&desc, &data, &this->buffer)))
         throw std::runtime_error("Falied to create constant buffer");
-    if (this->buffer == nullptr) 
-        throw std::runtime_error("Falied to create constant buffer");
+    if (this->buffer == nullptr) throw std::runtime_error("Falied to create constant buffer");
 }
 
 size_t ConstantBuffer::GetSize() const { return this->bufferSize; }

@@ -6,7 +6,13 @@ struct Particle
     float maxLifetime;
 };
 
-RWStructuredBuffer<Particle> Particles : register(u0);
+cbuffer TimeBuffer : register(b2)
+{
+    float deltaTime;
+    float3 padding;
+}
+
+RWStructuredBuffer<Particle> Particles : register(u1);
 
 [numthreads(32, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -16,12 +22,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
     Particle gettingProcessed = Particles[index];
     
     gettingProcessed.position += gettingProcessed.velocity;
-    gettingProcessed.lifetime -= 0.1;
+    gettingProcessed.velocity.y += deltaTime * 0.5f;
+    gettingProcessed.lifetime -= deltaTime;
     
-    if (gettingProcessed.lifetime <= 0.0)
+    if (gettingProcessed.lifetime <= 0.0f)
     {
-        gettingProcessed.position = float3(0.0, 0.0, 0.0);
-        gettingProcessed.velocity = float3(0.0, 0.0, 0.0);
+        gettingProcessed.position = float3(0.0f, 0.0f, 0.0f);
+        gettingProcessed.velocity = float3(0.0f, 0.0f, 0.0f);
         gettingProcessed.lifetime = gettingProcessed.maxLifetime;
     }
     

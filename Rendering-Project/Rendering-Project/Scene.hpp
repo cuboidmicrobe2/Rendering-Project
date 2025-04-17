@@ -19,7 +19,7 @@ class Scene {
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
-    HRESULT Init(ID3D11Device* device);
+    HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
     std::vector<Camera>& getCameras();
     const std::vector<Light>& getLights();

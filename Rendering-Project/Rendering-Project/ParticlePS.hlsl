@@ -1,9 +1,3 @@
-// ParticlePS.hlsl
-
-// Texture sampler for smoke pattern
-Texture2D smokeTexture : register(t0);
-SamplerState textureSampler : register(s0);
-
 struct PSInput
 {
     float4 position : SV_POSITION;
@@ -13,36 +7,37 @@ struct PSInput
 
 float4 main(PSInput input) : SV_TARGET
 {
-    // Sample the base smoke texture
-    float4 smokePattern = smokeTexture.Sample(textureSampler, input.texCoord);
+    // Create a procedural pattern using only UV coordinates
+    float2 uv = input.texCoord;
     
-    // Create turbulence effect by distorting UV coordinates
-    float2 distortedUV = input.texCoord + float2(
-        sin(input.texCoord.y * 10.0f) * 0.02f,
-        cos(input.texCoord.x * 10.0f) * 0.02f
+    // Create turbulence effect with UV coordinates
+    float2 distortedUV = uv + float2(
+        sin(uv.y * 10.0f) * 0.02f,
+        cos(uv.x * 10.0f) * 0.02f
     );
     
-    // Sample with distorted coordinates for additional detail
-    float4 distortedPattern = smokeTexture.Sample(textureSampler, distortedUV);
+    // Generate procedural patterns
+    float pattern1 = (sin(uv.x * 20.0f) + 1.0f) * 0.5f;
+    float pattern2 = (cos(distortedUV.y * 15.0f) + 1.0f) * 0.5f;
     
-    // Combine both samples for more interesting pattern
-    float alphaMask = smokePattern.r * distortedPattern.g;
+    // Combine patterns for more interesting results
+    float alphaMask = pattern1 * pattern2;
     
-    // Apply a soft falloff near edges
-    alphaMask *= smoothstep(0.0, 0.4, 1.0 - length(input.texCoord - 0.5) * 1.4);
+    // Apply a soft falloff near edges (circular gradient)
+    alphaMask *= smoothstep(0.0, 0.4, 1.0 - length(uv - 0.5) * 1.4);
     
-    // Create the final smoke color
-    // Base is the passed color (which is based on lifetime)
+    // Create the final color
     float4 finalColor = input.color;
     
-    // Apply some subtle color variation based on the texture
+    // Apply some procedural color variation
+    float colorVariation = (sin(distortedUV.x * 5.0f + distortedUV.y * 7.0f) + 1.0) * 0.15f + 0.7f;
     finalColor.rgb = lerp(
         finalColor.rgb,
-        finalColor.rgb * (0.7 + 0.3 * distortedPattern.b),
+        finalColor.rgb * colorVariation,
         0.5
     );
     
-    // Set alpha based on texture and lifetime
+    // Set alpha based on the procedural pattern and lifetime
     finalColor.a *= alphaMask;
     
     return finalColor;

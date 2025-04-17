@@ -1,7 +1,9 @@
 #include "ParticleSystem.hpp"
+#include "ConstantBuffer.hpp"
 #include "ReadFile.hpp"
+#include <random>
 
-ParticleSystem::ParticleSystem() {
+ParticleSystem::ParticleSystem() : isInitialized(false) {
     this->shaderPaths = {
         {"VertexShader", L"ParticleVS.cso"},
         {"PixelShader", L"ParticlePS.cso"},
@@ -10,10 +12,7 @@ ParticleSystem::ParticleSystem() {
     };
 }
 
-HRESULT ParticleSystem::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, UINT size, UINT nrOf, bool dynamic,
-                                   bool hasSRV, bool hasUAV) {
-    this->device = device;
-    device->GetImmediateContext(this->immediateContext.GetAddressOf());
+HRESULT ParticleSystem::Initialize(ID3D11Device* device, UINT size, UINT nrOf, bool dynamic, bool hasSRV, bool hasUAV) {
 
     HRESULT result = this->particleBuffer.Create(device, size, nrOf, dynamic, hasSRV, hasUAV);
     if (FAILED(result)) {
@@ -23,7 +22,31 @@ HRESULT ParticleSystem::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, 
     return S_OK;
 }
 
-HRESULT ParticleSystem::LoadShaders() {
+HRESULT ParticleSystem::InitializeParticles(ID3D11DeviceContext* immediateContext, UINT count) {
+    std::vector<Particle> particles(count);
+
+    for (UINT i = 0; i < count; i++) {
+        particles[i].position[0] = (float) ((rand() % 200) - 100) / 10.0f;
+        particles[i].position[1] = (float) ((rand() % 200) - 100) / 10.0f;
+        particles[i].position[2] = (float) ((rand() % 200) - 100) / 10.0f;
+
+        particles[i].velocity[0] = (float) ((rand() % 200) - 100) / 10.0f;
+        particles[i].velocity[1] = (float) ((rand() % 200) - 100) / 10.0f;
+        particles[i].velocity[2] = (float) ((rand() % 200) - 100) / 10.0f;
+
+        particles[i].maxLifetime = 1.0f + (float) (rand() % 9);
+        particles[i].lifetime    = particles[i].maxLifetime;
+    }
+
+    HRESULT result = this->particleBuffer.Update(immediateContext, particles.data());
+    if (SUCCEEDED(result)) {
+        this->isInitialized = true;
+    }
+
+    return result;
+}
+
+HRESULT ParticleSystem::LoadShaders(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
     for (const auto& [shaderType, filePath] : this->shaderPaths) {
         std::string byteData;
         if (!CM::ReadFile(std::string(filePath.begin(), filePath.end()), byteData)) {
@@ -33,17 +56,30 @@ HRESULT ParticleSystem::LoadShaders() {
 
         HRESULT result = E_FAIL;
         if (shaderType == "VertexShader") {
-            result = this->device->CreateVertexShader(byteData.data(), byteData.size(), nullptr,
-                                                      this->vertexShader.GetAddressOf());
+            result = device->CreateVertexShader(byteData.data(), byteData.size(), nullptr,
+                                                this->vertexShader.GetAddressOf());
+
+            D3D11_INPUT_ELEMENT_DESC layoutDesc[4] = {
+                {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"LIFETIME", 0, DXGI_FORMAT_D32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"MAX_LIFETIME", 0, DXGI_FORMAT_D32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}};
+
+            HRESULT result = device->CreateInputLayout(layoutDesc, ARRAYSIZE(layoutDesc), byteData.data(),
+                                                       byteData.size(), this->inputLayout.GetAddressOf());
+            if (FAILED(result)) {
+                return result;
+            }
+
         } else if (shaderType == "PixelShader") {
-            result = this->device->CreatePixelShader(byteData.data(), byteData.size(), nullptr,
-                                                     this->pixelShader.GetAddressOf());
+            result =
+                device->CreatePixelShader(byteData.data(), byteData.size(), nullptr, this->pixelShader.GetAddressOf());
         } else if (shaderType == "GeometryShader") {
-            result = this->device->CreateGeometryShader(byteData.data(), byteData.size(), nullptr,
-                                                        this->geometryShader.GetAddressOf());
+            result = device->CreateGeometryShader(byteData.data(), byteData.size(), nullptr,
+                                                  this->geometryShader.GetAddressOf());
         } else if (shaderType == "ComputeShader") {
-            result = this->device->CreateComputeShader(byteData.data(), byteData.size(), nullptr,
-                                                       this->computeShader.GetAddressOf());
+            result = device->CreateComputeShader(byteData.data(), byteData.size(), nullptr,
+                                                 this->computeShader.GetAddressOf());
         }
 
         if (FAILED(result)) {
@@ -52,18 +88,58 @@ HRESULT ParticleSystem::LoadShaders() {
         }
     }
 
-    if (this->vertexShader) {
-        this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
-    }
-    if (this->pixelShader) {
-        this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
-    }
-    if (this->geometryShader) {
-        this->immediateContext->GSSetShader(this->geometryShader.Get(), nullptr, 0);
-    }
-
     return S_OK;
 }
+
+void ParticleSystem::UpdateParticles(ID3D11Device* device, ID3D11DeviceContext* immediateContext, float deltaTime) {
+    if (!this->isInitialized || !this->computeShader) {
+        return;
+    }
+
+    // Create and update time buffer
+    struct TimeBufferData {
+        float deltaTime;
+        float padding[3];
+    } timeData;
+
+    timeData = {deltaTime, {0.0f, 0.0f, 0.0f}};
+
+    // Create constant buffer for the time
+    ConstantBuffer timeBuffer;
+    timeBuffer.Initialize(device, sizeof(TimeBufferData), &timeData);
+
+    // Set compute shader
+    immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
+
+    // Bind time buffer to compute shader at register b2
+    ID3D11Buffer* timeBufferPtr = timeBuffer.GetBuffer();
+    immediateContext->CSSetConstantBuffers(2, 1, &timeBufferPtr);
+
+    // Bind UAV to compute shader at register u1
+    ID3D11UnorderedAccessView* uav = this->particleBuffer.GetUAV();
+    immediateContext->CSSetUnorderedAccessViews(1, 1, &uav, nullptr);
+
+    // Calculate thread groups
+    UINT nrOfParticles    = this->particleBuffer.GetNrOfElements();
+    UINT nrOfThreadGroups = (nrOfParticles + 31) / 32;
+
+    // Dispatch compute shader
+    immediateContext->Dispatch(nrOfThreadGroups, 1, 1);
+
+    // Unbind UAV
+    ID3D11UnorderedAccessView* nullUAV[1] = {nullptr};
+    immediateContext->CSSetUnorderedAccessViews(1, 1, nullUAV, nullptr);
+
+    // Unbind constant buffer
+    ID3D11Buffer* nullBuffer[1] = {nullptr};
+    immediateContext->CSSetConstantBuffers(2, 1, nullBuffer);
+}
+
+void ParticleSystem::SetInputLayout(ID3D11DeviceContext* immediateContext) {
+    immediateContext->IASetInputLayout(this->inputLayout.Get());
+}
+
+ID3D11ComputeShader* ParticleSystem::GetComputeShader() const { return this->computeShader.Get(); }
 
 ID3D11VertexShader* ParticleSystem::GetVertexShader() const { return this->vertexShader.Get(); }
 

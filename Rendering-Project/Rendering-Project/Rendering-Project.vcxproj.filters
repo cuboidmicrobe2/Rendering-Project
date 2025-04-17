@@ -37,9 +37,6 @@
     <Filter Include="Source Files\Scene">
       <UniqueIdentifier>{25083945-3450-4689-8d23-d255515440be}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Rendering\ForwardRendering">
-      <UniqueIdentifier>{a12c0a17-3eb0-4edc-a61f-63593bd999ff}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Rendering\DeferredRendering">
       <UniqueIdentifier>{cf102c6d-1dc1-4890-ac86-07996de2e10e}</UniqueIdentifier>
     </Filter>
@@ -78,14 +75,14 @@
     <ClCompile Include="WindowHandler.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="ForwardRenderer.cpp">
-      <Filter>Source Files\Rendering\ForwardRendering</Filter>
+    <ClCompile Include="ParticleBuffer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DeferredRenderer.cpp">
-      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DaddyRenderer.cpp">
-      <Filter>Source Files\Rendering</Filter>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,38 +140,36 @@
     <ClInclude Include="OBJ_Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DaddyRenderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="DeferredRenderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="ForwardRenderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Gbuffer.hpp">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Source Files\Rendering\ForwardRendering</Filter>
-    </FxCompile>
     <FxCompile Include="deferredPS.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </FxCompile>
     <FxCompile Include="deferredVS.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Source Files\Rendering\ForwardRendering</Filter>
-    </FxCompile>
     <FxCompile Include="ComputeShader.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </FxCompile>
+    <FxCompile Include="ParticleCS.hlsl" />
+    <FxCompile Include="ParticleGS.hlsl" />
+    <FxCompile Include="ParticlePS.hlsl" />
+    <FxCompile Include="ParticleVS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg">

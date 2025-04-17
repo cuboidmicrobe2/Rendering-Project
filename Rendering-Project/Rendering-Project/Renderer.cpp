@@ -40,7 +40,30 @@ HRESULT Renderer::Init(const Window& window) {
 }
 
 void Renderer::Render(Scene& scene) {
-    this->BindLights(scene.getLights());
+    // this->BindLights(scene.getLights());
+    //  Bind Lights
+    const std::vector<Light>& lights = scene.getLights();
+    ConstantBuffer lightBuffer;
+    int nrOfLights = static_cast<int>(lights.size());
+    struct LightData {
+        float pos[3];
+        float intensity;
+        float color[4];
+    };
+    std::vector<LightData> lightData;
+    for (auto light : lights) {
+        float* tempPos   = light.transform.GetPosition().m128_f32;
+        float* tempColor = light.GetColor().m128_f32;
+
+        LightData l{
+            .pos{tempPos[0], tempPos[1], tempPos[2]},
+            .intensity = light.GetIntesity(),
+            .color     = {tempColor[0], tempColor[1], tempColor[2], tempColor[3]},
+        };
+        lightData.emplace_back(l);
+    }
+    lightBuffer.Initialize(this->device.Get(), lightData.size() * sizeof(LightData), lightData.data());
+    this->immediateContext.Get()->CSSetConstantBuffers(1, 1, lightBuffer.GetAdressOfBuffer());
 
     // Render all extra cameras to their texures
     for (auto& cam : scene.getCameras()) {
@@ -57,16 +80,20 @@ void Renderer::Render(Scene& scene) {
 
 ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
+ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
+
 void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV) {
     // Render particles using the particle system
-    this->RenderParticles(scene.GetParticleSystem());
+    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
+    this->RenderParticles(scene.GetParticleSystem(), cam);
+
+    this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
+    this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
+    this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
 
     this->BindViewAndProjMatrixes(cam);
 
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
-
-    // this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
-    // this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
 
     // Draw objects / Bind objects
     for (auto obj : scene.getObjects()) {
@@ -325,19 +352,45 @@ void Renderer::BindLightMetaData(const Camera& cam, int nrOfLights) {
     this->immediateContext.Get()->CSSetConstantBuffers(0, 1, CSMetaData.GetAdressOfBuffer());
 }
 
-void Renderer::RenderParticles(ParticleSystem& particleSystem) {
+void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
     this->immediateContext->VSSetShader(particleSystem.GetVertexShader(), nullptr, 0);
-    this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
-    this->immediateContext->GSSetShader(particleSystem.GetGeometryShader(), nullptr, 0);
+    // this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
+    // this->immediateContext->GSSetShader(particleSystem.GetGeometryShader(), nullptr, 0);
+
+    struct CameraBufferData {
+        DirectX::XMFLOAT4X4 viewProjection;
+        DirectX::XMFLOAT3 cameraPosition;
+        float padding;
+    };
+
+    CameraBufferData cameraData;
+    DirectX::XMStoreFloat4x4(&cameraData.viewProjection,
+                             DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
+
+    // Get camera position
+    DirectX::XMFLOAT3 camPos;
+    DirectX::XMStoreFloat3(&camPos, cam.transform.GetPosition());
+    cameraData.cameraPosition = camPos;
+
+    // Create and initialize the constant buffer
+    ConstantBuffer cameraBuffer;
+    cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), &cameraData);
+
+    // Bind the camera buffer to the geometry shader at register b1
+    ID3D11Buffer* camBufferPtr = cameraBuffer.GetBuffer();
+    this->immediateContext->GSSetConstantBuffers(1, 1, &camBufferPtr);
 
     ID3D11ShaderResourceView* srv = particleSystem.GetSRV();
     this->immediateContext->VSSetShaderResources(0, 1, &srv);
 
-    this->immediateContext->IASetInputLayout(this->inputLayout.Get());
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+    particleSystem.SetInputLayout(this->GetDeviceContext());
 
     UINT nrOfParticles = particleSystem.GetParticleCount();
     this->immediateContext->Draw(nrOfParticles, 0);
+
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->IASetInputLayout(this->inputLayout.Get());
 
     ID3D11ShaderResourceView* nullSRV[1] = {nullptr};
     this->immediateContext->VSSetShaderResources(0, 1, nullSRV);
