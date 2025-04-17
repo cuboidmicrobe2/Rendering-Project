@@ -333,11 +333,9 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
     CameraBufferData cameraData;
     DirectX::XMStoreFloat4x4(&cameraData.viewProjection,
                              DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
-    // Get camera position
     DirectX::XMFLOAT3 camPos;
     DirectX::XMStoreFloat3(&camPos, cam.transform.GetPosition());
     cameraData.cameraPosition = camPos;
-    // Create and initialize the constant buffer
     cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &cameraData);
     this->immediateContext->GSSetShader(particleSystem.GetGeometryShader(), nullptr, 0);
     this->immediateContext->GSSetConstantBuffers(1, 1, cameraBuffer.GetAdressOfBuffer());
@@ -346,16 +344,22 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
     this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
 
     this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->depthStencilView.Get());
-    this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
+     this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
 
-    // Unbind stuff
-    // this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 1);
-    // this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 1);
-    /*this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    this->immediateContext->IASetInputLayout(this->inputLayout.Get());*/
+    ID3D11RenderTargetView* rendertargets[3] = {
+        this->position.GetRTV(),
+        this->color.GetRTV(),
+        this->normal.GetRTV(),
+    };
+    this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
+    this->immediateContext->GSSetShader(nullptr, nullptr, 0);
+    this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
+    this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->IASetInputLayout(this->inputLayout.Get());
 
     ID3D11ShaderResourceView* nullSRV[1] = {nullptr};
-    // this->immediateContext->VSSetShaderResources(0, 1, nullSRV);
+    this->immediateContext->VSSetShaderResources(0, 1, nullSRV);
 }
 
 void Renderer::BindViewAndProjMatrixes(const Camera& cam) {

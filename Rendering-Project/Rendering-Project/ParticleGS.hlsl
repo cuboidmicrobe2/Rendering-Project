@@ -45,7 +45,7 @@ void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> outp
     float normalizedLife = input[0].lifetime.x / input[0].lifetime.y;
     
     // Create color based on lifetime
-    float4 particleColor = float4(normalizedLife, normalizedLife, normalizedLife, normalizedLife);
+    float4 particleColor = float4(0, 0, 0, 0);
     
     GSOutput vertices[4];
     
