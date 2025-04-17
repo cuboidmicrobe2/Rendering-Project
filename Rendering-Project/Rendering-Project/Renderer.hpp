@@ -48,6 +48,7 @@ class Renderer {
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaderDCEM;
     Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
 

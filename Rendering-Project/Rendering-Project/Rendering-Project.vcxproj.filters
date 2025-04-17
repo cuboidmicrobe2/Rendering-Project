@@ -78,14 +78,11 @@
     <ClCompile Include="WindowHandler.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="ForwardRenderer.cpp">
-      <Filter>Source Files\Rendering\ForwardRendering</Filter>
+    <ClCompile Include="DCEM.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DeferredRenderer.cpp">
-      <Filter>Source Files\Rendering\DeferredRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="DaddyRenderer.cpp">
-      <Filter>Source Files\Rendering</Filter>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,16 +140,19 @@
     <ClInclude Include="OBJ_Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DaddyRenderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="DeferredRenderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="ForwardRenderer.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Gbuffer.hpp">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="MirrorObject.hpp">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleObject.hpp">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DCEM.hpp">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.hpp">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
@@ -160,17 +160,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Source Files\Rendering\ForwardRendering</Filter>
-    </FxCompile>
     <FxCompile Include="deferredPS.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
     </FxCompile>
     <FxCompile Include="deferredVS.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Source Files\Rendering\ForwardRendering</Filter>
     </FxCompile>
     <FxCompile Include="ComputeShader.hlsl">
       <Filter>Source Files\Rendering\DeferredRendering</Filter>
