@@ -14,6 +14,8 @@ class Renderer {
     void Render(Scene& scene);
 
     ID3D11Device* GetDevice();
+    ID3D11PixelShader* GetPS() const;
+    ID3D11PixelShader* GetDCEMPS() const;
 
   private:
 
@@ -34,6 +36,7 @@ class Renderer {
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
+
 
     const uint32_t renderPasses = 1;
     D3D11_VIEWPORT viewport;

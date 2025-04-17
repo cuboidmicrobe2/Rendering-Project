@@ -4,6 +4,7 @@
 Renderer::Renderer() {}
 
 HRESULT Renderer::Init(const Window& window) {
+    this->SetViewPort(window);
     HRESULT result = this->CreateDeviceAndSwapChain(window);
     if (FAILED(result)) return result;
 
@@ -17,7 +18,6 @@ HRESULT Renderer::Init(const Window& window) {
     result = this->CreateDepthStencil(window);
     if (FAILED(result)) return result;
 
-    this->SetViewPort(window);
 
     std::string byteData;
     result = this->SetShaders(byteData);
@@ -42,6 +42,12 @@ HRESULT Renderer::Init(const Window& window) {
 void Renderer::Render(Scene& scene) {
     this->BindLights(scene.getLights());
 
+    DirectX::XMVECTOR pos = scene.getMainCam().transform.GetPosition();
+
+    ConstantBuffer mainCamBuf;
+    mainCamBuf.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), &pos);
+
+    this->immediateContext->PSSetConstantBuffers(0, 1, mainCamBuf.GetAdressOfBuffer());
     // Render all extra cameras to their texures
     for (auto& cam : scene.getCameras()) {
         this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetViewPort());
@@ -58,6 +64,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->RSSetViewports(1, &viewport);
 
     this->BindViewAndProjMatrixes(cam);
+
 
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
@@ -95,7 +102,7 @@ HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.SampleDesc.Count                   = 1;
     swapChainDesc.SampleDesc.Quality                 = 0;
-    swapChainDesc.BufferUsage                        = DXGI_USAGE_UNORDERED_ACCESS;
+    swapChainDesc.BufferUsage                        = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.OutputWindow                       = window.GetHWND();
     swapChainDesc.Windowed                           = TRUE;
     swapChainDesc.SwapEffect                         = DXGI_SWAP_EFFECT_DISCARD;
@@ -131,6 +138,19 @@ HRESULT Renderer::SetShaders(std::string& byteDataOutput) {
                                              this->pixelShader.GetAddressOf());
     if (FAILED(result)) {
         std::cerr << "Failed to create pixel shader!" << std::endl;
+        return result;
+    }
+
+    // Pixel Shader
+    if (!CM::ReadFile("DCEMPS.cso", shaderData)) {
+        std::cerr << "Failed to read pixel shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    result = this->device->CreatePixelShader(shaderData.data(), shaderData.size(), nullptr,
+                                             this->pixelShaderDCEM.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create pixel shader DCEM!" << std::endl;
         return result;
     }
 
@@ -171,6 +191,10 @@ HRESULT Renderer::CreateUAV() { // Vertex Shader
 
     return this->device->CreateUnorderedAccessView(backbuffer.Get(), &desc, this->UAV.GetAddressOf());
 }
+
+ID3D11PixelShader* Renderer::GetPS() const { return this->pixelShader.Get(); }
+
+ID3D11PixelShader* Renderer::GetDCEMPS() const { return this->pixelShaderDCEM.Get(); }
 
 HRESULT Renderer::CreateDepthStencil(const Window& window) {
     D3D11_TEXTURE2D_DESC depthStencilDesc = {

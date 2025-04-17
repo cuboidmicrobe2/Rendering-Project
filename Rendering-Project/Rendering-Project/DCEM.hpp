@@ -10,13 +10,13 @@ class DCEM : public SceneObject {
     HRESULT Init(ID3D11Device* device);
     void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const override;
     void Update() override;
+    std::array<Camera, 6>& GetCameras();
 
   private:
-    ID3D11Texture2D* texture;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
     Mesh* mesh;
     ID3D11PixelShader* PS;
     ID3D11PixelShader* normalPS;
     std::array<Camera, 6> cameras;
     ID3D11ShaderResourceView* srv;
-    ID3D11RenderTargetView* rtv;
 };

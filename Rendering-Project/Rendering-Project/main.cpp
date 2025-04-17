@@ -5,6 +5,7 @@
 #include "WindowHandler.hpp"
 #include "Renderer.hpp"
 #include "SimpleObject.hpp"
+#include "DCEM.hpp"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
@@ -16,8 +17,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     Scene scene(window);
     Mesh* mesh = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
+    Mesh* mesh2 = scene.LoadMesh(".", "icoSphere.obj", renderer.GetDevice());
     SimpleObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
     scene.AddSceneObject(&some);
+
+    DCEM dcem(Transform({-20, 0, 0}), static_cast<UINT>(256), static_cast<UINT>(256), renderer.GetPS(),
+              renderer.GetDCEMPS(), mesh2);
+    if (FAILED(dcem.Init(renderer.GetDevice()))) return -1;
+    scene.AddSceneObject(&dcem);
+
+    for (const Camera& cam : dcem.GetCameras())
+        scene.AddCameraObject(cam);
 
     Light light(Transform({10, 0, -10}), {1, 1, 1}, 1);
     scene.AddLightObject(light);

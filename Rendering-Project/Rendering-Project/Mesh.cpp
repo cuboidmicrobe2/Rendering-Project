@@ -52,7 +52,11 @@ void Mesh::Initialize(ID3D11Device* device, const std::filesystem::path& folderp
                 std::wstring path              = (folderpath / mesh.MeshMaterial.map_Ka).wstring();
                 HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(device, path.c_str(), nullptr, &ambientSrv);
 
-                if (FAILED(createShaderResult)) throw std::runtime_error("failed to load ambient texture");
+                if (FAILED(createShaderResult)) {
+                    std::cerr << createShaderResult << "\n";
+                    throw std::runtime_error("failed to load ambient texture");
+                }
+                    
 
             } else {
                 DirectX::CreateWICTextureFromFile(device, L"stone-man\\diffuso.tif", nullptr, &ambientSrv);

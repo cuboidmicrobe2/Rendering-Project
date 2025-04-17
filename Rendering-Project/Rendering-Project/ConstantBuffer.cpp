@@ -1,5 +1,6 @@
 #include "ConstantBuffer.hpp"
 #include <stdexcept>
+#include <iostream>
 
 ConstantBuffer::ConstantBuffer(ID3D11Device* device, size_t byteSize, void* initialData) : bufferSize(byteSize) {
     D3D11_BUFFER_DESC desc{
@@ -57,8 +58,11 @@ void ConstantBuffer::Initialize(ID3D11Device* device, size_t byteSize, void* ini
         .SysMemSlicePitch = 0,
 
     };
-    if (FAILED(device->CreateBuffer(&desc, &data, &this->buffer)))
+    HRESULT r = device->CreateBuffer(&desc, &data, &this->buffer);
+    if (FAILED(r)) {
+        std::cerr << r << "\n";
         throw std::runtime_error("Falied to create constant buffer");
+    }
     if (this->buffer == nullptr) 
         throw std::runtime_error("Falied to create constant buffer");
 }
