@@ -116,8 +116,7 @@ void ParticleSystem::UpdateParticles(ID3D11Device* device, ID3D11DeviceContext* 
     immediateContext->CSSetConstantBuffers(2, 1, &timeBufferPtr);
 
     // Bind UAV to compute shader at register u1
-    ID3D11UnorderedAccessView* uav = this->particleBuffer.GetUAV();
-    immediateContext->CSSetUnorderedAccessViews(1, 1, &uav, nullptr);
+    immediateContext->CSSetUnorderedAccessViews(1, 1, this->GetAddressOfUAV(), nullptr);
 
     // Calculate thread groups
     UINT nrOfParticles    = this->particleBuffer.GetNrOfElements();
@@ -149,6 +148,10 @@ ID3D11GeometryShader* ParticleSystem::GetGeometryShader() const { return this->g
 
 ID3D11ShaderResourceView* ParticleSystem::GetSRV() const { return this->particleBuffer.GetSRV(); }
 
+ID3D11ShaderResourceView** ParticleSystem::GetAddressOfSRV() { return this->particleBuffer.GetSRVAddress(); }
+
 ID3D11UnorderedAccessView* ParticleSystem::GetUAV() const { return this->particleBuffer.GetUAV(); }
+
+ID3D11UnorderedAccessView** ParticleSystem::GetAddressOfUAV() { return this->particleBuffer.GetUAVAddress(); }
 
 UINT ParticleSystem::GetParticleCount() const { return this->particleBuffer.GetNrOfElements(); }

@@ -11,13 +11,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     Window window(hInstance, nCmdShow);
     Renderer renderer;
-    renderer.Init(window);
+    HRESULT result = renderer.Init(window);
+    if (FAILED(result)) {
+        return result;
+    }
 
     Scene scene(window);
     scene.Init(renderer.GetDevice(), renderer.GetDeviceContext());
     Mesh* mesh = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
+
     SceneObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
-    scene.AddSceneObject(some);
+    some.InitBuffer(renderer.GetDevice());
+    scene.AddSceneObject(&some);
 
     Light light(Transform({10, 0, -10}), {1, 1, 1}, 1);
     scene.AddLightObject(light);
@@ -32,6 +37,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
         scene.UpdateScene();
         renderer.Render(scene);
+        std::cout << "Not Exception :))))\n";
     }
 
     return 0;

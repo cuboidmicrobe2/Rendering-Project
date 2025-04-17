@@ -5,7 +5,7 @@ Scene::Scene(Window& window)
 
 Scene::~Scene() {}
 
-void Scene::AddSceneObject(const SceneObject& sceneObject) { this->objects.emplace_back(sceneObject); }
+void Scene::AddSceneObject(SceneObject* sceneObject) { this->objects.push_back(sceneObject); }
 
 void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
 
@@ -37,7 +37,7 @@ std::vector<Camera>& Scene::getCameras() { return this->cameras; }
 
 const std::vector<Light>& Scene::getLights() { return this->lights; }
 
-const std::vector<SceneObject>& Scene::getObjects() { return this->objects; }
+std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
 
 ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
@@ -51,7 +51,7 @@ Camera& Scene::getMainCam() { return this->mainCamera; }
 void Scene::UpdateScene() {
     this->mainCamera.Update(this->input);
 
-    for (SceneObject& obj : this->objects) {
-        obj.Update();
+    for (SceneObject* obj : this->objects) {
+        obj->Update();
     }
 }

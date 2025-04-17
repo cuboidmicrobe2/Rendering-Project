@@ -15,7 +15,7 @@ class Scene {
     Scene(Window& window);
     ~Scene();
 
-    void AddSceneObject(const SceneObject& sceneObject);
+    void AddSceneObject(SceneObject* sceneObject);
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
@@ -23,7 +23,7 @@ class Scene {
 
     std::vector<Camera>& getCameras();
     const std::vector<Light>& getLights();
-    const std::vector<SceneObject>& getObjects();
+    std::vector<SceneObject*>& getObjects();
 
     ParticleSystem& GetParticleSystem();
 
@@ -39,7 +39,7 @@ class Scene {
     ParticleSystem particleSystem;
 
     std::vector<std::unique_ptr<Mesh>> meshes;
-    std::vector<SceneObject> objects;
+    std::vector<SceneObject*> objects;
     std::vector<Camera> cameras;
     std::vector<Light> lights;
 };

@@ -29,7 +29,9 @@ class ParticleSystem {
     ID3D11PixelShader* GetPixelShader() const;
     ID3D11GeometryShader* GetGeometryShader() const;
     ID3D11ShaderResourceView* GetSRV() const;
+    ID3D11ShaderResourceView** GetAddressOfSRV();
     ID3D11UnorderedAccessView* GetUAV() const;
+    ID3D11UnorderedAccessView** GetAddressOfUAV();
     UINT GetParticleCount() const;
 
   private:

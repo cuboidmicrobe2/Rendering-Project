@@ -50,10 +50,35 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
 
     GBuffer position;
     GBuffer color;
     GBuffer normal;
+
+    static constexpr int MAX_LIGHTS = 16;
+
+    struct LightData {
+        float pos[3];
+        float intensity;
+        float color[4];
+    };
+
+    struct CSMetadata {
+        int nrofLights;
+        float cameraPos[3];
+    };
+
+    struct CameraBufferData {
+        DirectX::XMFLOAT4X4 viewProjection;
+        DirectX::XMFLOAT3 cameraPosition;
+        float padding;
+    };
+
+    ConstantBuffer lightBuffer;
+    ConstantBuffer metadataBuffer;
+    ConstantBuffer viewProjBuffer;
+    ConstantBuffer cameraBuffer;
 };
 
 #endif
