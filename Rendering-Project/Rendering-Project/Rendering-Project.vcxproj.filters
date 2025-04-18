@@ -1,179 +1,188 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Header Files\Buffers">
-      <UniqueIdentifier>{efcfaeb5-f2eb-468c-bc7e-26c8d559cb1f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Meshes">
-      <UniqueIdentifier>{1e149fc8-0e8d-469c-9c8c-c8aba25ff693}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Scene">
-      <UniqueIdentifier>{665abbc5-a1dc-49e5-bfa9-0e6abcc0c6f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Rendering">
-      <UniqueIdentifier>{d3ea11b6-980e-4a16-bf29-c2fc4c880a9e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Source Files\Buffers">
-      <UniqueIdentifier>{b123170d-b3d5-4542-9d85-c698eecd45a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Meshes">
-      <UniqueIdentifier>{fc16d37c-c448-4558-a05d-91d0437e2b21}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Rendering">
-      <UniqueIdentifier>{7a161882-d3d5-4cb0-b39e-25b3880b3301}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Scene">
-      <UniqueIdentifier>{25083945-3450-4689-8d23-d255515440be}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Rendering\DeferredRendering">
-      <UniqueIdentifier>{cf102c6d-1dc1-4890-ac86-07996de2e10e}</UniqueIdentifier>
-    </Filter>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="DCEMPS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="deferredPS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="deferredVS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticleCS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticleGS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticlePS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticleVS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ConstantBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Source\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="DCEM.cpp">
+      <Filter>Source\Scene</Filter>
     </ClCompile>
     <ClCompile Include="DepthBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Source\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
+      <Filter>Source\Buffers</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Meshes</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneObject.cpp">
-      <Filter>Source Files\Scene</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="StructuredBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="SubMesh.cpp">
-      <Filter>Source Files\Meshes</Filter>
+      <Filter>Source\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
-      <Filter>Source Files\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowHandler.cpp">
-      <Filter>Source Files\Rendering</Filter>
+      <Filter>Source\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="ParticleBuffer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneObject.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SubMesh.cpp">
+      <Filter>Source\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowHandler.cpp">
+      <Filter>Source\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConstantBuffer.hpp">
-      <Filter>Header Files\Buffers</Filter>
+      <Filter>Headers\Buffers</Filter>
     </ClInclude>
     <ClInclude Include="DepthBuffer.hpp">
-      <Filter>Header Files\Buffers</Filter>
+      <Filter>Headers\Buffers</Filter>
     </ClInclude>
-    <ClInclude Include="IndexBuffer.hpp">
-      <Filter>Header Files\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexBuffer.hpp">
-      <Filter>Header Files\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="StructuredBuffer.hpp">
-      <Filter>Header Files\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>Header Files\Meshes</Filter>
-    </ClInclude>
-    <ClInclude Include="SubMesh.hpp">
-      <Filter>Header Files\Meshes</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleVertex.hpp">
-      <Filter>Header Files\Meshes</Filter>
+    <ClInclude Include="DCEM.hpp">
+      <Filter>Headers\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Camera.hpp">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.hpp">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneObject.hpp">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowHandler.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="ReadFile.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InputHandler.hpp">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.hpp">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.hpp">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OBJ_Loader.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Gbuffer.hpp">
-      <Filter>Header Files\Rendering</Filter>
+      <Filter>Headers\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.hpp">
+      <Filter>Headers\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="MirrorObject.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJ_Loader.h">
+      <Filter>Headers\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="ParticleBuffer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Buffers</Filter>
     </ClInclude>
     <ClInclude Include="ParticleSystem.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadFile.hpp">
+      <Filter>Headers\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObject.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleObject.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleVertex.hpp">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBuffer.hpp">
+      <Filter>Headers\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.hpp">
+      <Filter>Headers\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="SubMesh.hpp">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowHandler.hpp">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="slimepfp.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="deferredPS.hlsl">
-      <Filter>Source Files\Rendering\DeferredRendering</Filter>
-    </FxCompile>
-    <FxCompile Include="deferredVS.hlsl">
-      <Filter>Source Files\Rendering\DeferredRendering</Filter>
-    </FxCompile>
-    <FxCompile Include="ComputeShader.hlsl">
-      <Filter>Source Files\Rendering\DeferredRendering</Filter>
-    </FxCompile>
-    <FxCompile Include="ParticleGS.hlsl" />
-    <FxCompile Include="ParticlePS.hlsl" />
-    <FxCompile Include="ParticleVS.hlsl" />
-    <FxCompile Include="ParticleCS.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="slimepfp.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{b7e5f711-335f-40e0-926f-0912f9df29d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Buffers">
+      <UniqueIdentifier>{4577f08d-2e88-46eb-8dfd-4e51cdb25fcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{273e1c6a-5e7f-4eb4-b9e5-e43ddcbf8b73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Buffers">
+      <UniqueIdentifier>{b5f16349-3d9c-4c5a-9d47-15dda4b27b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Scene">
+      <UniqueIdentifier>{26a1a188-0997-445e-ae7a-33b782af9495}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scene">
+      <UniqueIdentifier>{48c747bb-6913-4bfe-b72e-e82230d7af65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hlsl">
+      <UniqueIdentifier>{f9b54621-1682-46d3-b3cb-15bd70305881}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Rendering">
+      <UniqueIdentifier>{e5aa6dbf-e223-4cfc-b3cb-4b7f6def72e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Rendering">
+      <UniqueIdentifier>{d1d33263-745a-4f51-9108-0a0b570ec7a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

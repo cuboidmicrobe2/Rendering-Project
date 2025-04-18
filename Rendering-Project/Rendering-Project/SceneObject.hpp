@@ -14,19 +14,19 @@ class SceneObject {
   public:
     Transform transform;
 
-    SceneObject(Transform transform, Mesh* mesh);
-    SceneObject(SceneObject&) = delete;
+    SceneObject(Transform transform/*, Mesh* mesh*/);
     ~SceneObject() {};
+
+    virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const = 0;
+    SceneObject(SceneObject&) = delete;
 
     void InitBuffer(ID3D11Device* device);
 
-    void Draw(ID3D11Device* device, ID3D11DeviceContext* context);
+    virtual void Update();
 
-    void Update();
+  protected:
 
-  private:
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;
-    Mesh* mesh;
     ConstantBuffer matrixBuffer;
 };
 

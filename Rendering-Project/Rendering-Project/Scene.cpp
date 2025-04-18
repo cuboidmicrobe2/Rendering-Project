@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 Scene::Scene(Window& window)
-    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr) {}
+    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr) {}
 
 Scene::~Scene() {}
 

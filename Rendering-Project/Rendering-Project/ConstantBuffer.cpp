@@ -1,4 +1,5 @@
 #include "ConstantBuffer.hpp"
+#include <iostream>
 #include <stdexcept>
 
 ConstantBuffer::ConstantBuffer(ID3D11Device* device, size_t byteSize, void* initialData) : bufferSize(byteSize) {
@@ -20,7 +21,10 @@ ConstantBuffer::ConstantBuffer(ID3D11Device* device, size_t byteSize, void* init
 }
 
 // Pointer Train go Chu Chu!
-ConstantBuffer::~ConstantBuffer() { this->buffer->Release(); }
+ConstantBuffer::~ConstantBuffer() { 
+    if (this->buffer)
+        this->buffer->Release(); 
+}
 
 ConstantBuffer::ConstantBuffer(ConstantBuffer&& other) noexcept {
     this->buffer     = other.buffer;
@@ -52,22 +56,17 @@ void ConstantBuffer::Initialize(ID3D11Device* device, size_t byteSize, void* ini
     };
 
     HRESULT result;
-    D3D11_SUBRESOURCE_DATA data;
-    if (initialData) {
-        data = {
-            .pSysMem          = initialData,
-            .SysMemPitch      = 0,
-            .SysMemSlicePitch = 0,
-
-        };
-        result = device->CreateBuffer(&desc, &data, &this->buffer);
-    } else {
-        result = device->CreateBuffer(&desc, nullptr, &this->buffer);
+    D3D11_SUBRESOURCE_DATA data{
+        .pSysMem          = initialData,
+        .SysMemPitch      = 0,
+        .SysMemSlicePitch = 0,
+    };
+    HRESULT r = device->CreateBuffer(&desc, (initialData) ? &data : nullptr, &this->buffer);
+    if (FAILED(r)) {
+        std::cerr << r << "\n";
+        throw std::runtime_error("Falied to create constant buffer");
     }
-
-    if (FAILED(result)) throw std::runtime_error("Failed to create constant buffer");
-
-    if (this->buffer == nullptr) throw std::runtime_error("Failed to create constant buffer");
+    if (this->buffer == nullptr) throw std::runtime_error("Falied to create constant buffer");
 }
 
 size_t ConstantBuffer::GetSize() const { return this->bufferSize; }
