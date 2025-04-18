@@ -7,7 +7,6 @@ struct PSInput
 
 float4 main(PSInput input) : SV_TARGET
 {
-    return input.color;
     // Create a procedural pattern using only UV coordinates
     float2 uv = input.texCoord;
     

@@ -32,7 +32,7 @@ VSOutput main(uint vertexID : SV_VertexID)
     
     // Calculate size based on lifetime (example: particles get smaller as they age)
     float normalizedLife = particle.lifetime / particle.maxLifetime;
-    output.size = 0.1f + 0.4f * (1.0f - normalizedLife); // Larger as lifetime decreases
+    output.size = 0.05f + 0.2f * (1.0f - normalizedLife); // Larger as lifetime decreases
     
     return output;
 }
