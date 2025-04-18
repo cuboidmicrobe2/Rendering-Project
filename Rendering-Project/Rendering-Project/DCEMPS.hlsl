@@ -1,9 +1,10 @@
 TextureCube shaderTexture : register(t1);
 SamplerState samplerState : register(s0);
 
-cbuffer camPos : register(b1)
+// Camera buffer (same as vertex shader)
+cbuffer CameraBuffer : register(b1)
 {
-    float4 pos;
+    float4 cameraPosition;
 };
 
 struct PixelShaderInput
@@ -24,14 +25,13 @@ struct PixelShaderOutput
 
 PixelShaderOutput main(PixelShaderInput input)
 {
-
     PixelShaderOutput output;
     
-    float4 vec = input.position - pos;
-    
-    float4 samplevec = reflect(vec, input.normal);
+    float3 viewDir = normalize(input.worldPosition.xyz - cameraPosition.xyz);
+    float3 samplevec = normalize(reflect(viewDir, normalize(input.normal.xyz)));
 
-    output.colour = shaderTexture.Sample(samplerState, vec.xyz);
+    output.colour = shaderTexture.Sample(samplerState, samplevec);
+    //output.colour = float4(normalize(cameraPosition.xyz), 1);
     output.normal = input.normal;
     output.position = input.worldPosition;
 

@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "ReadFile.hpp"
+#include "SceneObject.hpp"
 
 Renderer::Renderer() {}
 
@@ -8,14 +9,10 @@ HRESULT Renderer::Init(const Window& window) {
     HRESULT result = this->CreateDeviceAndSwapChain(window);
     if (FAILED(result)) return result;
 
-    this->position.Init(this->device.Get(), window.GetWidth(), window.GetHeight());
-    this->normal.Init(this->device.Get(), window.GetWidth(), window.GetHeight());
-    this->color.Init(this->device.Get(), window.GetWidth(), window.GetHeight());
-
-    result = CreateUAV();
+    result = this->rr.Init(this->device.Get(), window.GetWidth(), window.GetHeight());
     if (FAILED(result)) return result;
 
-    result = this->CreateDepthStencil(window);
+    result = CreateUAV();
     if (FAILED(result)) return result;
 
 
@@ -29,17 +26,11 @@ HRESULT Renderer::Init(const Window& window) {
     result = this->SetSamplers();
     if (FAILED(result)) return result;
 
-    ID3D11RenderTargetView* rendertargets[3] = {
-        this->position.GetRTV(),
-        this->color.GetRTV(),
-        this->normal.GetRTV(),
-    };
-    this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
-
     this->metadataBuffer.Initialize(this->device.Get(), sizeof(CSMetadata), nullptr);
     this->viewProjBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4) * 3, nullptr);
     this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
     this->lightBuffer.Initialize(this->device.Get(), sizeof(LightData) * MAX_LIGHTS, nullptr);
+    this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
 
     return S_OK;
 }
@@ -48,19 +39,25 @@ void Renderer::Render(Scene& scene) {
     this->BindLights(scene.getLights());
 
     DirectX::XMVECTOR pos = scene.getMainCam().transform.GetPosition();
-
-    ConstantBuffer mainCamBuf;
-    mainCamBuf.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), &pos);
-
-    this->immediateContext->PSSetConstantBuffers(0, 1, mainCamBuf.GetAdressOfBuffer());
+    this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
+    this->immediateContext->PSSetConstantBuffers(1, 1, this->viewPos.GetAdressOfBuffer());
     // Render all extra cameras to their texures
     for (auto& cam : scene.getCameras()) {
-        this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetViewPort());
+        this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
+        // clear
+        std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
+        cam.GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
     }
 
     // Render to backbuffer
-    this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf(), this->viewport);
+    this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf(), &this->rr);
 
+    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
+    this->RenderParticles(scene.GetParticleSystem(), scene.getMainCam());
+
+        // clear
+    std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
+    this->rr.Clear(this->immediateContext.Get(), clearColor);
     // Present
     this->swapChain->Present(1, 0);
 }
@@ -69,17 +66,14 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
-void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT& viewport) {
-    this->immediateContext->RSSetViewports(1, &viewport);
+void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
+    D3D11_VIEWPORT vp = rr->GetViewPort();
+    this->immediateContext->RSSetViewports(1, &vp);
     // Render particles using the particle system
-    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
-    this->RenderParticles(scene.GetParticleSystem(), cam);
 
+    rr->BindGeometryPass(this->GetDeviceContext());
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
-
     this->BindViewAndProjMatrixes(cam);
-
-
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
     // Draw objects / Bind objects
@@ -87,21 +81,15 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
         obj->Draw(this->device.Get(), this->immediateContext.Get());
     }
 
+    rr->BindLightingPass(this->GetDeviceContext());
     // Do lighting pass
-    this->LightingPass(UAV);
-
-    // clear
-    this->Clear();
+    this->LightingPass(UAV, viewport);
 }
 
 void Renderer::Clear() {
-    float clearColor[] = {1.0f, 0.5f, 0.2f, 1.0f};
-    float zero[4]{};
+    std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
 
-    this->immediateContext->ClearRenderTargetView(this->color.GetRTV(), clearColor);
-    this->immediateContext->ClearRenderTargetView(this->position.GetRTV(), zero);
-    this->immediateContext->ClearRenderTargetView(this->normal.GetRTV(), zero);
-    this->immediateContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+    this->rr.Clear(this->immediateContext.Get(), clearColor);
 }
 
 HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
@@ -195,9 +183,11 @@ HRESULT Renderer::CreateUAV() { // Vertex Shader
 
     D3D11_UNORDERED_ACCESS_VIEW_DESC desc{
         .Format        = DXGI_FORMAT_R8G8B8A8_UNORM,
-        .ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D,
-        .Texture2D{
+        .ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY,
+        .Texture2DArray{
             .MipSlice = 0,
+            .FirstArraySlice = 0,
+            .ArraySize = 1,
         },
     };
 
@@ -213,27 +203,27 @@ ID3D11PixelShader* Renderer::GetPS() const { return this->pixelShader.Get(); }
 
 ID3D11PixelShader* Renderer::GetDCEMPS() const { return this->pixelShaderDCEM.Get(); }
 
-HRESULT Renderer::CreateDepthStencil(const Window& window) {
-    D3D11_TEXTURE2D_DESC depthStencilDesc = {
-        depthStencilDesc.Width              = window.GetWidth(),
-        depthStencilDesc.Height             = window.GetHeight(),
-        depthStencilDesc.MipLevels          = 1,
-        depthStencilDesc.ArraySize          = 1,
-        depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
-        depthStencilDesc.SampleDesc.Count   = 1,
-        depthStencilDesc.SampleDesc.Quality = 0,
-        depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
-        depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
-        depthStencilDesc.CPUAccessFlags     = 0,
-        depthStencilDesc.MiscFlags          = 0,
-    };
-
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
-    HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf());
-    if (FAILED(result)) return result;
-
-    return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
-}
+//HRESULT Renderer::CreateDepthStencil(const Window& window) {
+//    D3D11_TEXTURE2D_DESC depthStencilDesc = {
+//        depthStencilDesc.Width              = window.GetWidth(),
+//        depthStencilDesc.Height             = window.GetHeight(),
+//        depthStencilDesc.MipLevels          = 1,
+//        depthStencilDesc.ArraySize          = 1,
+//        depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
+//        depthStencilDesc.SampleDesc.Count   = 1,
+//        depthStencilDesc.SampleDesc.Quality = 0,
+//        depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
+//        depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
+//        depthStencilDesc.CPUAccessFlags     = 0,
+//        depthStencilDesc.MiscFlags          = 0,
+//    };
+//
+//    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
+//    HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf());
+//    if (FAILED(result)) return result;
+//
+//    return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
+//}
 
 HRESULT Renderer::SetInputLayout(const std::string& byteCode) {
     D3D11_INPUT_ELEMENT_DESC layoutDesc[] = {
@@ -286,40 +276,20 @@ HRESULT Renderer::SetSamplers() {
     return S_OK;
 }
 
-void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV) {
+void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {
     // Unbind GBuffers from writing
-    this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr); // ?
-
-    // Bind gbuffers to Compute
-    ID3D11ShaderResourceView* SRVs[3] = {
-        this->position.GetSRV(),
-        this->color.GetSRV(),
-        this->normal.GetSRV(),
-    };
-    this->immediateContext->CSSetShaderResources(0, 3, SRVs);
+    //this->rr.BindLightingPass(this->immediateContext.Get());
 
     // Bind UAV to Compute
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
 
     // Do Compute
-    this->immediateContext->Dispatch(this->viewport.Width / 8, this->viewport.Height / 8, 1);
+    this->immediateContext->Dispatch(viewport.Width / 8, viewport.Height / 8, 1);
 
     ID3D11UnorderedAccessView* resetter[1] = {nullptr};
 
     // Unbind UAV from Compute
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, resetter, nullptr);
-
-    ID3D11ShaderResourceView* rVResetter[3] = {nullptr, nullptr, nullptr};
-    // Unbind Gbuffers from Compute
-    this->immediateContext->CSSetShaderResources(0, 3, rVResetter);
-
-    // reset rendertargets
-    ID3D11RenderTargetView* rendertargets[3] = {
-        this->position.GetRTV(),
-        this->color.GetRTV(),
-        this->normal.GetRTV(),
-    };
-    this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
 }
 
 void Renderer::BindLights(const std::vector<Light>& lights) {
@@ -367,15 +337,9 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
     this->immediateContext->RSSetViewports(1, &this->viewport);
     this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
 
-    this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->depthStencilView.Get());
+    this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->rr.GetDepthStencilView());
     this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
 
-    ID3D11RenderTargetView* rendertargets[3] = {
-        this->position.GetRTV(),
-        this->color.GetRTV(),
-        this->normal.GetRTV(),
-    };
-    this->immediateContext->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
     this->immediateContext->GSSetShader(nullptr, nullptr, 0);
     this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
     this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);

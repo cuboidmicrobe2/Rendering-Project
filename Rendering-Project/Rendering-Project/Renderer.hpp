@@ -21,15 +21,14 @@ class Renderer {
   private:
     void Clear();
 
-    void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT& viewport);
+    void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr);
 
     HRESULT CreateDeviceAndSwapChain(const Window& window);
-    HRESULT CreateDepthStencil(const Window& window);
     HRESULT SetInputLayout(const std::string& byteCode);
     void SetViewPort(const Window& window);
     HRESULT SetSamplers();
 
-    void LightingPass(ID3D11UnorderedAccessView** UAV);
+    void LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport);
     void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights);
@@ -45,7 +44,6 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
     Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 
@@ -56,9 +54,7 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
 
-    GBuffer position;
-    GBuffer color;
-    GBuffer normal;
+    RenderingResources rr;
 
     static constexpr int MAX_LIGHTS = 16;
 
@@ -83,6 +79,7 @@ class Renderer {
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
+    ConstantBuffer viewPos;
 };
 
 #endif

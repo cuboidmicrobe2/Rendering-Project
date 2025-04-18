@@ -51,9 +51,9 @@ GBuffer::GBuffer(ID3D11Device* device, const UINT windowWidth, const UINT window
 
 
 inline GBuffer::~GBuffer() {
-    this->texture->Release();
-    this->srv->Release();
-    this->rtv->Release();
+    if (this->texture) this->texture->Release();
+    if (this->srv) this->srv->Release();
+    if (this->rtv) this->rtv->Release();
 }
 
 inline void GBuffer::Init(ID3D11Device* device, const UINT windowWidth, const UINT windowHeight) {

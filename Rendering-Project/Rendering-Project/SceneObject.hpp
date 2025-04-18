@@ -18,13 +18,9 @@ class SceneObject {
     ~SceneObject() {};
 
     virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const = 0;
-    SceneObject(Transform transform, Mesh* mesh);
     SceneObject(SceneObject&) = delete;
-    ~SceneObject() {};
 
     void InitBuffer(ID3D11Device* device);
-
-    void Draw(ID3D11Device* device, ID3D11DeviceContext* context);
 
     virtual void Update();
 
