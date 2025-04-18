@@ -1,4 +1,4 @@
-RWTexture2D<unorm float4> backBufferUAV : register(u0);
+RWTexture2DArray<unorm float4> backBufferUAV : register(u0);
 Texture2D<float4> positionGBuffer : register(t0);
 Texture2D<float4> colorGBuffer : register(t1);
 Texture2D<float4> normalGBuffer : register(t2);
@@ -38,7 +38,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     {
         Light cl = lights[i];
         
-        float4 ambientComponent = cl.color * 0.05;
+        float4 ambientComponent = cl.color * 0.25;
     
         float4 lightDirection = normalize(float4(cl.pos, 0) - position);
         float intensity = max(0, dot(normal, lightDirection)) * cl.intensity;
@@ -52,6 +52,5 @@ void main(uint3 DTid : SV_DispatchThreadID)
         result += specularComponent + (ambientComponent + diffuseComponent) * colorGBuffer[DTid.xy];
     }
     result /= nrofLights;
-    backBufferUAV[DTid.xy] = result;
-    
+    backBufferUAV[float3(DTid.xy, 0)] = result;
 }
