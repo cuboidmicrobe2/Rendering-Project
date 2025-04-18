@@ -37,7 +37,6 @@ class Renderer {
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
 
-
     const uint32_t renderPasses = 1;
     D3D11_VIEWPORT viewport;
 
@@ -53,6 +52,8 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
+    Microsoft::WRL::ComPtr<ID3D11HullShader> hullShader;
+    Microsoft::WRL::ComPtr<ID3D11DomainShader> domainShader;
 
     RenderingResources rr;
 
@@ -75,11 +76,17 @@ class Renderer {
         float padding;
     };
 
+    struct TessellationData {
+        float distance;
+        float padding[3];
+    };
+
     ConstantBuffer lightBuffer;
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
     ConstantBuffer viewPos;
+    ConstantBuffer tessBuffer;
 };
 
 #endif

@@ -157,6 +157,30 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="deferredPS.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="deferredVS.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>Source Files\Rendering\DeferredRendering</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticleGS.hlsl" />
+    <FxCompile Include="ParticlePS.hlsl" />
+    <FxCompile Include="ParticleVS.hlsl" />
+    <FxCompile Include="ParticleCS.hlsl" />
+    <FxCompile Include="TessellationHS.hlsl">
+      <Filter>Source Files\Rendering</Filter>
+    </FxCompile>
+    <FxCompile Include="TessellationDS.hlsl">
+      <Filter>Source Files\Rendering</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="slimepfp.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Filter Include="Headers">
       <UniqueIdentifier>{b7e5f711-335f-40e0-926f-0912f9df29d0}</UniqueIdentifier>
     </Filter>

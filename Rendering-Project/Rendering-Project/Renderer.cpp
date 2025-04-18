@@ -15,7 +15,6 @@ HRESULT Renderer::Init(const Window& window) {
     result = CreateUAV();
     if (FAILED(result)) return result;
 
-
     std::string byteData;
     result = this->SetShaders(byteData);
     if (FAILED(result)) return result;
@@ -31,6 +30,7 @@ HRESULT Renderer::Init(const Window& window) {
     this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
     this->lightBuffer.Initialize(this->device.Get(), sizeof(LightData) * MAX_LIGHTS, nullptr);
     this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
+    this->tessBuffer.Initialize(this->device.Get(), sizeof(TessellationData), nullptr);
 
     return S_OK;
 }
@@ -55,7 +55,7 @@ void Renderer::Render(Scene& scene) {
     scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
     this->RenderParticles(scene.GetParticleSystem(), scene.getMainCam());
 
-        // clear
+    // clear
     std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
     this->rr.Clear(this->immediateContext.Get(), clearColor);
     // Present
@@ -76,10 +76,26 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->BindViewAndProjMatrixes(cam);
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
+    // Tessellation ON
+    this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
+    this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
+    this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+
     // Draw objects / Bind objects
     for (auto& obj : scene.getObjects()) {
+        // Calculate distance to object from camera
+        float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
+            DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
+        this->tessBuffer.UpdateBuffer(this->GetDeviceContext(), &distance);
+
+        // Draw object
         obj->Draw(this->device.Get(), this->immediateContext.Get());
     }
+
+    // Tessellation OFF
+    this->immediateContext->HSSetShader(nullptr, nullptr, 0);
+    this->immediateContext->DSSetShader(nullptr, nullptr, 0);
 
     rr->BindLightingPass(this->GetDeviceContext());
     // Do lighting pass
@@ -168,6 +184,34 @@ HRESULT Renderer::SetShaders(std::string& byteDataOutput) {
         return result;
     }
 
+    // Hull Shader
+    shaderData.clear();
+    if (!CM::ReadFile("TessellationHS.cso", shaderData)) {
+        std::cerr << "Failed to read hull shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    result =
+        this->device->CreateHullShader(shaderData.data(), shaderData.size(), nullptr, this->hullShader.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create hull shader!" << std::endl;
+        return result;
+    }
+
+    // Domain Shader
+    shaderData.clear();
+    if (!CM::ReadFile("TessellationDS.cso", shaderData)) {
+        std::cerr << "Failed to read domain shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    result = this->device->CreateDomainShader(shaderData.data(), shaderData.size(), nullptr,
+                                              this->domainShader.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create domain shader!" << std::endl;
+        return result;
+    }
+
     this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
     this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
@@ -185,9 +229,9 @@ HRESULT Renderer::CreateUAV() { // Vertex Shader
         .Format        = DXGI_FORMAT_R8G8B8A8_UNORM,
         .ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY,
         .Texture2DArray{
-            .MipSlice = 0,
+            .MipSlice        = 0,
             .FirstArraySlice = 0,
-            .ArraySize = 1,
+            .ArraySize       = 1,
         },
     };
 
@@ -203,27 +247,27 @@ ID3D11PixelShader* Renderer::GetPS() const { return this->pixelShader.Get(); }
 
 ID3D11PixelShader* Renderer::GetDCEMPS() const { return this->pixelShaderDCEM.Get(); }
 
-//HRESULT Renderer::CreateDepthStencil(const Window& window) {
-//    D3D11_TEXTURE2D_DESC depthStencilDesc = {
-//        depthStencilDesc.Width              = window.GetWidth(),
-//        depthStencilDesc.Height             = window.GetHeight(),
-//        depthStencilDesc.MipLevels          = 1,
-//        depthStencilDesc.ArraySize          = 1,
-//        depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
-//        depthStencilDesc.SampleDesc.Count   = 1,
-//        depthStencilDesc.SampleDesc.Quality = 0,
-//        depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
-//        depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
-//        depthStencilDesc.CPUAccessFlags     = 0,
-//        depthStencilDesc.MiscFlags          = 0,
-//    };
+// HRESULT Renderer::CreateDepthStencil(const Window& window) {
+//     D3D11_TEXTURE2D_DESC depthStencilDesc = {
+//         depthStencilDesc.Width              = window.GetWidth(),
+//         depthStencilDesc.Height             = window.GetHeight(),
+//         depthStencilDesc.MipLevels          = 1,
+//         depthStencilDesc.ArraySize          = 1,
+//         depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
+//         depthStencilDesc.SampleDesc.Count   = 1,
+//         depthStencilDesc.SampleDesc.Quality = 0,
+//         depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
+//         depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
+//         depthStencilDesc.CPUAccessFlags     = 0,
+//         depthStencilDesc.MiscFlags          = 0,
+//     };
 //
-//    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
-//    HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf());
-//    if (FAILED(result)) return result;
+//     Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
+//     HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf());
+//     if (FAILED(result)) return result;
 //
-//    return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
-//}
+//     return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
+// }
 
 HRESULT Renderer::SetInputLayout(const std::string& byteCode) {
     D3D11_INPUT_ELEMENT_DESC layoutDesc[] = {
@@ -238,7 +282,7 @@ HRESULT Renderer::SetInputLayout(const std::string& byteCode) {
     }
 
     this->immediateContext->IASetInputLayout(this->inputLayout.Get());
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     return S_OK;
 }
@@ -278,7 +322,7 @@ HRESULT Renderer::SetSamplers() {
 
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {
     // Unbind GBuffers from writing
-    //this->rr.BindLightingPass(this->immediateContext.Get());
+    // this->rr.BindLightingPass(this->immediateContext.Get());
 
     // Bind UAV to Compute
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
@@ -361,4 +405,5 @@ void Renderer::BindViewAndProjMatrixes(const Camera& cam) {
 
     this->viewProjBuffer.UpdateBuffer(this->immediateContext.Get(), matrices);
     this->immediateContext.Get()->VSSetConstantBuffers(0, 1, this->viewProjBuffer.GetAdressOfBuffer());
+    this->immediateContext.Get()->DSSetConstantBuffers(0, 1, this->viewProjBuffer.GetAdressOfBuffer());
 }

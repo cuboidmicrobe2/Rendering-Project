@@ -30,7 +30,7 @@ void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
 
 void Mesh::Initialize(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname) {
     objl::Loader loader;
-        
+
     fs::path objpath = folderpath / objname;
 
     bool loaded = loader.LoadFile(objpath.string());
@@ -49,14 +49,14 @@ void Mesh::Initialize(ID3D11Device* device, const std::filesystem::path& folderp
 
             if (!mesh.MeshMaterial.map_Ka.empty()) {
                 std::cout << "Trying to bind map_Ka\n";
-                std::wstring path              = (folderpath / mesh.MeshMaterial.map_Ka).wstring();
-                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(device, path.c_str(), nullptr, &ambientSrv);
+                std::wstring path = (folderpath / mesh.MeshMaterial.map_Ka).wstring();
+                HRESULT createShaderResult =
+                    DirectX::CreateWICTextureFromFile(device, path.c_str(), nullptr, &ambientSrv);
 
                 if (FAILED(createShaderResult)) {
                     std::cerr << createShaderResult << "\n";
                     throw std::runtime_error("failed to load ambient texture");
                 }
-                    
 
             } else {
                 DirectX::CreateWICTextureFromFile(device, L"stone-man\\diffuso.tif", nullptr, &ambientSrv);
@@ -128,6 +128,8 @@ void Mesh::PerformSubMeshDrawCall(ID3D11DeviceContext* context, size_t subMeshIn
 }
 
 size_t Mesh::GetNrOfSubMeshes() const { return this->subMeshes.size(); }
+
+const std::vector<SubMesh>& Mesh::GetSubMeshes() const { return this->subMeshes; }
 
 ID3D11ShaderResourceView* Mesh::GetAmbientSRV(size_t subMeshIndex) const {
     return this->subMeshes.at(subMeshIndex).GetAmbientSRV();
