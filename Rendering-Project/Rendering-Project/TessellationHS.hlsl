@@ -7,6 +7,11 @@ struct VertexShaderOutput
     
 };
 
+cbuffer DistanceToObject : register(b0)
+{
+    float distance;
+}
+
 struct HS_CONSTANT_DATA_OUTPUT
 {
     float EdgeTessFactor[3] : SV_TessFactor;
@@ -20,8 +25,13 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 	uint PatchID : SV_PrimitiveID)
 {
     HS_CONSTANT_DATA_OUTPUT Output;
-
-    Output.EdgeTessFactor[0] = Output.EdgeTessFactor[1] = Output.EdgeTessFactor[2] = Output.InsideTessFactor = 15;
+    float baseTess = 15.0f;
+    float minTess = 1.0f;
+    float maxDistance = 100.0f;
+    
+    float tessFactor = lerp(baseTess, minTess, saturate(distance / maxDistance));
+    
+    Output.EdgeTessFactor[0] = Output.EdgeTessFactor[1] = Output.EdgeTessFactor[2] = Output.InsideTessFactor = tessFactor;
 
     return Output;
 }
@@ -48,6 +58,8 @@ HullShaderOutput main(
     output.worldPosition = ip[i].worldPosition.xyz;
     output.normal = ip[i].normal.xyz;
     output.uv = ip[i].uv;
+    
+    
 
     return output;
 }

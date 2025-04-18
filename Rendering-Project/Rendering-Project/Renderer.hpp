@@ -37,7 +37,6 @@ class Renderer {
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
 
-
     const uint32_t renderPasses = 1;
     D3D11_VIEWPORT viewport;
 
@@ -77,11 +76,17 @@ class Renderer {
         float padding;
     };
 
+    struct TessellationData {
+        float distance;
+        float padding[3];
+    };
+
     ConstantBuffer lightBuffer;
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
     ConstantBuffer viewPos;
+    ConstantBuffer tessBuffer;
 };
 
 #endif

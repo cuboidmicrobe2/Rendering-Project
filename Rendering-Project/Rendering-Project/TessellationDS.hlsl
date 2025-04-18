@@ -1,5 +1,6 @@
 cbuffer Camera : register(b0)
 {
+    float4x4 padding[2];
     float4x4 vp;
 };
 
@@ -31,8 +32,20 @@ DomainShaderOutput main(HS_CONSTANT_DATA_OUTPUT input, float3 barycentric : SV_D
 	                    const OutputPatch<HullShaderOutput, NUM_CONTROL_POINTS> patch)
 {
     DomainShaderOutput output;
-
-    output.worldPosition = patch[0].worldPosition * barycentric.x + patch[1].worldPosition * barycentric.y + patch[2].worldPosition * barycentric.z;
+    
+    float3 linearPosition = patch[0].worldPosition * barycentric.x + patch[1].worldPosition * barycentric.y + patch[2].worldPosition * barycentric.z;
+    float3 phongPosition = float3(0, 0, 0);
+    
+    for (int i = 0; i < NUM_CONTROL_POINTS; ++i)
+    {
+        float3 cPointToLinearPos = linearPosition - patch[i].worldPosition;
+        float proj = dot(cPointToLinearPos, patch[i].normal);
+        float3 pointOnTangetPlane = patch[i].worldPosition + cPointToLinearPos - proj * patch[i].normal;
+        
+        phongPosition += barycentric[i] * pointOnTangetPlane;
+    }
+    
+    output.worldPosition = lerp(linearPosition, phongPosition, 0.7f);
     output.normal = normalize(patch[0].normal * barycentric.x + patch[1].normal * barycentric.y + patch[2].normal * barycentric.z);
     output.uv = patch[0].uv * barycentric.x + patch[1].uv * barycentric.y + patch[2].uv * barycentric.z;
     output.position = mul(float4(output.worldPosition, 1), vp);

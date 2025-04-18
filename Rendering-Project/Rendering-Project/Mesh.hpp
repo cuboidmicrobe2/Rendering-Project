@@ -55,6 +55,7 @@ class Mesh {
     void PerformSubMeshDrawCall(ID3D11DeviceContext* context, size_t subMeshIndex) const;
 
     size_t GetNrOfSubMeshes() const;
+    const std::vector<SubMesh>& GetSubMeshes() const;
     ID3D11ShaderResourceView* GetAmbientSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetDiffuseSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetSpecularSRV(size_t subMeshIndex) const;
