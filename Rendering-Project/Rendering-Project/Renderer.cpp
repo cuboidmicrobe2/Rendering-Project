@@ -72,10 +72,20 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
 
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
+    // Tessellation ON
+    this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
+    this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+
     // Draw objects / Bind objects
     for (auto& obj : scene.getObjects()) {
+
         obj->Draw(this->device.Get(), this->immediateContext.Get());
     }
+
+    // Tessellation OFF
+    this->immediateContext->HSSetShader(nullptr, nullptr, 0);
+    this->immediateContext->DSSetShader(nullptr, nullptr, 0);
 
     // Do lighting pass
     this->LightingPass(UAV);
@@ -161,6 +171,34 @@ HRESULT Renderer::SetShaders(std::string& byteDataOutput) {
         return result;
     }
 
+    // Hull Shader
+    shaderData.clear();
+    if (!CM::ReadFile("TessellationHS.cso", shaderData)) {
+        std::cerr << "Failed to read hull shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    result =
+        this->device->CreateHullShader(shaderData.data(), shaderData.size(), nullptr, this->hullShader.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create hull shader!" << std::endl;
+        return result;
+    }
+
+    // Domain Shader
+    shaderData.clear();
+    if (!CM::ReadFile("TessellationDS.cso", shaderData)) {
+        std::cerr << "Failed to read domain shader file!" << std::endl;
+        return E_FAIL;
+    }
+
+    result = this->device->CreateDomainShader(shaderData.data(), shaderData.size(), nullptr,
+                                              this->domainShader.GetAddressOf());
+    if (FAILED(result)) {
+        std::cerr << "Failed to create domain shader!" << std::endl;
+        return result;
+    }
+
     this->immediateContext->VSSetShader(this->vertexShader.Get(), nullptr, 0);
     this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
@@ -225,7 +263,7 @@ HRESULT Renderer::SetInputLayout(const std::string& byteCode) {
     }
 
     this->immediateContext->IASetInputLayout(this->inputLayout.Get());
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     return S_OK;
 }
@@ -374,4 +412,5 @@ void Renderer::BindViewAndProjMatrixes(const Camera& cam) {
 
     this->viewProjBuffer.UpdateBuffer(this->immediateContext.Get(), matrices);
     this->immediateContext.Get()->VSSetConstantBuffers(0, 1, this->viewProjBuffer.GetAdressOfBuffer());
+    this->immediateContext.Get()->DSSetConstantBuffers(0, 1, this->viewProjBuffer.GetAdressOfBuffer());
 }

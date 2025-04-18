@@ -170,6 +170,12 @@
     <FxCompile Include="ParticlePS.hlsl" />
     <FxCompile Include="ParticleVS.hlsl" />
     <FxCompile Include="ParticleCS.hlsl" />
+    <FxCompile Include="TessellationHS.hlsl">
+      <Filter>Source Files\Rendering</Filter>
+    </FxCompile>
+    <FxCompile Include="TessellationDS.hlsl">
+      <Filter>Source Files\Rendering</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg">

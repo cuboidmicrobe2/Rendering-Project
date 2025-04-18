@@ -51,6 +51,8 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
+    Microsoft::WRL::ComPtr<ID3D11HullShader> hullShader;
+    Microsoft::WRL::ComPtr<ID3D11DomainShader> domainShader;
 
     GBuffer position;
     GBuffer color;
