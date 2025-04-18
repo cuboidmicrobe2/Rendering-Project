@@ -15,7 +15,6 @@ HRESULT Renderer::Init(const Window& window) {
     result = CreateUAV();
     if (FAILED(result)) return result;
 
-
     std::string byteData;
     result = this->SetShaders(byteData);
     if (FAILED(result)) return result;
@@ -42,21 +41,21 @@ void Renderer::Render(Scene& scene) {
     this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
     this->immediateContext->PSSetConstantBuffers(1, 1, this->viewPos.GetAdressOfBuffer());
     // Render all extra cameras to their texures
-    for (auto& cam : scene.getCameras()) {
-        this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
-        // clear
-        std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
-        cam.GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
+    std::array<float, 4> clearColor{0, 0, 0, 1};
+    for (int i = 0; i < this->renderPasses; i++) {
+        for (auto& cam : scene.getCameras()) {
+            this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
+            // clear
+            cam.GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
+        }
     }
-
     // Render to backbuffer
     this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf(), &this->rr);
 
     scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
     this->RenderParticles(scene.GetParticleSystem(), scene.getMainCam());
 
-        // clear
-    std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
+    // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
     // Present
     this->swapChain->Present(1, 0);
@@ -87,7 +86,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
 }
 
 void Renderer::Clear() {
-    std::array<float, 4> clearColor{1.0f, 0.5f, 0.2f, 1.0f};
+    std::array<float, 4> clearColor{0, 0, 0, 1};
 
     this->rr.Clear(this->immediateContext.Get(), clearColor);
 }
@@ -185,9 +184,9 @@ HRESULT Renderer::CreateUAV() { // Vertex Shader
         .Format        = DXGI_FORMAT_R8G8B8A8_UNORM,
         .ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY,
         .Texture2DArray{
-            .MipSlice = 0,
+            .MipSlice        = 0,
             .FirstArraySlice = 0,
-            .ArraySize = 1,
+            .ArraySize       = 1,
         },
     };
 
@@ -203,27 +202,27 @@ ID3D11PixelShader* Renderer::GetPS() const { return this->pixelShader.Get(); }
 
 ID3D11PixelShader* Renderer::GetDCEMPS() const { return this->pixelShaderDCEM.Get(); }
 
-//HRESULT Renderer::CreateDepthStencil(const Window& window) {
-//    D3D11_TEXTURE2D_DESC depthStencilDesc = {
-//        depthStencilDesc.Width              = window.GetWidth(),
-//        depthStencilDesc.Height             = window.GetHeight(),
-//        depthStencilDesc.MipLevels          = 1,
-//        depthStencilDesc.ArraySize          = 1,
-//        depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
-//        depthStencilDesc.SampleDesc.Count   = 1,
-//        depthStencilDesc.SampleDesc.Quality = 0,
-//        depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
-//        depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
-//        depthStencilDesc.CPUAccessFlags     = 0,
-//        depthStencilDesc.MiscFlags          = 0,
-//    };
+// HRESULT Renderer::CreateDepthStencil(const Window& window) {
+//     D3D11_TEXTURE2D_DESC depthStencilDesc = {
+//         depthStencilDesc.Width              = window.GetWidth(),
+//         depthStencilDesc.Height             = window.GetHeight(),
+//         depthStencilDesc.MipLevels          = 1,
+//         depthStencilDesc.ArraySize          = 1,
+//         depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
+//         depthStencilDesc.SampleDesc.Count   = 1,
+//         depthStencilDesc.SampleDesc.Quality = 0,
+//         depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
+//         depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
+//         depthStencilDesc.CPUAccessFlags     = 0,
+//         depthStencilDesc.MiscFlags          = 0,
+//     };
 //
-//    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
-//    HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf());
-//    if (FAILED(result)) return result;
+//     Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
+//     HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf());
+//     if (FAILED(result)) return result;
 //
-//    return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
-//}
+//     return device->CreateDepthStencilView(depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
+// }
 
 HRESULT Renderer::SetInputLayout(const std::string& byteCode) {
     D3D11_INPUT_ELEMENT_DESC layoutDesc[] = {
@@ -278,7 +277,7 @@ HRESULT Renderer::SetSamplers() {
 
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {
     // Unbind GBuffers from writing
-    //this->rr.BindLightingPass(this->immediateContext.Get());
+    // this->rr.BindLightingPass(this->immediateContext.Get());
 
     // Bind UAV to Compute
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
@@ -297,11 +296,14 @@ void Renderer::BindLights(const std::vector<Light>& lights) {
     for (int i = 0; i < lights.size(); i++) {
         float* tempPos   = lights[i].transform.GetPosition().m128_f32;
         float* tempColor = lights[i].GetColor().m128_f32;
+        float* tempDir   = lights[i].GetDirection().m128_f32;
 
         LightData l{
             .pos{tempPos[0], tempPos[1], tempPos[2]},
             .intensity = lights[i].GetIntesity(),
             .color     = {tempColor[0], tempColor[1], tempColor[2], tempColor[3]},
+            .direction = {tempDir[0], tempDir[1], tempDir[2]},
+            .angle     = cos(lights[i].GetAngle() / 2),
         };
         lightData[i] = l;
     }

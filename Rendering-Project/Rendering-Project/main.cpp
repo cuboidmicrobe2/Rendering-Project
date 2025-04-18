@@ -45,10 +45,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         scene.AddSceneObject(&o);
     }
 
-    Light light(Transform({10, 0, -10}), {1, 1, 1}, 5);
+    Light light(Transform({0, 0, 0}), {1, 1, 1}, 5, {1,0,0}, 45);
     scene.AddLightObject(light);
-    Light light2(Transform({-10, 0, 10}), {1, 1, 1}, 5);
-    scene.AddLightObject(light2);
+    //Light light2(Transform({-10, 0, 10}), {1, 1, 1}, 5, {-1,0,0}, 45);
+    //scene.AddLightObject(light2);
 
     MSG msg = {};
     while (msg.message != WM_QUIT) {

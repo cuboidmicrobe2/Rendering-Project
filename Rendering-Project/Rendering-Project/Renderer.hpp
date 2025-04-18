@@ -56,12 +56,14 @@ class Renderer {
 
     RenderingResources rr;
 
-    static constexpr int MAX_LIGHTS = 16;
+    static constexpr int MAX_LIGHTS = 32;
 
     struct LightData {
         float pos[3];
         float intensity;
         float color[4];
+        float direction[3];
+        float angle;
     };
 
     struct CSMetadata {
