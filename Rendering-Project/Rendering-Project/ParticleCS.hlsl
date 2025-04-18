@@ -43,7 +43,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     gettingProcessed.velocity.y += deltaTime * 0.05f;
     
     // Limit maximum velocity for slow ascent
-    float maxVelocity = 0.08;
+    float maxVelocity = 0.15f;
     float currentVelLength = length(gettingProcessed.velocity);
     if (currentVelLength > maxVelocity)
     {
@@ -61,23 +61,23 @@ void main(uint3 DTid : SV_DispatchThreadID)
     {
         // Reset to a random position near the ground in a circle
         float angle = rand(float2(index, deltaTime)) * 6.28; // 0 to 2π
-        float radius = rand(float2(deltaTime, index)) * 2.0; // Radius of emission area
+        float radius = rand(float2(deltaTime, index)) * 1.0; // Radius of emission area
+        float height = radius * radius;
         
         gettingProcessed.position = float3(
-            radius * cos(angle), // X position in a circle
-            0.0f, // Start at ground level
-            radius * sin(angle) // Z position in a circle
+            radius * cos(angle) + 2, // X position in a circle
+            height + 3,
+            radius * sin(angle) + 3 // Z position in a circle
         );
         
         // Initial small upward velocity with tiny random horizontal component
         gettingProcessed.velocity = float3(
             (rand(float2(index, deltaTime + 1)) - 0.5) * 0.01, // Tiny X velocity
-            0.01f + rand(float2(index, deltaTime)) * 0.02, // Small upward Y velocity
+            0.1f + rand(float2(index, deltaTime)) * 0.2f, // Small upward Y velocity
             (rand(float2(index, deltaTime + 2)) - 0.5) * 0.01 // Tiny Z velocity
         );
         
-        // Randomize lifetime between 5 and 10 seconds for varied effect
-        gettingProcessed.lifetime = gettingProcessed.maxLifetime * (0.5 + rand(float2(index, deltaTime)) * 0.5);
+        gettingProcessed.lifetime = gettingProcessed.maxLifetime * (0.2 + rand(float2(index, deltaTime)) * 0.8);
     }
     
     Particles[index] = gettingProcessed;

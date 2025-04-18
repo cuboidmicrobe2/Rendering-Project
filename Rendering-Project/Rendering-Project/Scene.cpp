@@ -21,7 +21,7 @@ HRESULT Scene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext)
 
     // Initialize particles with random values
     result =
-        this->particleSystem.InitializeParticles(device, immediateContext, sizeof(Particle), 100, false, true, true);
+        this->particleSystem.InitializeParticles(device, immediateContext, sizeof(Particle), 10000, false, true, true);
     if (FAILED(result)) {
         std::cerr << "Particle system particles failed\n";
         return result;

@@ -65,9 +65,6 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
 void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV) {
-    // Render particles using the particle system
-    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
-    this->RenderParticles(scene.GetParticleSystem(), cam);
 
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
 
@@ -82,6 +79,10 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
 
     // Do lighting pass
     this->LightingPass(UAV);
+
+    // Render particles using the particle system
+    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
+    this->RenderParticles(scene.GetParticleSystem(), cam);
 
     // clear
     this->Clear();
