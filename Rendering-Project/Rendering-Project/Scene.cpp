@@ -1,11 +1,40 @@
 #include "Scene.hpp"
+#include "SimpleObject.hpp"
+#include <DirectXCollision.h>
+#include <memory>
 
 Scene::Scene(Window& window)
     : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr) {}
 
 Scene::~Scene() {}
 
-void Scene::AddSceneObject(SceneObject* sceneObject) { this->objects.push_back(sceneObject); }
+void Scene::AddSceneObject(SceneObject* sceneObject) {
+    this->quadTree.AddElement(sceneObject, sceneObject->GetBoundingBox());
+    this->objects.push_back(sceneObject);
+}
+
+void Scene::CreateObject(const std::string& objectFileName, const DirectX::XMVECTOR& position, ID3D11Device* device,
+                         const std::string& folder) {
+
+    // Object
+    Mesh* mesh           = this->LoadMesh(folder, objectFileName, device);
+    SimpleObject* object = new SimpleObject(Transform(position), mesh);
+
+    DirectX::BoundingBox boundingBox = mesh->GetBoundingBox();
+    boundingBox.Transform(boundingBox, object->GetWorldMatrixMatrix());
+    object->SetBoundingBox(boundingBox);
+    object->InitBuffer(device);
+
+    // Box
+    Mesh* boxMesh = this->LoadMesh(folder, "cube.obj", device);
+    SimpleObject* box =
+        new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
+                                   DirectX::XMLoadFloat3(&boundingBox.Extents)),
+                         boxMesh);
+
+    this->AddSceneObject(object);
+    this->AddSceneObject(box);
+}
 
 void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
 
@@ -36,6 +65,8 @@ const std::vector<Light>& Scene::getLights() { return this->lights; }
 
 std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
 
+const std::vector<SceneObject*>& Scene::GetVisibleObjects() const { return this->visibleObjects; }
+
 ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
 Mesh* Scene::LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device) {
@@ -48,7 +79,23 @@ Camera& Scene::getMainCam() { return this->mainCamera; }
 void Scene::UpdateScene() {
     this->mainCamera.Update(this->input);
 
+    // Create a frustum from the main camera's view and projection matrices
+    DirectX::BoundingFrustum cameraFrustum;
+    DirectX::XMMATRIX viewProj = DirectX::XMMatrixMultiplyTranspose(this->mainCamera.createViewMatrix(),
+                                                                    this->mainCamera.createProjectionMatrix());
+    DirectX::BoundingFrustum::CreateFromMatrix(cameraFrustum, viewProj);
+
+    // Get visible objects using the quadtree
+    std::vector<SceneObject*> visibleObjects = this->quadTree.CheckTree(cameraFrustum);
+
+    // Update all objects
     for (SceneObject* obj : this->objects) {
         obj->Update();
+    }
+
+    // Store the list of visible objects for rendering
+    this->visibleObjects.clear();
+    for (const SceneObject* obj : visibleObjects) {
+        this->visibleObjects.push_back(const_cast<SceneObject*>(obj));
     }
 }

@@ -19,7 +19,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     Scene scene(window);
     if (FAILED(scene.Init(renderer.GetDevice(), renderer.GetDeviceContext()))) return -1;
-    Mesh* mesh  = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
+
+    // Mesh* mesh  = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
+    scene.CreateObject("boat.obj", {0, 0, 10, 1}, renderer.GetDevice());
+
     Mesh* mesh2 = scene.LoadMesh(".", "icoSphere.obj", renderer.GetDevice());
 
     DCEM dcem(Transform({0, 0, 0}), renderer.GetPS(), renderer.GetDCEMPS(), mesh2);
@@ -29,11 +32,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     for (const Camera& cam : dcem.GetCameras())
         scene.AddCameraObject(cam);
 
-    // SimpleObject some(Transform({0, 0, 0, 0}, DirectX::XMQuaternionIdentity(), {1, 1, 1}), mesh);
-    // some.InitBuffer(renderer.GetDevice());
-    // scene.AddSceneObject(&some);
-
-    std::array<SimpleObject, 6> arr{SimpleObject(DirectX::XMVECTOR{-10, 0, 0}, mesh),
+    /*std::array<SimpleObject, 6> arr{SimpleObject(DirectX::XMVECTOR{-10, 0, 0}, mesh),
                                     SimpleObject(DirectX::XMVECTOR{10, 0, 0}, mesh),
                                     SimpleObject(Transform(DirectX::XMVECTOR{0, -4, 0}, {1, 0, 0}), mesh),
                                     SimpleObject(DirectX::XMVECTOR{0, 10, 0}, mesh),
@@ -43,7 +42,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
         o.InitBuffer(renderer.GetDevice());
         scene.AddSceneObject(&o);
-    }
+    }*/
 
     Light light(Transform({10, 0, -10}), {1, 1, 1}, 5);
     scene.AddLightObject(light);

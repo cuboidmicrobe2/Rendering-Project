@@ -27,7 +27,7 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
     HS_CONSTANT_DATA_OUTPUT Output;
     float baseTess = 15.0f;
     float minTess = 1.0f;
-    float maxDistance = 100.0f;
+    float maxDistance = 200.0f;
     
     float tessFactor = lerp(baseTess, minTess, saturate(distance / maxDistance));
     

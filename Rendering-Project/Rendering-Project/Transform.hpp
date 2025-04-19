@@ -33,7 +33,6 @@ class Transform {
     DirectX::XMVECTOR scale;
 };
 
-
 inline Transform::Transform() : position({}), quaternion(DirectX::XMQuaternionIdentity()), scale({1, 1, 1}) {}
 
 inline Transform::Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion, DirectX::XMVECTOR scale)

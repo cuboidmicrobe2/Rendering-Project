@@ -83,7 +83,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     // Draw objects / Bind objects
-    for (auto& obj : scene.getObjects()) {
+    for (auto& obj : scene.GetVisibleObjects()) {
         // Calculate distance to object from camera
         float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
@@ -110,11 +110,11 @@ void Renderer::Clear() {
 
 HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
-    swapChainDesc.BufferCount                        = 1;
+    swapChainDesc.BufferCount                        = 2;
     swapChainDesc.BufferDesc.Width                   = 0;
     swapChainDesc.BufferDesc.Height                  = 0;
     swapChainDesc.BufferDesc.Format                  = DXGI_FORMAT_R8G8B8A8_UNORM;
-    swapChainDesc.BufferDesc.RefreshRate.Numerator   = 60;
+    swapChainDesc.BufferDesc.RefreshRate.Numerator   = 0;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.SampleDesc.Count                   = 1;
     swapChainDesc.SampleDesc.Quality                 = 0;

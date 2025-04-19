@@ -3,7 +3,7 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform) : transform(transform){}
+SceneObject::SceneObject(Transform transform) : transform(transform) {}
 
 void SceneObject::InitBuffer(ID3D11Device* device) {
     DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
@@ -17,6 +17,10 @@ void SceneObject::Update() {
     // this->transform.SetScale(DirectX::XMVectorSet(scale, scale, scale, 1));
     // scale += 0.001;
 }
+
+void SceneObject::SetBoundingBox(DirectX::BoundingBox& boundingBox) { this->boundingBox = boundingBox; }
+
+DirectX::BoundingBox SceneObject::GetBoundingBox() const { return this->boundingBox; }
 
 DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
     // Create the scaling, rotation, and translation matrices
@@ -35,4 +39,19 @@ DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
     DirectX::XMStoreFloat4x4(&worldMatrixFloat4x4, worldMatrix);
 
     return worldMatrixFloat4x4;
+}
+
+DirectX::XMMATRIX SceneObject::GetWorldMatrixMatrix() {
+    // Create the scaling, rotation, and translation matrices
+    DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
+    DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
+    DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
+
+    // Combine the matrices to create the world matrix (scale * rotation * translation)
+    DirectX::XMMATRIX worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
+
+    // Transpose the matrix if needed (depends on the target platform/GPU conventions)
+    worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+
+    return worldMatrix;
 }

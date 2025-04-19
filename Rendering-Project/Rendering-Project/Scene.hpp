@@ -5,6 +5,7 @@
 #include "InputHandler.hpp"
 #include "Light.hpp"
 #include "ParticleSystem.hpp"
+#include "QuadTree.hpp"
 #include "SceneObject.hpp"
 #include "WindowHandler.hpp"
 #include <memory>
@@ -16,6 +17,10 @@ class Scene {
     ~Scene();
 
     void AddSceneObject(SceneObject* sceneObject);
+
+    void CreateObject(const std::string& objectFileName, const DirectX::XMVECTOR& position, ID3D11Device* device,
+                      const std::string& folder = ".");
+
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
 
@@ -24,6 +29,7 @@ class Scene {
     std::vector<Camera>& getCameras();
     const std::vector<Light>& getLights();
     std::vector<SceneObject*>& getObjects();
+    const std::vector<SceneObject*>& GetVisibleObjects() const;
 
     ParticleSystem& GetParticleSystem();
 
@@ -42,6 +48,9 @@ class Scene {
     std::vector<SceneObject*> objects;
     std::vector<Camera> cameras;
     std::vector<Light> lights;
+
+    QuadTree<SceneObject> quadTree;
+    std::vector<SceneObject*> visibleObjects;
 };
 
 #endif
