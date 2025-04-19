@@ -82,10 +82,10 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
 
     // Tessellation ON
-    //this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
-    //this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
-    //this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
-    //this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+    this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
+    this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
+    this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     // Draw objects / Bind objects
     for (auto& obj : scene.getObjects()) {
