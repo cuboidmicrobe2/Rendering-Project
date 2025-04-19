@@ -33,6 +33,8 @@ class Renderer {
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights);
     void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
+    void ShadowPass(const std::vector<Light>& lights, std::vector<SceneObject*> obj);
+    void BindShadowViewAndProjection(const Light& light);
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
