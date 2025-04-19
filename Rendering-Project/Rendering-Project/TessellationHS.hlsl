@@ -25,7 +25,7 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 	uint PatchID : SV_PrimitiveID)
 {
     HS_CONSTANT_DATA_OUTPUT Output;
-    float baseTess = 15.0f;
+    float baseTess = 1.0f;
     float minTess = 1.0f;
     float maxDistance = 100.0f;
     

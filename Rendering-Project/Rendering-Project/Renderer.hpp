@@ -5,6 +5,8 @@
 #include "Scene.hpp"
 #include "WindowHandler.hpp"
 #include <d3d11_4.h>
+#include "LightManager.hpp"
+#include "StructuredBuffer.hpp"
 class Renderer {
   public:
     Renderer();
@@ -29,11 +31,11 @@ class Renderer {
     HRESULT SetSamplers();
 
     void LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport);
-    void BindLights(const std::vector<Light>& lights);
+    //void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights);
     void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
-    void ShadowPass(const std::vector<Light>& lights, std::vector<SceneObject*> obj);
+    void ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj);
     void BindShadowViewAndProjection(const Light& light);
 
     HRESULT SetShaders(std::string& byteDataOutput);
@@ -85,7 +87,6 @@ class Renderer {
         float padding[3];
     };
 
-    ConstantBuffer lightBuffer;
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;

@@ -2,13 +2,15 @@
 #define LIGHT_HPP
 #include "ConstantBuffer.hpp"
 #include "Transform.hpp"
+#include <wrl/client.h>
 
 class Light {
   public:
-    inline Light(Transform transform, DirectX::XMVECTOR color, float intensity, DirectX::XMVECTOR direction,
+    inline Light(Transform transform, DirectX::XMVECTOR color, float intensity,
                  float angle);
     ~Light() {};
-    inline HRESULT Init(ID3D11Device* device, UINT resolution);
+    inline HRESULT Init(ID3D11Device* device, UINT resolution, D3D11_DEPTH_STENCIL_VIEW_DESC* desc,
+                        ID3D11Texture2D* depthStencil);
     inline float GetIntesity() const { return this->intensity; }
     inline DirectX::XMVECTOR GetColor() const { return this->color; }
     Transform transform;
@@ -19,39 +21,20 @@ class Light {
     inline ID3D11DepthStencilView* GetDepthStencilVeiw() const;
 
   private:
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
     DirectX::XMVECTOR color;
-    DirectX::XMVECTOR direction;
     float angle;
     float intensity;
 
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 };
 
-inline Light::Light(Transform transform, DirectX::XMVECTOR color, float intensity, DirectX::XMVECTOR direction,
+inline Light::Light(Transform transform, DirectX::XMVECTOR color, float intensity,
                     float angle)
-    : transform(transform), color(color), intensity(intensity), direction(direction),
+    : transform(transform), color(color), intensity(intensity),
       angle(DirectX::XMConvertToRadians(angle)) {}
 
-HRESULT Light::Init(ID3D11Device* device, UINT resolution) {
-    D3D11_TEXTURE2D_DESC depthStencilDesc = {
-        depthStencilDesc.Width              = resolution,
-        depthStencilDesc.Height             = resolution,
-        depthStencilDesc.MipLevels          = 1,
-        depthStencilDesc.ArraySize          = 1,
-        depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT,
-        depthStencilDesc.SampleDesc.Count   = 1,
-        depthStencilDesc.SampleDesc.Quality = 0,
-        depthStencilDesc.Usage              = D3D11_USAGE_DEFAULT,
-        depthStencilDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL,
-        depthStencilDesc.CPUAccessFlags     = 0,
-        depthStencilDesc.MiscFlags          = 0,
-    };
-
-    HRESULT result = device->CreateTexture2D(&depthStencilDesc, nullptr, this->depthStencil.GetAddressOf());
-    if (FAILED(result)) return result;
-
-    return device->CreateDepthStencilView(this->depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
+HRESULT Light::Init(ID3D11Device* device, UINT resolution, D3D11_DEPTH_STENCIL_VIEW_DESC* desc, ID3D11Texture2D* depthStencil) {
+    return device->CreateDepthStencilView(depthStencil, desc, this->depthStencilView.GetAddressOf());
 }
 
 inline DirectX::XMMATRIX Light::CreateViewMatrix() const {
@@ -68,7 +51,7 @@ inline DirectX::XMMATRIX Light::CreateProjectionMatrix() const {
 
 inline ID3D11DepthStencilView* Light::GetDepthStencilVeiw() const { return this->depthStencilView.Get(); }
 
-inline DirectX::XMVECTOR Light::GetDirection() const { return this->direction; }
+inline DirectX::XMVECTOR Light::GetDirection() const { return this->transform.GetDirectionVector(); }
 
 inline float Light::GetAngle() const { return this->angle; }
 

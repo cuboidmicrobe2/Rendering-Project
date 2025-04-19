@@ -9,6 +9,7 @@
 #include "WindowHandler.hpp"
 #include <memory>
 #include <vector>
+#include "LightManager.hpp"
 
 class Scene {
   public:
@@ -18,6 +19,7 @@ class Scene {
     void AddSceneObject(SceneObject* sceneObject);
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
+    LightManager& GetLightManager();
 
     HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
@@ -34,6 +36,7 @@ class Scene {
     void UpdateScene();
 
   private:
+    LightManager lm;
     Camera mainCamera;
     InputHandler& input;
     ParticleSystem particleSystem;
@@ -41,7 +44,6 @@ class Scene {
     std::vector<std::unique_ptr<Mesh>> meshes;
     std::vector<SceneObject*> objects;
     std::vector<Camera> cameras;
-    std::vector<Light> lights;
 };
 
 #endif
