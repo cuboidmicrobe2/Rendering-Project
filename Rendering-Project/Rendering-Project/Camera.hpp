@@ -13,12 +13,12 @@ class RenderingResources {
   public:
     RenderingResources() : viewport({}) {}
 
-    HRESULT Init(ID3D11Device* device, UINT width, UINT height) {
+    HRESULT Init(ID3D11Device* device, FLOAT width, FLOAT height) {
         this->viewport = D3D11_VIEWPORT{
             .TopLeftX = 0,
             .TopLeftY = 0,
-            .Width    = static_cast<FLOAT>(width),
-            .Height   = static_cast<FLOAT>(height),
+            .Width    = width,
+            .Height   = height,
             .MinDepth = 0.0f,
             .MaxDepth = 1.0f,
         };
@@ -45,7 +45,6 @@ class RenderingResources {
         if (FAILED(result)) return result;
 
         return device->CreateDepthStencilView(this->depthStencil.Get(), nullptr, this->depthStencilView.GetAddressOf());
-
     }
 
     void BindLightingPass(ID3D11DeviceContext* context) {
@@ -98,8 +97,7 @@ class RenderingResources {
 class Camera {
   public:
     inline Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
-                  DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV,
-                  RenderingResources* rr);
+                  DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV, RenderingResources* rr);
     inline ~Camera() = default;
 
     Transform transform;
@@ -118,9 +116,6 @@ class Camera {
 
     inline ID3D11UnorderedAccessView** GetAdressOfUAV();
 
-    inline ID3D11RenderTargetView* GetRTV() const;
-    inline ID3D11RenderTargetView** GetAdressOfRTV();
-
   private:
     RenderingResources* rr;
     ID3D11UnorderedAccessView* UAV;
@@ -131,6 +126,8 @@ class Camera {
     float farZ;
     float xRotation;
     float yRotation;
+    bool showCursor = false;
+    bool showInit   = false;
 };
 
 inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
@@ -192,42 +189,54 @@ inline void Camera::Update(InputHandler& input) {
         this->transform.Move({0, -1, 0, 0}, speed);
     }
 
-    // Hide cursor
-    ShowCursor(FALSE);
+    // Initialize cursor state
+    if (!this->showInit) {
+        ShowCursor(FALSE);
+        this->showInit = true;
+    }
 
-    // Get screen center
-    POINT screenCenter{
-        .x = GetSystemMetrics(SM_CXSCREEN) / 2,
-        .y = GetSystemMetrics(SM_CYSCREEN) / 2,
-    };
+    // Toggle cursor visibility
+    if (input.wasPressed('E')) {
+        this->showCursor = !this->showCursor;
+        ShowCursor(this->showCursor);
+    }
 
-    // Get current cursor
-    POINT cursorPos;
-    GetCursorPos(&cursorPos);
+    // Camera mouse movement
+    if (!this->showCursor) {
+        // Get screen center
+        POINT screenCenter{
+            .x = GetSystemMetrics(SM_CXSCREEN) / 2,
+            .y = GetSystemMetrics(SM_CYSCREEN) / 2,
+        };
 
-    // Calculate mouse movement
-    int mouseDeltaX = cursorPos.x - screenCenter.x;
-    int mouseDeltaY = cursorPos.y - screenCenter.y;
+        // Get current cursor
+        POINT cursorPos;
+        GetCursorPos(&cursorPos);
 
-    // Reset cursor pos to center
-    SetCursorPos(screenCenter.x, screenCenter.y);
+        // Calculate mouse movement
+        int mouseDeltaX = cursorPos.x - screenCenter.x;
+        int mouseDeltaY = cursorPos.y - screenCenter.y;
 
-    // Mouse movement
-    const float sensitivity = 0.001f;
-    const float clampMargin = 0.3f;
-    float x                 = mouseDeltaX * sensitivity;
-    float y                 = mouseDeltaY * sensitivity;
+        // Reset cursor pos to center
+        SetCursorPos(screenCenter.x, screenCenter.y);
 
-    // Rotate rotations
-    this->xRotation += y;
-    this->xRotation =
-        std::clamp(this->xRotation, (-DirectX::XM_PIDIV2) + clampMargin, DirectX::XM_PIDIV2 - clampMargin);
+        // Mouse movement
+        const float sensitivity = 0.001f;
+        const float clampMargin = 0.3f;
+        float x                 = mouseDeltaX * sensitivity;
+        float y                 = mouseDeltaY * sensitivity;
 
-    this->yRotation += x;
+        // Rotate rotations
+        this->xRotation += y;
+        this->xRotation =
+            std::clamp(this->xRotation, (-DirectX::XM_PIDIV2) + clampMargin, DirectX::XM_PIDIV2 - clampMargin);
 
-    // Apply rotations
-    DirectX::XMVECTOR rotationQuat = DirectX::XMQuaternionRotationRollPitchYaw(this->xRotation, this->yRotation, 0);
-    this->transform.SetRotationQuaternion(rotationQuat);
+        this->yRotation += x;
+
+        // Apply rotations
+        DirectX::XMVECTOR rotationQuat = DirectX::XMQuaternionRotationRollPitchYaw(this->xRotation, this->yRotation, 0);
+        this->transform.SetRotationQuaternion(rotationQuat);
+    }
 }
 
 #endif
