@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
+#include "LightManager.hpp"
 #include "ReadFile.hpp"
 #include "SceneObject.hpp"
-#include "LightManager.hpp"
 
 Renderer::Renderer() {}
 
@@ -36,7 +36,7 @@ HRESULT Renderer::Init(const Window& window) {
 }
 
 void Renderer::Render(Scene& scene) {
-    //this->BindLights(scene.getLights());
+    // this->BindLights(scene.getLights());
     LightManager& lm = scene.GetLightManager();
     lm.BindLightData(this->GetDeviceContext(), 4, 5);
     this->ShadowPass(scene.GetLightManager(), scene.getObjects());
@@ -46,7 +46,7 @@ void Renderer::Render(Scene& scene) {
     this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
     this->immediateContext->PSSetConstantBuffers(1, 1, this->viewPos.GetAdressOfBuffer());
     // Render all extra cameras to their texures
-    std::array<float, 4> clearColor{0, 0, 0, 1};
+    std::array<float, 4> clearColor{1, 1, 1, 1};
     for (int i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene.getCameras()) {
             this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
@@ -63,8 +63,8 @@ void Renderer::Render(Scene& scene) {
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
-    //lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
-    // Present
+    // lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
+    //  Present
     this->swapChain->Present(1, 0);
 }
 
@@ -79,7 +79,8 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     rr->BindGeometryPass(this->GetDeviceContext());
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
     this->BindViewAndProjMatrixes(cam);
-    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()), scene.GetLightManager().GetDirectionalLights().size());
+    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()),
+                            scene.GetLightManager().GetDirectionalLights().size());
 
     // Tessellation ON
     this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);

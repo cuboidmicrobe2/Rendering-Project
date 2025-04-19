@@ -4,7 +4,8 @@
 #include <memory>
 
 Scene::Scene(Window& window)
-    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr), lm(256, 8192 * 2) {}
+    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr),
+      lm(256, 8192) {}
 
 Scene::~Scene() {}
 
