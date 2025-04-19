@@ -40,18 +40,3 @@ DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
 
     return worldMatrixFloat4x4;
 }
-
-DirectX::XMMATRIX SceneObject::GetWorldMatrixMatrix() {
-    // Create the scaling, rotation, and translation matrices
-    DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
-    DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
-    DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
-
-    // Combine the matrices to create the world matrix (scale * rotation * translation)
-    DirectX::XMMATRIX worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
-
-    // Transpose the matrix if needed (depends on the target platform/GPU conventions)
-    worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
-
-    return worldMatrix;
-}

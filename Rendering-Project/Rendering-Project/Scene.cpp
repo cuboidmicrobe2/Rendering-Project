@@ -19,11 +19,14 @@ void Scene::CreateObject(const std::string& objectFileName, const DirectX::XMVEC
     // Object
     Mesh* mesh           = this->LoadMesh(folder, objectFileName, device);
     SimpleObject* object = new SimpleObject(Transform(position), mesh);
+    object->InitBuffer(device);
+
+    DirectX::XMFLOAT4X4 worldMatrix = object->GetWorldMatrix();
+    DirectX::XMMATRIX matrix        = DirectX::XMLoadFloat4x4(&worldMatrix);
 
     DirectX::BoundingBox boundingBox = mesh->GetBoundingBox();
-    boundingBox.Transform(boundingBox, object->GetWorldMatrixMatrix());
+    boundingBox.Transform(boundingBox, matrix);
     object->SetBoundingBox(boundingBox);
-    object->InitBuffer(device);
 
     // Box
     Mesh* boxMesh = this->LoadMesh(folder, "cube.obj", device);
@@ -31,7 +34,7 @@ void Scene::CreateObject(const std::string& objectFileName, const DirectX::XMVEC
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                    DirectX::XMLoadFloat3(&boundingBox.Extents)),
                          boxMesh);
-
+    box->InitBuffer(device);
     this->AddSceneObject(object);
     this->AddSceneObject(box);
 }
