@@ -23,7 +23,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Mesh* mesh2 = scene.LoadMesh(".", "icoSphere.obj", renderer.GetDevice());
 
     DCEM dcem(Transform({0, 0, 0}), renderer.GetPS(), renderer.GetDCEMPS(), mesh2);
-    if (FAILED(dcem.Init(renderer.GetDevice(), 1024))) return -1;
+    if (FAILED(dcem.Init(renderer.GetDevice(), 256))) return -1;
     scene.AddSceneObject(&dcem);
 
     for (const Camera& cam : dcem.GetCameras())
