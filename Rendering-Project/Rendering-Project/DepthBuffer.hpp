@@ -1,7 +1,5 @@
 #pragma once
-
 #include <d3d11_4.h>
-
 #include <vector>
 
 class DepthBuffer
@@ -25,4 +23,5 @@ public:
 
 	ID3D11DepthStencilView* GetDSV(UINT arrayIndex) const;
 	ID3D11ShaderResourceView* GetSRV() const;
+	ID3D11ShaderResourceView** GetAddressOfSRV();
 };

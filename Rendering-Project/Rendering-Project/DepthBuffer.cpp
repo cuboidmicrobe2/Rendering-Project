@@ -79,3 +79,5 @@ ID3D11DepthStencilView* DepthBuffer::GetDSV(UINT arrayIndex) const {
 }
 
 ID3D11ShaderResourceView* DepthBuffer::GetSRV() const { return this->srv; }
+
+ID3D11ShaderResourceView** DepthBuffer::GetAddressOfSRV() { return &this->srv; }

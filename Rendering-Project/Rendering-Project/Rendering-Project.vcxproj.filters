@@ -25,6 +25,12 @@
     <FxCompile Include="ParticleVS.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
+    <FxCompile Include="TessellationDS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="TessellationHS.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp">
@@ -72,6 +78,7 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="LightManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConstantBuffer.hpp">
@@ -149,6 +156,10 @@
     <ClInclude Include="stb_image.h">
       <Filter>Headers\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="LightManager.hpp" />
+    <ClInclude Include="DirectionalLight.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg" />
@@ -170,12 +181,6 @@
     <FxCompile Include="ParticlePS.hlsl" />
     <FxCompile Include="ParticleVS.hlsl" />
     <FxCompile Include="ParticleCS.hlsl" />
-    <FxCompile Include="TessellationHS.hlsl">
-      <Filter>Source Files\Rendering</Filter>
-    </FxCompile>
-    <FxCompile Include="TessellationDS.hlsl">
-      <Filter>Source Files\Rendering</Filter>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg">

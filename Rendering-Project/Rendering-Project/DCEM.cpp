@@ -30,7 +30,7 @@ DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* 
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr,
                  &this->rr),
       }),
-      SceneObject(transform), mesh(mesh), PS(DCEMPS), normalPS(normalPS) {}
+      SceneObject(transform), mesh(mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr) {}
 
 HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
     this->rr.Init(device, size, size);

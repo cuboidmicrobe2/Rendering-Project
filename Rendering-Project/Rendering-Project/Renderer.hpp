@@ -5,6 +5,8 @@
 #include "Scene.hpp"
 #include "WindowHandler.hpp"
 #include <d3d11_4.h>
+#include "LightManager.hpp"
+#include "StructuredBuffer.hpp"
 class Renderer {
   public:
     Renderer();
@@ -29,10 +31,12 @@ class Renderer {
     HRESULT SetSamplers();
 
     void LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport);
-    void BindLights(const std::vector<Light>& lights);
+    //void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
-    void BindLightMetaData(const Camera& cam, int nrOfLights);
+    void BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights);
     void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
+    void ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj);
+    void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
@@ -57,17 +61,21 @@ class Renderer {
 
     RenderingResources rr;
 
-    static constexpr int MAX_LIGHTS = 16;
+    static constexpr int MAX_LIGHTS = 32;
 
     struct LightData {
         float pos[3];
         float intensity;
         float color[4];
+        float direction[3];
+        float angle;
     };
 
     struct CSMetadata {
         int nrofLights;
+        int nrofDirLights;
         float cameraPos[3];
+        char padding[12];
     };
 
     struct CameraBufferData {
@@ -81,7 +89,6 @@ class Renderer {
         float padding[3];
     };
 
-    ConstantBuffer lightBuffer;
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;

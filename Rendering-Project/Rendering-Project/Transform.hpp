@@ -8,6 +8,8 @@ class Transform {
   public:
     inline Transform();
     inline Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion = DirectX::XMQuaternionIdentity(),
+                     DirectX::XMVECTOR scale = {1, 1, 1});    
+    inline Transform(DirectX::XMVECTOR position, float pitch, float yaw,
                      DirectX::XMVECTOR scale = {1, 1, 1});
 
     inline void SetPosition(DirectX::XMVECTOR position);
@@ -28,16 +30,20 @@ class Transform {
     inline DirectX::XMVECTOR GetScale() const;
 
   private:
+    inline DirectX::XMVECTOR GetCameraRotationQuaternion(float pitch, float yaw);
+
     DirectX::XMVECTOR position;
     DirectX::XMVECTOR quaternion;
     DirectX::XMVECTOR scale;
 };
 
-
 inline Transform::Transform() : position({}), quaternion(DirectX::XMQuaternionIdentity()), scale({1, 1, 1}) {}
 
 inline Transform::Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion, DirectX::XMVECTOR scale)
     : position(position), quaternion(DirectX::XMQuaternionNormalize(quaternion)), scale(scale) {}
+
+inline Transform::Transform(DirectX::XMVECTOR position, float pitch, float yaw, DirectX::XMVECTOR scale)
+: position(position), quaternion(GetCameraRotationQuaternion(pitch, yaw)), scale(scale) {}
 
 inline void Transform::SetPosition(DirectX::XMVECTOR position) { this->position = position; }
 
@@ -78,5 +84,17 @@ inline DirectX::XMVECTOR Transform::GetDirectionVector() const {
 }
 
 inline DirectX::XMVECTOR Transform::GetScale() const { return this->scale; }
+
+inline DirectX::XMVECTOR Transform::GetCameraRotationQuaternion(float pitch, float yaw) {
+    // Create pitch (X-axis) and yaw (Y-axis) quaternions
+    DirectX::XMVECTOR qPitch = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), DirectX::XMConvertToRadians(pitch));
+    DirectX::XMVECTOR qYaw   = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0, 1, 0, 0), DirectX::XMConvertToRadians(yaw));
+
+    // Combine yaw and pitch: yaw * pitch (important order!)
+    DirectX::XMVECTOR orientation = DirectX::XMQuaternionMultiply(qYaw, qPitch);
+
+    return DirectX::XMQuaternionNormalize(orientation);
+}
+
 
 #endif
