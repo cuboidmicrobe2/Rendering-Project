@@ -157,6 +157,9 @@
       <Filter>Headers\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="LightManager.hpp" />
+    <ClInclude Include="DirectionalLight.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg" />

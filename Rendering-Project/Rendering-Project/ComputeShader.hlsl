@@ -4,6 +4,7 @@ Texture2D<float4> positionGBuffer : register(t0);
 Texture2D<float4> colorGBuffer : register(t1);
 Texture2D<float4> normalGBuffer : register(t2);
 Texture2DArray<unorm float> shadowMaps : register(t3);
+Texture2DArray<unorm float> DirShadowMaps : register(t6);
 // Some lights and potentially other resources
 // ...
 
@@ -18,10 +19,12 @@ struct Light
 };
 
 StructuredBuffer<Light> lights : register(t4);
+StructuredBuffer<Light> DirLights : register(t5);
 
 cbuffer metadata : register(b0)
 {
     int nrofLights;
+    int nrofDirLights;
     float3 cameraPos;
     
 }
@@ -54,7 +57,38 @@ void main(uint3 DTid : SV_DispatchThreadID)
         
         if (dot(-lightDirection.xyz, normalize(cl.direction)) > cl.cosAngle && lit)
         {
-            float intensity = 1 / dot(hitToLight, hitToLight) * cl.intensity;
+            float intensity = 1 / dot(hitToLight, hitToLight) * cl.intensity * max(0.0f, dot(normalize(hitToLight), normal));
+            float4 diffuseComponent = color * intensity;
+    
+            float4 reflection = reflect(-lightDirection, normal);
+            float4 pixelToCamera = normalize(float4(cameraPos, 0) - position);
+            float specular = pow(max(0, dot(reflection, pixelToCamera)), 100);
+            float4 specularComponent = color * specular;
+        
+            result += specularComponent + diffuseComponent * colorGBuffer[DTid.xy];
+        }
+    }
+        // Dir Lights
+        
+    for (int i = 0; i < nrofDirLights; i++)
+    {
+        Light cl = DirLights[i];
+        float4 lightClip = mul(float4(position.xyz, 1), cl.vpMatrix);
+        float3 ndc = lightClip.xyz / lightClip.w;
+        
+        float2 uv = float2(ndc.x * 0.5f + 0.5f, ndc.y * -0.5f + 0.5f);
+        
+        float sceneDepth = ndc.z;
+        float mapDepth = DirShadowMaps.SampleLevel(shadowSampler, float3(uv, i), 0.f).r;
+        
+        const float bias = 0.005f;
+        bool lit = (mapDepth + bias) >= sceneDepth;
+        
+        float4 lightDirection = float4(normalize(cl.direction), 0);
+        
+        if (lit)
+        {
+            float intensity = cl.intensity * max(0.0f, dot(normalize(-lightDirection), normalize(normal)));
             float4 diffuseComponent = color * intensity;
     
             float4 reflection = reflect(-lightDirection, normal);

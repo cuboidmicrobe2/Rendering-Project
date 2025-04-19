@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 Scene::Scene(Window& window)
-    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr), lm(256) {}
+    : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr), lm(256, 8192 * 2) {}
 
 Scene::~Scene() {}
 
@@ -9,7 +9,9 @@ void Scene::AddSceneObject(SceneObject* sceneObject) { this->objects.push_back(s
 
 void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
 
-void Scene::AddLightObject(const Light& light) { lm.AddLight(light); }
+void Scene::AddLightObject(const Light& light) { lm.AddSpotLight(light); }
+
+void Scene::AddDirLight(const DirectionalLight& light) { this->lm.AddDirectionalLight(light); }
 
 LightManager& Scene::GetLightManager() { return this->lm; }
 
@@ -40,7 +42,7 @@ HRESULT Scene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext)
 
 std::vector<Camera>& Scene::getCameras() { return this->cameras; }
 
-const std::vector<Light>& Scene::getLights() { return this->lm.GetLights(); }
+const std::vector<Light>& Scene::getLights() { return this->lm.GetSpotLights(); }
 
 std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
 

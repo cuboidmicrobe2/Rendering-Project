@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include "LightManager.hpp"
+#include "DirectionalLight.hpp"
 
 class Scene {
   public:
@@ -19,6 +20,7 @@ class Scene {
     void AddSceneObject(SceneObject* sceneObject);
     void AddCameraObject(const Camera& camera);
     void AddLightObject(const Light& light);
+    void AddDirLight(const DirectionalLight& light);
     LightManager& GetLightManager();
 
     HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);

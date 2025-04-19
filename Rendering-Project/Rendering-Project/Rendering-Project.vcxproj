@@ -162,6 +162,7 @@
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DCEM.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
+    <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Gbuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputHandler.hpp" />

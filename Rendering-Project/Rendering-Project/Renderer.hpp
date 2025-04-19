@@ -33,10 +33,10 @@ class Renderer {
     void LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport);
     //void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
-    void BindLightMetaData(const Camera& cam, int nrOfLights);
+    void BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights);
     void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
     void ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj);
-    void BindShadowViewAndProjection(const Light& light);
+    void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
@@ -73,7 +73,9 @@ class Renderer {
 
     struct CSMetadata {
         int nrofLights;
+        int nrofDirLights;
         float cameraPos[3];
+        char padding[12];
     };
 
     struct CameraBufferData {

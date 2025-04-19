@@ -38,9 +38,9 @@ HRESULT Renderer::Init(const Window& window) {
 void Renderer::Render(Scene& scene) {
     //this->BindLights(scene.getLights());
     LightManager& lm = scene.GetLightManager();
-    lm.BindLightData(this->GetDeviceContext(), 4);
+    lm.BindLightData(this->GetDeviceContext(), 4, 5);
     this->ShadowPass(scene.GetLightManager(), scene.getObjects());
-    lm.BindDepthTextures(this->GetDeviceContext(), 3);
+    lm.BindDepthTextures(this->GetDeviceContext(), 3, 6);
 
     DirectX::XMVECTOR pos = scene.getMainCam().transform.GetPosition();
     this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
@@ -63,7 +63,7 @@ void Renderer::Render(Scene& scene) {
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
-    lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
+    //lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
     // Present
     this->swapChain->Present(1, 0);
 }
@@ -79,7 +79,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     rr->BindGeometryPass(this->GetDeviceContext());
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
     this->BindViewAndProjMatrixes(cam);
-    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()));
+    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()), scene.GetLightManager().GetDirectionalLights().size());
 
     // Tessellation ON
     this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
@@ -109,27 +109,38 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
 
 void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj) {
     this->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
-    const std::vector<Light>& lights = lm.GetLights();
-    this->GetDeviceContext()->RSSetViewports(1, &lm.GetViewPort());
 
-    for (const Light& light : lights) {
+    const std::vector<Light>& SpotLights = lm.GetSpotLights();
+    this->GetDeviceContext()->RSSetViewports(1, &lm.GetSpotLightVP());
+
+    for (const Light& light : SpotLights) {
         this->immediateContext->ClearDepthStencilView(light.GetDepthStencilVeiw(), D3D11_CLEAR_DEPTH, 1, 0);
-        this->BindShadowViewAndProjection(light);
+        this->BindShadowViewAndProjection(light.CreateViewMatrix(), light.CreateProjectionMatrix());
         this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
         for (auto& obj : obj) {
             obj->Draw(this->device.Get(), this->immediateContext.Get());
         }
     }
+
+    const std::vector<DirectionalLight>& DirLights = lm.GetDirectionalLights();
+    this->GetDeviceContext()->RSSetViewports(1, &lm.GetDirectionalLightVP());
+    for (const DirectionalLight& light : DirLights) {
+        this->immediateContext->ClearDepthStencilView(light.GetDepthStencilVeiw(), D3D11_CLEAR_DEPTH, 1, 0);
+        this->BindShadowViewAndProjection(light.CreateViewMatrix(), light.CreateProjectionMatrix());
+        this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
+        for (auto& obj : obj) {
+            obj->Draw(this->device.Get(), this->immediateContext.Get());
+        }
+    }
+
     this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, this->rr.GetDepthStencilView());
     this->GetDeviceContext()->PSSetShader(this->pixelShader.Get(), nullptr, 0);
-    this->GetDeviceContext()->CSSetShaderResources(3, lights.size(), lm.GetAdressOfDSSRV());
+    this->GetDeviceContext()->CSSetShaderResources(3, SpotLights.size(), lm.GetAdressOfSpotlightDSSRV());
 }
 
-void Renderer::BindShadowViewAndProjection(const Light& light) {
+void Renderer::BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix) {
     // Create and Bind view and projection matrixes
     DirectX::XMFLOAT4X4 matrices[3];
-    DirectX::XMMATRIX viewMatrix       = light.CreateViewMatrix();
-    DirectX::XMMATRIX projectionMatrix = light.CreateProjectionMatrix();
     DirectX::XMStoreFloat4x4(&matrices[0], viewMatrix);
     DirectX::XMStoreFloat4x4(&matrices[1], projectionMatrix);
     DirectX::XMStoreFloat4x4(&matrices[2], DirectX::XMMatrixMultiplyTranspose(viewMatrix, projectionMatrix));
@@ -352,31 +363,9 @@ void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT view
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, resetter, nullptr);
 }
 
-//void Renderer::BindLights(const std::vector<Light>& lights) {
-//    std::array<LightData, MAX_LIGHTS> lightData{};
-//    for (int i = 0; i < lights.size(); i++) {
-//        float* tempPos   = lights[i].transform.GetPosition().m128_f32;
-//        float* tempColor = lights[i].GetColor().m128_f32;
-//        float* tempDir   = lights[i].GetDirection().m128_f32;
-//
-//        LightData l{
-//            .pos{tempPos[0], tempPos[1], tempPos[2]},
-//            .intensity = lights[i].GetIntesity(),
-//            .color     = {tempColor[0], tempColor[1], tempColor[2], tempColor[3]},
-//            .direction = {tempDir[0], tempDir[1], tempDir[2]},
-//            .angle     = cos(lights[i].GetAngle() / 2),
-//        };
-//        lightData[i] = l;
-//    }
-//
-//    this->lightBuffer.UpdateBuffer(this->immediateContext.Get(), lightData.data());
-//    lm.
-//    this->immediateContext.Get()->CSSetConstantBuffers(1, 1, lm.);
-//}
-
-void Renderer::BindLightMetaData(const Camera& cam, int nrOfLights) {
+void Renderer::BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights) {
     float* t = cam.transform.GetPosition().m128_f32;
-    CSMetadata metaData{.nrofLights = nrOfLights, .cameraPos = {t[0], t[1], t[2]}};
+    CSMetadata metaData{.nrofLights = nrOfLights, .nrofDirLights = nrOfDirLights, .cameraPos = {t[0], t[1], t[2]}};
 
     this->metadataBuffer.UpdateBuffer(this->immediateContext.Get(), &metaData);
     this->immediateContext.Get()->CSSetConstantBuffers(0, 1, this->metadataBuffer.GetAdressOfBuffer());
