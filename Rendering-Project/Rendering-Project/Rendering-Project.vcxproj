@@ -144,6 +144,7 @@
     <ClCompile Include="DCEM.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="ParticleBuffer.cpp" />
@@ -163,10 +164,12 @@
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DCEM.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
+    <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Gbuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputHandler.hpp" />
     <ClInclude Include="Light.hpp" />
+    <ClInclude Include="LightManager.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="MirrorObject.hpp" />
     <ClInclude Include="OBJ_Loader.h" />

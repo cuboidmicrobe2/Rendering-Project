@@ -68,3 +68,5 @@ UINT StructuredBuffer::GetElementSize() const { return this->elementSize; }
 size_t StructuredBuffer::GetNrOfElements() const { return this->nrOfElements; }
 
 ID3D11ShaderResourceView* StructuredBuffer::GetSRV() const { return this->srv; }
+
+ID3D11ShaderResourceView** StructuredBuffer::GetAdressOfSRV() { return &this->srv; }
