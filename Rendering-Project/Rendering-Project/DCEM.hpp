@@ -17,7 +17,6 @@ class DCEM : public SceneObject {
   private:
     RenderingResources rr;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-    Mesh* mesh;
     ID3D11PixelShader* PS;
     ID3D11PixelShader* normalPS;
     std::array<Camera, 6> cameras;

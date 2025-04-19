@@ -21,7 +21,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     if (FAILED(scene.Init(renderer.GetDevice(), renderer.GetDeviceContext()))) return -1;
 
     // Mesh* mesh  = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
-    scene.CreateObject("boat.obj", {0, 0, 10, 1}, renderer.GetDevice());
+    scene.CreateObject("boat.obj", {0, 0, 30, 1}, renderer.GetDevice());
 
     Mesh* mesh2 = scene.LoadMesh(".", "icoSphere.obj", renderer.GetDevice());
 

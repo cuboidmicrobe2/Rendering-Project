@@ -1,6 +1,6 @@
 #include "SimpleObject.hpp"
 
-SimpleObject::SimpleObject(Transform transform, Mesh* mesh) : SceneObject(transform), mesh(mesh) {}
+SimpleObject::SimpleObject(Transform transform, Mesh* mesh) : SceneObject(transform, mesh) {}
 
 void SimpleObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) const {
     // Write Object Worldmatrix to vertexShader

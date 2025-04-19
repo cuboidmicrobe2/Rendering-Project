@@ -14,7 +14,7 @@ class SceneObject {
   public:
     Transform transform;
 
-    SceneObject(Transform transform /*, Mesh* mesh*/);
+    SceneObject(Transform transform, Mesh* mesh);
     ~SceneObject() {};
 
     virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const = 0;
@@ -31,6 +31,7 @@ class SceneObject {
   protected:
     ConstantBuffer matrixBuffer;
     DirectX::BoundingBox boundingBox;
+    Mesh* mesh;
 };
 
 #endif

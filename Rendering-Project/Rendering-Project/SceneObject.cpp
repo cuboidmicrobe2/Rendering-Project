@@ -3,7 +3,13 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform) : transform(transform) {}
+SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {
+    this->boundingBox = mesh->GetBoundingBox();
+
+    DirectX::XMFLOAT4X4 worldMatrix = this->GetWorldMatrix();
+    DirectX::XMMATRIX matrix        = DirectX::XMLoadFloat4x4(&worldMatrix);
+    this->boundingBox.Transform(this->boundingBox, matrix);
+}
 
 void SceneObject::InitBuffer(ID3D11Device* device) {
     DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();

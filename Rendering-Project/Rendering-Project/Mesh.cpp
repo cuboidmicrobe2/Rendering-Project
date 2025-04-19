@@ -112,8 +112,8 @@ void Mesh::Initialize(ID3D11Device* device, const std::filesystem::path& folderp
         this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), tempVertexBuffer.size(), tempVertexBuffer.data());
         this->indexBuffer.Initialize(device, tempIndexBuffer.size(), tempIndexBuffer.data());
 
-        DirectX::BoundingBox::CreateFromPoints(this->boundingBox, vertexPositions.size(), vertexPositions.data(),
-                                               sizeof(DirectX::XMFLOAT3));
+        this->boundingBox.CreateFromPoints(this->boundingBox, vertexPositions.size(), vertexPositions.data(),
+                                           sizeof(DirectX::XMFLOAT3));
 
     } else {
         throw std::runtime_error("Failed to load model");
