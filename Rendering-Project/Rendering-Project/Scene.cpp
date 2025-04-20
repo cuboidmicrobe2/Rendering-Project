@@ -34,8 +34,6 @@ void Scene::CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11De
     this->AddBoundingBox(box);
     this->quadTree.AddElement(object);
     this->quadTree.AddElement(box);
-
-    quadTree.PrintTree(this->quadTree);
 }
 
 void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
@@ -114,10 +112,7 @@ void Scene::UpdateScene() {
     }
 
     // Store the list of visible objects for rendering
-    std::cout << "Visible Objects\n";
     for (const SceneObject* obj : visibleObjects) {
         this->visibleObjects.push_back(const_cast<SceneObject*>(obj));
-        std::cout << "x: " << obj->transform.GetPosition().m128_f32 << ", y: " << obj->transform.GetPosition().m128_f32
-                  << ", <: " << obj->transform.GetPosition().m128_f32 << "\n";
     }
 }

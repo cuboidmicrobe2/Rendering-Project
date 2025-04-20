@@ -360,8 +360,6 @@ HRESULT Renderer::SetSamplers() {
 }
 
 HRESULT Renderer::SetupRasterizerStates() {
-    HRESULT result = E_FAIL;
-
     // Solid rendering
     D3D11_RASTERIZER_DESC solidDesc{
         .FillMode              = D3D11_FILL_SOLID,
@@ -369,7 +367,7 @@ HRESULT Renderer::SetupRasterizerStates() {
         .FrontCounterClockwise = FALSE,
         .DepthClipEnable       = TRUE,
     };
-    result = this->device->CreateRasterizerState(&solidDesc, this->solidRasterizerState.GetAddressOf());
+    HRESULT result = this->device->CreateRasterizerState(&solidDesc, this->solidRasterizerState.GetAddressOf());
     if (FAILED(result)) return result;
 
     // Wireframe rendering
@@ -384,6 +382,8 @@ HRESULT Renderer::SetupRasterizerStates() {
 
     // Set solid rendering as default
     this->immediateContext->RSSetState(this->solidRasterizerState.Get());
+
+    return S_OK;
 }
 
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {

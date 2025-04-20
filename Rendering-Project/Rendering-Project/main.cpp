@@ -21,7 +21,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Scene scene(window);
 
     Mesh* mesh = scene.LoadMesh(".", "boat.obj", renderer.GetDevice());
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 1; i++) {
         float x = (i % 5) * 20.0f - 40.0f;
         float y = ((i % 3) - 1) * 5.0f;
         float z = (i / 5) * 20.0f + 10.0f;
