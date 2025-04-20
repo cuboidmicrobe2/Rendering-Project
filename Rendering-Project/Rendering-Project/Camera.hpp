@@ -24,8 +24,10 @@ class RenderingResources {
         };
 
         this->position.Init(device, this->viewport.Width, this->viewport.Height);
-        this->color.Init(device, this->viewport.Width, this->viewport.Height);
+        this->diffuse.Init(device, this->viewport.Width, this->viewport.Height);
         this->normal.Init(device, this->viewport.Width, this->viewport.Height);
+        this->ambient.Init(device, this->viewport.Width, this->viewport.Height);
+        this->specular.Init(device, this->viewport.Width, this->viewport.Height);
 
         D3D11_TEXTURE2D_DESC depthStencilDesc = {
             depthStencilDesc.Width              = width,
@@ -49,35 +51,35 @@ class RenderingResources {
 
     void BindLightingPass(ID3D11DeviceContext* context) {
         // Unbind Gbuffers from write
-        ID3D11RenderTargetView* rVResetter[3] = {nullptr, nullptr, nullptr};
+        ID3D11RenderTargetView* rVResetter[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
         context->OMSetRenderTargets(3, rVResetter, nullptr);
 
         // Bind to Compute
-        ID3D11ShaderResourceView* srvs[3]{
-            this->position.GetSRV(),
-            this->color.GetSRV(),
-            this->normal.GetSRV(),
+        ID3D11ShaderResourceView* srvs[5]{
+            this->position.GetSRV(), this->diffuse.GetSRV(), this->normal.GetSRV(),
+            this->ambient.GetSRV(),  this->specular.GetSRV(),
         };
-        context->CSSetShaderResources(0, 3, srvs);
+        context->CSSetShaderResources(0, 5, srvs);
     }
     void BindGeometryPass(ID3D11DeviceContext* context) {
         // Unbind Gbuffers from Compute
-        ID3D11ShaderResourceView* rVResetter[3] = {nullptr, nullptr, nullptr};
-        context->CSSetShaderResources(0, 3, rVResetter);
+        ID3D11ShaderResourceView* rVResetter[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+        context->CSSetShaderResources(0, 5, rVResetter);
 
         // Bind Gbuffers for write
-        ID3D11RenderTargetView* rendertargets[3] = {
-            this->position.GetRTV(),
-            this->color.GetRTV(),
-            this->normal.GetRTV(),
+        ID3D11RenderTargetView* rendertargets[5] = {
+            this->position.GetRTV(), this->diffuse.GetRTV(),  this->normal.GetRTV(),
+            this->ambient.GetRTV(),  this->specular.GetRTV(),
         };
-        context->OMSetRenderTargets(3, rendertargets, this->depthStencilView.Get());
+        context->OMSetRenderTargets(5, rendertargets, this->depthStencilView.Get());
     }
     void Clear(ID3D11DeviceContext* context, std::array<float, 4> clearColor) {
         float zero[4]{};
-        context->ClearRenderTargetView(this->color.GetRTV(), clearColor.data());
+        context->ClearRenderTargetView(this->diffuse.GetRTV(), clearColor.data());
         context->ClearRenderTargetView(this->position.GetRTV(), zero);
         context->ClearRenderTargetView(this->normal.GetRTV(), zero);
+        context->ClearRenderTargetView(this->ambient.GetRTV(), clearColor.data());
+        context->ClearRenderTargetView(this->specular.GetRTV(), clearColor.data());
 
         context->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
     }
@@ -89,8 +91,10 @@ class RenderingResources {
     Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
 
     D3D11_VIEWPORT viewport;
+    GBuffer diffuse;
+    GBuffer ambient;
+    GBuffer specular;
     GBuffer position;
-    GBuffer color;
     GBuffer normal;
 };
 

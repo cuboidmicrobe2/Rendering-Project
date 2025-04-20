@@ -25,6 +25,7 @@
 //	is needed and used for the OBJ Model Loader
 namespace objl
 {
+	constexpr double PI = 3.14159265358979323846;
 	// Structure: Vector2
 	//
 	// Description: A 2D Vector that Holds Positional Data
@@ -943,9 +944,9 @@ namespace objl
 						tVerts.clear();
 						break;
 					}
-
+					
 					// If Vertex is not an interior vertex
-					float angle = math::AngleBetweenV3(pPrev.Position - pCur.Position, pNext.Position - pCur.Position) * (180 / 3.14159265359);
+					float angle = math::AngleBetweenV3(pPrev.Position - pCur.Position, pNext.Position - pCur.Position) * (180 / (float)PI);
 					if (angle <= 0 && angle >= 180)
 						continue;
 

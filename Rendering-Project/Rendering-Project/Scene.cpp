@@ -23,7 +23,7 @@ void Scene::CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11De
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
 
     // Box
-    Mesh* boxMesh = this->LoadMesh(".", "cube.obj", device);
+    Mesh* boxMesh = this->LoadMesh("./cube", "cube.obj", device);
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                    DirectX::XMLoadFloat3(&boundingBox.Extents)),
@@ -81,7 +81,7 @@ std::vector<SceneObject*>& Scene::GetVisibleObjects() { return this->visibleObje
 
 ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
-Mesh* Scene::LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device) {
+Mesh* Scene::LoadMesh(const std::string& folder, const std::string& objname, ID3D11Device* device) {
     this->meshes.emplace_back(new Mesh(device, folder, objname));
     return this->meshes.back().get();
 }

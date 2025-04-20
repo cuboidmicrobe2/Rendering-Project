@@ -78,8 +78,9 @@ class Renderer {
     struct CSMetadata {
         int nrofLights;
         int nrofDirLights;
+        float padding[2];
         float cameraPos[3];
-        char padding[12];
+        float alsoPadding;
     };
 
     struct CameraBufferData {

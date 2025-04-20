@@ -1,5 +1,6 @@
 #ifndef MESH_HPP
 #define MESH_HPP
+#define DIRECTXTK_WIC_LOADER_FLAGS
 
 #include <vector>
 
@@ -29,6 +30,8 @@ struct MeshData {
         ID3D11ShaderResourceView* ambientTextureSRV;
         ID3D11ShaderResourceView* diffuseTextureSRV;
         ID3D11ShaderResourceView* specularTextureSRV;
+        ID3D11ShaderResourceView* normalMapSRV;
+        ID3D11ShaderResourceView* parallaxMapSRV;
     };
 
     std::vector<SubMeshInfo> subMeshInfo;
@@ -43,7 +46,7 @@ class Mesh {
 
   public:
     Mesh() = default;
-    Mesh(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname);
+    Mesh(ID3D11Device* device, const std::string& folderpath, const std::string& objname);
     ~Mesh()                            = default;
     Mesh(const Mesh& other)            = delete;
     Mesh& operator=(const Mesh& other) = delete;
@@ -51,16 +54,19 @@ class Mesh {
     Mesh& operator=(Mesh&& other)      = delete;
 
     void Initialize(ID3D11Device* device, const MeshData& meshInfo);
-    void Initialize(ID3D11Device* device, const std::filesystem::path& folderpath, const std::string& objname);
+    void Initialize(ID3D11Device* device, const std::string& folderpath, const std::string& objname);
 
     void BindMeshBuffers(ID3D11DeviceContext* context) const;
-    void PerformSubMeshDrawCall(ID3D11DeviceContext* context, size_t subMeshIndex) const;
+    void PerformSubMeshDrawCall(ID3D11DeviceContext* context, size_t subMeshIndex);
 
     size_t GetNrOfSubMeshes() const;
     const std::vector<SubMesh>& GetSubMeshes() const;
     ID3D11ShaderResourceView* GetAmbientSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetDiffuseSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetSpecularSRV(size_t subMeshIndex) const;
+    ID3D11ShaderResourceView* GetNormalMapSRV(size_t subMeshIndex) const;
+    ID3D11ShaderResourceView* GetParallaxMapSRV(size_t subMeshIndex) const;
+
     DirectX::BoundingBox GetBoundingBox() const;
 };
 
