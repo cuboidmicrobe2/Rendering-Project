@@ -3,7 +3,12 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform) : transform(transform){}
+SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {
+    this->boundingBox = mesh->GetBoundingBox();
+
+    this->boundingBox.Transform(this->boundingBox, 1, this->transform.GetRotationQuaternion(),
+                                this->transform.GetPosition());
+}
 
 void SceneObject::InitBuffer(ID3D11Device* device) {
     DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
@@ -17,6 +22,10 @@ void SceneObject::Update() {
     // this->transform.SetScale(DirectX::XMVectorSet(scale, scale, scale, 1));
     // scale += 0.001;
 }
+
+void SceneObject::SetBoundingBox(DirectX::BoundingBox& boundingBox) { this->boundingBox = boundingBox; }
+
+DirectX::BoundingBox SceneObject::GetBoundingBox() const { return this->boundingBox; }
 
 DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
     // Create the scaling, rotation, and translation matrices

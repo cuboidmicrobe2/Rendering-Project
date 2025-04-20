@@ -9,6 +9,7 @@
 #include "IndexBuffer.hpp"
 #include "SubMesh.hpp"
 #include "VertexBuffer.hpp"
+#include <DirectXCollision.h>
 #include <filesystem>
 
 struct MeshData {
@@ -41,6 +42,7 @@ class Mesh {
     std::vector<SubMesh> subMeshes;
     VertexBuffer vertexBuffer;
     IndexBuffer indexBuffer;
+    DirectX::BoundingBox boundingBox;
 
   public:
     Mesh() = default;
@@ -65,6 +67,7 @@ class Mesh {
     ID3D11ShaderResourceView* GetNormalMapSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetParallaxMapSRV(size_t subMeshIndex) const;
 
+    DirectX::BoundingBox GetBoundingBox() const;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include "Mesh.hpp"
 #include "OBJ_Loader.h"
 #include "SimpleVertex.hpp"
+#include <DirectXCollision.h>
 #include <WICTextureLoader.h>
 #include <DDSTextureLoader.h>
 #include <filesystem>
@@ -43,6 +44,8 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
         size_t meshStartIndex = 0;
         std::vector<uint32_t> tempIndexBuffer;
         std::vector<SimpleVertex> tempVertexBuffer;
+        std::vector<DirectX::XMFLOAT3> vertexPositions; // For bounding boxes
+
         for (auto& mesh : loader.LoadedMeshes) {
             SubMesh submesh;
             ID3D11ShaderResourceView* ambientSrv  = nullptr;
@@ -120,12 +123,18 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             tempVertexBuffer.reserve(mesh.Vertices.size());
             for (const auto& vertex : mesh.Vertices) {
                 tempVertexBuffer.emplace_back(vertex);
+                vertexPositions.emplace_back(DirectX::XMFLOAT3(vertex.Position.X, vertex.Position.Y,
+                                                               vertex.Position.Z)); // For bounding boxes
             }
         }
 
         // Initialize buffers
         this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), tempVertexBuffer.size(), tempVertexBuffer.data());
         this->indexBuffer.Initialize(device, tempIndexBuffer.size(), tempIndexBuffer.data());
+
+        this->boundingBox.CreateFromPoints(this->boundingBox, vertexPositions.size(), vertexPositions.data(),
+                                           sizeof(DirectX::XMFLOAT3));
+
     } else {
         throw std::runtime_error("Failed to load model");
     }
@@ -218,3 +227,4 @@ ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device,
 
     return srv;
 }
+DirectX::BoundingBox Mesh::GetBoundingBox() const { return this->boundingBox; }

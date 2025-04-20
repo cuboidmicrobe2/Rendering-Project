@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
+#include "LightManager.hpp"
 #include "ReadFile.hpp"
 #include "SceneObject.hpp"
-#include "LightManager.hpp"
 
 Renderer::Renderer() {}
 
@@ -14,6 +14,9 @@ HRESULT Renderer::Init(const Window& window) {
     if (FAILED(result)) return result;
 
     result = CreateUAV();
+    if (FAILED(result)) return result;
+
+    result = this->SetupRasterizerStates();
     if (FAILED(result)) return result;
 
     std::string byteData;
@@ -36,7 +39,7 @@ HRESULT Renderer::Init(const Window& window) {
 }
 
 void Renderer::Render(Scene& scene) {
-    //this->BindLights(scene.getLights());
+    // this->BindLights(scene.getLights());
     LightManager& lm = scene.GetLightManager();
     this->ShadowPass(scene.GetLightManager(), scene.getObjects());
     lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
@@ -46,7 +49,7 @@ void Renderer::Render(Scene& scene) {
     this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
     this->immediateContext->PSSetConstantBuffers(1, 1, this->viewPos.GetAdressOfBuffer());
     // Render all extra cameras to their texures
-    std::array<float, 4> clearColor{0, 0, 0, 1};
+    std::array<float, 4> clearColor{1, 1, 1, 1};
     for (int i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene.getCameras()) {
             this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
@@ -63,7 +66,8 @@ void Renderer::Render(Scene& scene) {
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
-    //lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
+    // lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
+
     // Present
     this->swapChain->Present(1, 0);
 }
@@ -79,7 +83,8 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     rr->BindGeometryPass(this->GetDeviceContext());
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
     this->BindViewAndProjMatrixes(cam);
-    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()), scene.GetLightManager().GetDirectionalLights().size());
+    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()),
+                            scene.GetLightManager().GetDirectionalLights().size());
 
     // Tessellation ON
     this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
@@ -88,7 +93,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     // Draw objects / Bind objects
-    for (auto& obj : scene.getObjects()) {
+    for (SceneObject*& obj : scene.GetVisibleObjects()) {
         // Calculate distance to object from camera
         float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
@@ -101,6 +106,14 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     // Tessellation OFF
     this->immediateContext->HSSetShader(nullptr, nullptr, 0);
     this->immediateContext->DSSetShader(nullptr, nullptr, 0);
+
+    // Draw bounding boxes with wireframe fill mode
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
+    for (SceneObject*& box : scene.GetBoundingBoxes()) {
+        box->Draw(this->device.Get(), this->immediateContext.Get());
+    }
+    this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     rr->BindLightingPass(this->GetDeviceContext());
     // Do lighting pass
@@ -157,11 +170,11 @@ void Renderer::Clear() {
 
 HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
-    swapChainDesc.BufferCount                        = 1;
+    swapChainDesc.BufferCount                        = 2;
     swapChainDesc.BufferDesc.Width                   = 0;
     swapChainDesc.BufferDesc.Height                  = 0;
     swapChainDesc.BufferDesc.Format                  = DXGI_FORMAT_R8G8B8A8_UNORM;
-    swapChainDesc.BufferDesc.RefreshRate.Numerator   = 60;
+    swapChainDesc.BufferDesc.RefreshRate.Numerator   = 0;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.SampleDesc.Count                   = 1;
     swapChainDesc.SampleDesc.Quality                 = 0;
@@ -342,6 +355,33 @@ HRESULT Renderer::SetSamplers() {
 
     this->immediateContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
     this->immediateContext->CSSetSamplers(0, 1, this->samplerState.GetAddressOf());
+
+    return S_OK;
+}
+
+HRESULT Renderer::SetupRasterizerStates() {
+    // Solid rendering
+    D3D11_RASTERIZER_DESC solidDesc{
+        .FillMode              = D3D11_FILL_SOLID,
+        .CullMode              = D3D11_CULL_BACK,
+        .FrontCounterClockwise = FALSE,
+        .DepthClipEnable       = TRUE,
+    };
+    HRESULT result = this->device->CreateRasterizerState(&solidDesc, this->solidRasterizerState.GetAddressOf());
+    if (FAILED(result)) return result;
+
+    // Wireframe rendering
+    D3D11_RASTERIZER_DESC wireframeDesc = {
+        .FillMode              = D3D11_FILL_WIREFRAME,
+        .CullMode              = D3D11_CULL_BACK,
+        .FrontCounterClockwise = FALSE,
+        .DepthClipEnable       = TRUE,
+    };
+    result = this->device->CreateRasterizerState(&wireframeDesc, this->wireframeRasterizerState.GetAddressOf());
+    if (FAILED(result)) return result;
+
+    // Set solid rendering as default
+    this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     return S_OK;
 }

@@ -17,20 +17,14 @@ inline DirectX::XMVECTOR LookRotation(DirectX::XMVECTOR forward, DirectX::XMVECT
 
 DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh)
     : cameras({
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr,
-                 &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr,
-                 &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 1, 0}, {0, 0, -1}), nullptr,
-                 &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, -1, 0}, {0, 0, 1}), nullptr,
-                 &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, 1}, {0, 1, 0}), nullptr,
-                 &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr,
-                 &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr, &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr, &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 1, 0}, {0, 0, -1}), nullptr, &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, -1, 0}, {0, 0, 1}), nullptr, &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, 1}, {0, 1, 0}), nullptr, &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr, &this->rr),
       }),
-      SceneObject(transform), mesh(mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr) {}
+      SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS) {}
 
 HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
     this->rr.Init(device, size, size);
@@ -65,7 +59,6 @@ HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
             std::cerr << "UAV Creation failed " << __LINE__ << __FILE__ << " Error: " << r << "\n";
             return r;
         }
-
     }
 
     return S_OK;

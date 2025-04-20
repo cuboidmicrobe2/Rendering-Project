@@ -120,6 +120,9 @@ class Camera {
 
     inline ID3D11UnorderedAccessView** GetAdressOfUAV();
 
+    inline void SetFOV(float degrees);
+    inline float GetFOV() const;
+
   private:
     RenderingResources* rr;
     ID3D11UnorderedAccessView* UAV;
@@ -167,6 +170,12 @@ inline RenderingResources* Camera::GetRenderResources() const { return this->rr;
 inline D3D11_VIEWPORT Camera::GetViewPort() const { return this->rr->GetViewPort(); }
 
 inline ID3D11UnorderedAccessView** Camera::GetAdressOfUAV() { return &this->UAV; }
+
+inline void Camera::SetFOV(float degrees) {
+    this->verticalFOVRadians = DirectX::XMConvertToRadians(degrees / this->aspectRatio);
+}
+
+inline float Camera::GetFOV() const { return DirectX::XMConvertToDegrees(this->verticalFOVRadians); }
 
 inline void Camera::Update(InputHandler& input) {
 
