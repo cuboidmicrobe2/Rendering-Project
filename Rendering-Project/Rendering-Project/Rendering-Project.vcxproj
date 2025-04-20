@@ -149,15 +149,18 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="ParticleBuffer.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="SimpleObject.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="SubMesh.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoundingBox.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DCEM.hpp" />
@@ -173,6 +176,7 @@
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="ParticleBuffer.hpp" />
     <ClInclude Include="ParticleSystem.hpp" />
+    <ClInclude Include="QuadTree.hpp" />
     <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />

@@ -2,11 +2,11 @@
 #define RENDERER
 #include "Camera.hpp"
 #include "Gbuffer.hpp"
+#include "LightManager.hpp"
 #include "Scene.hpp"
+#include "StructuredBuffer.hpp"
 #include "WindowHandler.hpp"
 #include <d3d11_4.h>
-#include "LightManager.hpp"
-#include "StructuredBuffer.hpp"
 class Renderer {
   public:
     Renderer();
@@ -29,9 +29,10 @@ class Renderer {
     HRESULT SetInputLayout(const std::string& byteCode);
     void SetViewPort(const Window& window);
     HRESULT SetSamplers();
+    HRESULT SetupRasterizerStates();
 
     void LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport);
-    //void BindLights(const std::vector<Light>& lights);
+    // void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights);
     void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
@@ -49,6 +50,9 @@ class Renderer {
     Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> solidRasterizerState;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;

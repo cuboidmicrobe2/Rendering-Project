@@ -32,6 +32,9 @@ SortIncludes: true                  # Sort `#include` statements.
 DerivePointerAlignment: false
 PointerAlignment: Left             # Place `*` or `&` to the right of variable names.
 
+#Templates
+AlwaysBreakTemplateDeclarations: Yes
+
 # Other Options
 AllowShortFunctionsOnASingleLine: All  # Allow short functions to be written on one line.
 AlwaysBreakAfterReturnType: None         # Keep return type and function name on the same line.

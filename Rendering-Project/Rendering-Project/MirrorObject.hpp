@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Camera.hpp"
 #include "SceneObject.hpp"
 #include "Transform.hpp"
@@ -19,20 +21,22 @@ class MirrorObject : public SceneObject {
 };
 
 MirrorObject::MirrorObject(Transform transform, UINT width, UINT height)
-    : SceneObject(transform), camera(90, 16.f / 9.f, 1, 1000, transform.GetPosition(), transform.GetRotationQuaternion(), nullptr, D3D11_VIEWPORT {
-              .TopLeftX = 0,
-              .TopLeftY = 0,
-              .Width    = static_cast<FLOAT>(width),
-              .Height   = static_cast<FLOAT>(height),
-              .MinDepth = 0.0f,
-              .MaxDepth = 1.0f,
-          }) {}
+    : SceneObject(transform),
+      camera(90, 16.f / 9.f, 1, 1000, transform.GetPosition(), transform.GetRotationQuaternion(), nullptr,
+             D3D11_VIEWPORT{
+                 .TopLeftX = 0,
+                 .TopLeftY = 0,
+                 .Width    = static_cast<FLOAT>(width),
+                 .Height   = static_cast<FLOAT>(height),
+                 .MinDepth = 0.0f,
+                 .MaxDepth = 1.0f,
+             }) {}
 
 void MirrorObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) const {}
 
 void MirrorObject::Update() {}
 
-inline void MirrorObject::Init(ID3D11Device* device) { 
+inline void MirrorObject::Init(ID3D11Device* device) {
     D3D11_TEXTURE2D_DESC desc{
         .Width     = this->camera.GetViewPort().Width,
         .Height    = this->camera.GetViewPort().Height,
@@ -47,7 +51,7 @@ inline void MirrorObject::Init(ID3D11Device* device) {
         .CPUAccessFlags = 0,
         .MiscFlags      = D3D11_RESOURCE_MISC_TEXTURECUBE,
     };
-    HRESULT hr       = device->CreateTexture2D(&desc, nullptr, &this->texture);
+    HRESULT hr = device->CreateTexture2D(&desc, nullptr, &this->texture);
 
     D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV{
         .Format        = DXGI_FORMAT_R8G8B8A8_UNORM,

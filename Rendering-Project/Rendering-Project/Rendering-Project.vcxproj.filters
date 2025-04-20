@@ -78,6 +78,9 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="SimpleObject.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="LightManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +159,10 @@
     <ClInclude Include="stb_image.h">
       <Filter>Headers\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="QuadTree.hpp">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingBox.hpp">
     <ClInclude Include="LightManager.hpp" />
     <ClInclude Include="DirectionalLight.hpp">
       <Filter>Headers\Scene</Filter>
