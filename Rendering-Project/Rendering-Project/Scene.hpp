@@ -31,7 +31,7 @@ class Scene {
 
     ParticleSystem& GetParticleSystem();
 
-    Mesh* LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device);
+    Mesh* LoadMesh(const std::string& folder, const std::string& objname, ID3D11Device* device);
 
     Camera& getMainCam();
 

@@ -82,7 +82,7 @@ void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) const {
     // Bind verticies to VertexShader
     this->mesh->BindMeshBuffers(context);
 
-    context->PSSetShaderResources(1, 1, &this->srv);
+    context->PSSetShaderResources(4, 1, &this->srv);
 
     // Draw all submeshes
     for (size_t i = 0; i < this->mesh->GetNrOfSubMeshes(); i++) {

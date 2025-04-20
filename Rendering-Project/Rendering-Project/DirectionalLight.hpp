@@ -34,12 +34,6 @@ inline DirectionalLight::DirectionalLight(Transform transform, DirectX::XMVECTOR
     DirectX::XMVECTOR pos =
         DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), 40));
     this->transform.SetPosition(pos);
-
-    float* p = this->transform.GetPosition().m128_f32;
-    std::cout << p[0] << " " << p[1] << " " << p[2] << "\n";
-
-    p = this->transform.GetDirectionVector().m128_f32;
-    std::cout << p[0] << " " << p[1] << " " << p[2] << "\n";
 }
 
 HRESULT DirectionalLight::Init(ID3D11Device* device, UINT resolution, D3D11_DEPTH_STENCIL_VIEW_DESC* desc,

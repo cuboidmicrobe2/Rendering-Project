@@ -1,3 +1,5 @@
+# some comment
+
 newmtl aiStandardSurface1SG
 illum 4
 Kd 1.00 1.00 1.00
@@ -5,7 +7,7 @@ Ka 1.00 1.00 1.00
 Tf 1.00 1.00 1.00
 Ni 0.00
 map_Kd boatUV.png
-map_Ka boatUV.png
+map_bump BavariaC42_NormalMap.png
 
 newmtl initialShadingGroup
 illum 4
@@ -14,4 +16,4 @@ Ka 1.00 1.00 1.00
 Tf 1.00 1.00 1.00
 Ni 0.00
 map_Kd boatUV.png
-map_Ka boatUV.png
+map_bump BavariaC42_NormalMap.png

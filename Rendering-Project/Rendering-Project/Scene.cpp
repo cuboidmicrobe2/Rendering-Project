@@ -48,7 +48,7 @@ std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
 
 ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
-Mesh* Scene::LoadMesh(const std::filesystem::path& folder, const std::string& objname, ID3D11Device* device) {
+Mesh* Scene::LoadMesh(const std::string& folder, const std::string& objname, ID3D11Device* device) {
     this->meshes.emplace_back(new Mesh(device, folder, objname));
     return this->meshes.back().get();
 }
