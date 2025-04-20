@@ -10,7 +10,7 @@ Scene::Scene(Window& window)
 Scene::~Scene() {}
 
 void Scene::AddSceneObject(SceneObject* sceneObject) {
-    this->quadTree.AddElement(sceneObject, sceneObject->GetBoundingBox());
+    this->quadTree.AddElement(sceneObject);
     this->objects.push_back(sceneObject);
 }
 

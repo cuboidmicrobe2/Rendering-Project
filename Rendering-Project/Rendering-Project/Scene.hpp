@@ -2,16 +2,16 @@
 #define SCENE_HPP
 
 #include "Camera.hpp"
+#include "DirectionalLight.hpp"
 #include "InputHandler.hpp"
 #include "Light.hpp"
+#include "LightManager.hpp"
 #include "ParticleSystem.hpp"
 #include "QuadTree.hpp"
 #include "SceneObject.hpp"
 #include "WindowHandler.hpp"
 #include <memory>
 #include <vector>
-#include "LightManager.hpp"
-#include "DirectionalLight.hpp"
 
 class Scene {
   public:
@@ -54,7 +54,7 @@ class Scene {
     std::vector<Camera> cameras;
     std::vector<Light> lights;
 
-    QuadTree<SceneObject> quadTree;
+    QuadTree quadTree;
     std::vector<SceneObject*> visibleObjects;
 };
 
