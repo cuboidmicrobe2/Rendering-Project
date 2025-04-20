@@ -19,8 +19,9 @@ class Scene {
     ~Scene();
 
     void AddSceneObject(SceneObject* sceneObject);
+    void AddBoundingBox(SceneObject* box);
 
-    void CreateObject(const std::string& objectFileName, const DirectX::XMVECTOR& position, ID3D11Device* device,
+    void CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11Device* device,
                       const std::string& folder = ".");
 
     void AddCameraObject(const Camera& camera);
@@ -33,7 +34,8 @@ class Scene {
     std::vector<Camera>& getCameras();
     const std::vector<Light>& getLights();
     std::vector<SceneObject*>& getObjects();
-    const std::vector<SceneObject*>& GetVisibleObjects() const;
+    std::vector<SceneObject*>& GetBoundingBoxes();
+    std::vector<SceneObject*>& GetVisibleObjects();
 
     ParticleSystem& GetParticleSystem();
 
@@ -55,6 +57,8 @@ class Scene {
     std::vector<Light> lights;
 
     QuadTree quadTree;
+
+    std::vector<SceneObject*> boundingBoxes;
     std::vector<SceneObject*> visibleObjects;
 };
 

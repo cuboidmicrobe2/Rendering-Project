@@ -5,27 +5,25 @@
 
 Scene::Scene(Window& window)
     : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr),
-      lm(256, 8192) {}
+      lm(256, 8192), quadTree({100.0f, 100.0f, 100.0f, 0.0f}, 6, 8) {}
 
 Scene::~Scene() {}
 
-void Scene::AddSceneObject(SceneObject* sceneObject) {
-    this->quadTree.AddElement(sceneObject);
-    this->objects.push_back(sceneObject);
-}
+void Scene::AddSceneObject(SceneObject* sceneObject) { this->objects.push_back(sceneObject); }
 
-void Scene::CreateObject(const std::string& objectFileName, const DirectX::XMVECTOR& position, ID3D11Device* device,
+void Scene::AddBoundingBox(SceneObject* box) { this->boundingBoxes.push_back(box); }
+
+void Scene::CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11Device* device,
                          const std::string& folder) {
 
     // Object
-    Mesh* mesh           = this->LoadMesh(folder, objectFileName, device);
     SimpleObject* object = new SimpleObject(Transform(position), mesh);
     object->InitBuffer(device);
 
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
 
     // Box
-    Mesh* boxMesh = this->LoadMesh(folder, "cube.obj", device);
+    Mesh* boxMesh = this->LoadMesh(".", "cube.obj", device);
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                    DirectX::XMLoadFloat3(&boundingBox.Extents)),
@@ -33,7 +31,11 @@ void Scene::CreateObject(const std::string& objectFileName, const DirectX::XMVEC
     box->InitBuffer(device);
 
     this->AddSceneObject(object);
-    this->AddSceneObject(box);
+    this->AddBoundingBox(box);
+    this->quadTree.AddElement(object);
+    this->quadTree.AddElement(box);
+
+    quadTree.PrintTree(this->quadTree);
 }
 
 void Scene::AddCameraObject(const Camera& camera) { this->cameras.emplace_back(camera); }
@@ -75,7 +77,9 @@ const std::vector<Light>& Scene::getLights() { return this->lm.GetSpotLights(); 
 
 std::vector<SceneObject*>& Scene::getObjects() { return this->objects; }
 
-const std::vector<SceneObject*>& Scene::GetVisibleObjects() const { return this->visibleObjects; }
+std::vector<SceneObject*>& Scene::GetBoundingBoxes() { return this->boundingBoxes; }
+
+std::vector<SceneObject*>& Scene::GetVisibleObjects() { return this->visibleObjects; }
 
 ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
@@ -89,13 +93,19 @@ Camera& Scene::getMainCam() { return this->mainCamera; }
 void Scene::UpdateScene() {
     this->mainCamera.Update(this->input);
 
+    Camera frustumFOV = this->mainCamera;
+    frustumFOV.SetFOV(this->mainCamera.GetFOV() - 20.0f);
     // Create a frustum from the main camera's view and projection matrices
     DirectX::BoundingFrustum cameraFrustum;
-    DirectX::XMMATRIX viewProj = DirectX::XMMatrixMultiplyTranspose(this->mainCamera.createViewMatrix(),
-                                                                    this->mainCamera.createProjectionMatrix());
-    DirectX::BoundingFrustum::CreateFromMatrix(cameraFrustum, viewProj);
+    DirectX::XMMATRIX proj = frustumFOV.createProjectionMatrix();
+    DirectX::BoundingFrustum::CreateFromMatrix(cameraFrustum, proj);
+
+    DirectX::XMMATRIX view  = frustumFOV.createViewMatrix();
+    DirectX::XMMATRIX world = DirectX::XMMatrixInverse(nullptr, view);
+    cameraFrustum.Transform(cameraFrustum, world);
 
     // Get visible objects using the quadtree
+    this->visibleObjects.clear();
     std::vector<SceneObject*> visibleObjects = this->quadTree.CheckTree(cameraFrustum);
 
     // Update all objects
@@ -104,8 +114,10 @@ void Scene::UpdateScene() {
     }
 
     // Store the list of visible objects for rendering
-    this->visibleObjects.clear();
+    std::cout << "Visible Objects\n";
     for (const SceneObject* obj : visibleObjects) {
         this->visibleObjects.push_back(const_cast<SceneObject*>(obj));
+        std::cout << "x: " << obj->transform.GetPosition().m128_f32 << ", y: " << obj->transform.GetPosition().m128_f32
+                  << ", <: " << obj->transform.GetPosition().m128_f32 << "\n";
     }
 }

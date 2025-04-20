@@ -8,6 +8,8 @@
 
 class QuadTree {
   public:
+    QuadTree(DirectX::XMVECTOR volume, int maxDepth, int maxElements);
+    void PrintTree(const QuadTree& tree);
     void AddElement(SceneObject* elementAddress);
     std::vector<SceneObject*> CheckTree(DirectX::BoundingFrustum& frustum);
 
@@ -18,10 +20,13 @@ class QuadTree {
         std::unique_ptr<Node> children[4];
     };
 
-    void AddToNode(SceneObject* elementAddress, std::unique_ptr<Node>& node);
+    void PrintNode(const std::unique_ptr<Node>& node, int depth = 0);
+    void AddToNode(SceneObject* elementAddress, std::unique_ptr<Node>& node, int currentDepth);
+    void SubdivideNode(std::unique_ptr<Node>& node);
     void CheckNode(DirectX::BoundingFrustum& frustum, std::unique_ptr<Node>& node,
                    std::vector<SceneObject*>& foundObjects);
 
+    int maxDepth;
+    int maxElements;
     std::unique_ptr<Node> root;
-    const DirectX::XMFLOAT3 volume = {1000.0f, 1000.0f, 1000.0f};
 };

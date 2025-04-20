@@ -16,6 +16,9 @@ HRESULT Renderer::Init(const Window& window) {
     result = CreateUAV();
     if (FAILED(result)) return result;
 
+    result = this->SetupRasterizerStates();
+    if (FAILED(result)) return result;
+
     std::string byteData;
     result = this->SetShaders(byteData);
     if (FAILED(result)) return result;
@@ -64,7 +67,8 @@ void Renderer::Render(Scene& scene) {
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
     // lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
-    //  Present
+
+    // Present
     this->swapChain->Present(1, 0);
 }
 
@@ -89,7 +93,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     // Draw objects / Bind objects
-    for (auto& obj : scene.GetVisibleObjects()) {
+    for (SceneObject*& obj : scene.GetVisibleObjects()) {
         // Calculate distance to object from camera
         float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
@@ -102,6 +106,14 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     // Tessellation OFF
     this->immediateContext->HSSetShader(nullptr, nullptr, 0);
     this->immediateContext->DSSetShader(nullptr, nullptr, 0);
+
+    // Draw bounding boxes with wireframe fill mode
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
+    for (SceneObject*& box : scene.GetBoundingBoxes()) {
+        box->Draw(this->device.Get(), this->immediateContext.Get());
+    }
+    this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     rr->BindLightingPass(this->GetDeviceContext());
     // Do lighting pass
@@ -345,6 +357,33 @@ HRESULT Renderer::SetSamplers() {
     this->immediateContext->CSSetSamplers(0, 1, this->samplerState.GetAddressOf());
 
     return S_OK;
+}
+
+HRESULT Renderer::SetupRasterizerStates() {
+    HRESULT result = E_FAIL;
+
+    // Solid rendering
+    D3D11_RASTERIZER_DESC solidDesc{
+        .FillMode              = D3D11_FILL_SOLID,
+        .CullMode              = D3D11_CULL_BACK,
+        .FrontCounterClockwise = FALSE,
+        .DepthClipEnable       = TRUE,
+    };
+    result = this->device->CreateRasterizerState(&solidDesc, this->solidRasterizerState.GetAddressOf());
+    if (FAILED(result)) return result;
+
+    // Wireframe rendering
+    D3D11_RASTERIZER_DESC wireframeDesc = {
+        .FillMode              = D3D11_FILL_WIREFRAME,
+        .CullMode              = D3D11_CULL_BACK,
+        .FrontCounterClockwise = FALSE,
+        .DepthClipEnable       = TRUE,
+    };
+    result = this->device->CreateRasterizerState(&wireframeDesc, this->wireframeRasterizerState.GetAddressOf());
+    if (FAILED(result)) return result;
+
+    // Set solid rendering as default
+    this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 }
 
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {

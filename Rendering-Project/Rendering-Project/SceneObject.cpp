@@ -6,9 +6,8 @@ namespace dx = DirectX;
 SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {
     this->boundingBox = mesh->GetBoundingBox();
 
-    DirectX::XMFLOAT4X4 worldMatrix = this->GetWorldMatrix();
-    DirectX::XMMATRIX matrix        = DirectX::XMLoadFloat4x4(&worldMatrix);
-    this->boundingBox.Transform(this->boundingBox, matrix);
+    this->boundingBox.Transform(this->boundingBox, 1, this->transform.GetRotationQuaternion(),
+                                this->transform.GetPosition());
 }
 
 void SceneObject::InitBuffer(ID3D11Device* device) {
