@@ -49,7 +49,7 @@ void Renderer::Render(Scene& scene) {
     this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
     this->immediateContext->PSSetConstantBuffers(1, 1, this->viewPos.GetAdressOfBuffer());
     // Render all extra cameras to their texures
-    std::array<float, 4> clearColor{1, 1, 1, 1};
+    std::array<float, 4> clearColor{0, 0, 0, 1};
     for (int i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene.getCameras()) {
             this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
