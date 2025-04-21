@@ -118,20 +118,5 @@ PixelShaderOutput main(PixelShaderInput input)
     output.ambient = hasAmbient ? ambientTexture.Sample(samplerState, samplePoint) : hasDiffuse ? output.diffuse * defaultAmbient : float4(defaultAmbient, defaultAmbient, defaultAmbient, 1);
     output.specular = hasSpecular ? specularTexture.Sample(samplerState, samplePoint) : float4(1, 1, 1, 1);
 
-    //TEMP
-    //output.specular = float4(0, 0, 0, 0);
-    //output.ambient = float4(0, 1, 0, 1);
-    //output.diffuse = float4(0, 0, 0, 0);
-    // -----------
     return output;
-    
-            //TEMP
-    //PixelShaderOutput output;
-    //output.normal = float4(normal, 0);
-    //output.position = input.worldPosition;
-    //output.specular = float4(0, 0, 0, 0);
-    //output.ambient = float4(abs(viewDirTangent), 1);
-    //output.diffuse = float4(0, 0, 0, 0);
-    //return output;
-        // -----------
 }
