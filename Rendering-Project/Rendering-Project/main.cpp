@@ -20,7 +20,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     Scene scene(window);
 
-    Mesh* mesh = scene.LoadMesh("./boat", "boat.obj", renderer.GetDevice());
+    Mesh* mesh = scene.GetMesh("./boat", "boat.obj", renderer.GetDevice());
+    Mesh* cubeMesh = scene.GetMesh("./NPCube2", "cube.obj", renderer.GetDevice());
+    scene.CreateObject(cubeMesh, {5, 5, 5}, renderer.GetDevice());
     for (int i = 0; i < 5; i++) {
         float x = (i % 5) * 20.0f - 40.0f;
         float y = ((i % 3) - 1) * 5.0f;
@@ -28,9 +30,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         scene.CreateObject(mesh, {x, y, z, 1}, renderer.GetDevice());
     }
 
-    Mesh* mesh2 = scene.LoadMesh("./sphere", "icoSphere.obj", renderer.GetDevice());
+    Mesh* mesh2 = scene.GetMesh("./sphere", "icoSphere.obj", renderer.GetDevice());
 
-    DCEM dcem(Transform({0, 0, 0}), renderer.GetPS(), renderer.GetDCEMPS(), mesh2);
+    DCEM dcem(Transform({10, 0, 0}), renderer.GetPS(), renderer.GetDCEMPS(), mesh2);
     if (FAILED(dcem.Init(renderer.GetDevice(), 256))) return -1;
     scene.AddSceneObject(&dcem);
 

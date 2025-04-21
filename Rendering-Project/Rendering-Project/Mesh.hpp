@@ -31,7 +31,7 @@ struct MeshData {
         ID3D11ShaderResourceView* diffuseTextureSRV;
         ID3D11ShaderResourceView* specularTextureSRV;
         ID3D11ShaderResourceView* normalMapSRV;
-        ID3D11ShaderResourceView* parallaxMapSRV;
+        float parallaxFactor = 0;
     };
 
     std::vector<SubMeshInfo> subMeshInfo;
@@ -65,7 +65,6 @@ class Mesh {
     ID3D11ShaderResourceView* GetDiffuseSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetSpecularSRV(size_t subMeshIndex) const;
     ID3D11ShaderResourceView* GetNormalMapSRV(size_t subMeshIndex) const;
-    ID3D11ShaderResourceView* GetParallaxMapSRV(size_t subMeshIndex) const;
 
     DirectX::BoundingBox GetBoundingBox() const;
 };

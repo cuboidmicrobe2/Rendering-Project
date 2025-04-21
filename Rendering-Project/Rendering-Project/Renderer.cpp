@@ -116,8 +116,9 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     rr->BindLightingPass(this->GetDeviceContext());
+    this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     // Do lighting pass
-    this->LightingPass(UAV, viewport);
+    this->LightingPass(UAV, vp);
 }
 
 void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj) {

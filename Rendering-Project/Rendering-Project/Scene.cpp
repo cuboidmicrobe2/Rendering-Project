@@ -9,7 +9,10 @@ Scene::Scene(Window& window)
 
 Scene::~Scene() {}
 
-void Scene::AddSceneObject(SceneObject* sceneObject) { this->objects.push_back(sceneObject); }
+void Scene::AddSceneObject(SceneObject* sceneObject) {
+    
+    this->objects.push_back(sceneObject); 
+}
 
 void Scene::AddBoundingBox(SceneObject* box) { this->boundingBoxes.push_back(box); }
 
@@ -23,7 +26,7 @@ void Scene::CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11De
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
 
     // Box
-    Mesh* boxMesh = this->LoadMesh("./cube", "cube.obj", device);
+    Mesh* boxMesh = this->GetMesh("./cube", "cube.obj", device);
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                    DirectX::XMLoadFloat3(&boundingBox.Extents)),
@@ -81,9 +84,14 @@ std::vector<SceneObject*>& Scene::GetVisibleObjects() { return this->visibleObje
 
 ParticleSystem& Scene::GetParticleSystem() { return this->particleSystem; }
 
-Mesh* Scene::LoadMesh(const std::string& folder, const std::string& objname, ID3D11Device* device) {
-    this->meshes.emplace_back(new Mesh(device, folder, objname));
-    return this->meshes.back().get();
+Mesh* Scene::GetMesh(const std::string& folder, const std::string& objname, ID3D11Device* device) {
+    std::string key = folder + "/" + objname;
+    auto it = this->meshes.find(key);
+    if (it != this->meshes.end()) return it->second.get();
+    else {
+        this->meshes.emplace(key, std::make_unique<Mesh>(device, folder, objname));
+        return this->meshes.at(key).get();
+    }
 }
 
 Camera& Scene::getMainCam() { return this->mainCamera; }

@@ -16,7 +16,7 @@ class SubMesh {
     void Initialize(ID3D11Device* device, size_t startIndexValue, size_t nrOfIndicesInSubMesh,
                     ID3D11ShaderResourceView* ambientTextureSRV, ID3D11ShaderResourceView* diffuseTextureSRV,
                     ID3D11ShaderResourceView* specularTextureSRV, ID3D11ShaderResourceView* normalMapTexture,
-                    ID3D11ShaderResourceView* parallaxMapTexture);
+                    float parallaxFactor);
 
     void PerformDrawCall(ID3D11DeviceContext* context);
 
@@ -44,7 +44,7 @@ class SubMesh {
         int hasAmbient;
         int hasSpecular;
         int hasNormal;
-        int hasParallax;
+        float parallaxFactor;
         int padding[3];
     };
 

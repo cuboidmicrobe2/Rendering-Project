@@ -68,7 +68,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
             specular += pow(specularDot, 100);            
         }
     }
-        
+    
     // Dir Lights
     for (int i = 0; i < nrofDirLights; i++)
     {
