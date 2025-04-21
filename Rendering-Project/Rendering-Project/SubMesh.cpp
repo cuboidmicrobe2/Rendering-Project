@@ -4,7 +4,7 @@
 void SubMesh::Initialize(ID3D11Device* device, size_t startIndexValue, size_t nrOfIndicesInSubMesh,
                          ID3D11ShaderResourceView* ambientTextureSRV, ID3D11ShaderResourceView* diffuseTextureSRV,
                          ID3D11ShaderResourceView* specularTextureSRV,
-                         ID3D11ShaderResourceView* normalMapTexture, ID3D11ShaderResourceView* parallaxMapTexture) {
+                         ID3D11ShaderResourceView* normalMapTexture, float  parallaxFactor) {
     this->startIndex       = startIndexValue;
     this->nrOfIndices      = nrOfIndicesInSubMesh;
     this->ambientTexture   = ambientTextureSRV;
@@ -17,7 +17,7 @@ void SubMesh::Initialize(ID3D11Device* device, size_t startIndexValue, size_t nr
         (bool)ambientTextureSRV,
         (bool)specularTextureSRV,
         (bool)normalMapTexture,
-        (bool)parallaxMapTexture,
+        parallaxFactor,
     };
 
     this->PSMetaData.Initialize(device, sizeof(PSMetaData_t), &metaData);

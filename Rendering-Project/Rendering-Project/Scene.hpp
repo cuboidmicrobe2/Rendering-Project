@@ -39,7 +39,7 @@ class Scene {
 
     ParticleSystem& GetParticleSystem();
 
-    Mesh* LoadMesh(const std::string& folder, const std::string& objname, ID3D11Device* device);
+    Mesh* GetMesh(const std::string& folder, const std::string& objname, ID3D11Device* device);
 
     Camera& getMainCam();
 
@@ -51,7 +51,7 @@ class Scene {
     InputHandler& input;
     ParticleSystem particleSystem;
 
-    std::vector<std::unique_ptr<Mesh>> meshes;
+    std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes;
     std::vector<SceneObject*> objects;
     std::vector<Camera> cameras;
     std::vector<Light> lights;

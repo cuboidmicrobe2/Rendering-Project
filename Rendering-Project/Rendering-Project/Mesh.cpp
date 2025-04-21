@@ -2,15 +2,16 @@
 #include "Mesh.hpp"
 #include "OBJ_Loader.h"
 #include "SimpleVertex.hpp"
+#include "stb_image.h"
+#include <DDSTextureLoader.h>
 #include <DirectXCollision.h>
 #include <WICTextureLoader.h>
-#include <DDSTextureLoader.h>
 #include <filesystem>
 #include <fstream>
-#include "stb_image.h"
 
 namespace fs = std::filesystem;
-ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device, const std::string& filename);
+ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device, const std::string& filename,
+                                     const std::string& filenameDisp);
 
 Mesh::Mesh(ID3D11Device* device, const std::string& folderpath, const std::string& objname) {
     this->Initialize(device, folderpath, objname);
@@ -22,7 +23,7 @@ void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
         SubMesh newSubMesh;
         newSubMesh.Initialize(device, subMeshInfo.startIndexValue, subMeshInfo.nrOfIndicesInSubMesh,
                               subMeshInfo.ambientTextureSRV, subMeshInfo.diffuseTextureSRV,
-                              subMeshInfo.specularTextureSRV, subMeshInfo.normalMapSRV, subMeshInfo.parallaxMapSRV);
+                              subMeshInfo.specularTextureSRV, subMeshInfo.normalMapSRV, subMeshInfo.parallaxFactor);
         this->subMeshes.emplace_back(std::move(newSubMesh));
     }
 
@@ -52,7 +53,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             ID3D11ShaderResourceView* diffuseSrv  = nullptr;
             ID3D11ShaderResourceView* specularSrv = nullptr;
             ID3D11ShaderResourceView* normalMap   = nullptr;
-            ID3D11ShaderResourceView* parallaxMap = nullptr;
+            float parallaxFactor                  = 0;
 
             std::cout << mesh.MeshMaterial.map_Ka << "\n";
 
@@ -96,20 +97,17 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             if (!mesh.MeshMaterial.map_bump.empty()) {
                 std::cout << "Trying to bind normal map\n";
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_bump;
-                //std::wstring wpath(path.begin(), path.end());
-                normalMap = LoadNormal(device, path);
-                //HRESULT createShaderResult =
-                //    DirectX::CreateDDSTextureFromFile(device, wpath.c_str(), nullptr, &normalMap);
-
-                //if (FAILED(createShaderResult)) {
-                //    std::cerr << "Failed to load normal map, Error: "  << createShaderResult << "\n";
-                //    throw std::runtime_error("failed to load normal map");
-                //}
+                std::string dispPath;
+                if (!mesh.MeshMaterial.map_d.empty()) {
+                    dispPath = folderpath + "/" + mesh.MeshMaterial.map_d;
+                    parallaxFactor = 0.05;
+                }
+                normalMap = LoadNormal(device, path, dispPath);
             }
 
             // Initialize and add submesh
             submesh.Initialize(device, meshStartIndex, mesh.Indices.size(), ambientSrv, diffuseSrv, specularSrv,
-                               normalMap, parallaxMap);
+                               normalMap, parallaxFactor);
             this->subMeshes.emplace_back(std::move(submesh));
 
             // Add indices to temp index buffer
@@ -176,16 +174,37 @@ ID3D11ShaderResourceView* Mesh::GetNormalMapSRV(size_t subMeshIndex) const {
     return this->subMeshes.at(subMeshIndex).GetNormalMapSRV();
 }
 
-ID3D11ShaderResourceView* Mesh::GetParallaxMapSRV(size_t subMeshIndex) const {
-    return this->subMeshes.at(subMeshIndex).GetParallaxMapSRV();
-}
-
-ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device,
-                                                  const std::string& filename) {
+ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device, const std::string& filename,
+                                     const std::string& filenameDisp) {
     int width, height, channels;
-    stbi_uc* imageData = stbi_load(filename.c_str(), &width, &height, &channels, 4); // force RGBA
-    if (!imageData) {
-        throw std::runtime_error("Failed to load image via stb_image: " + filename);
+    // Load normal map with RGBA output
+    stbi_uc* normalData = stbi_load(filename.c_str(), &width, &height, &channels, 4);
+    if (!normalData) {
+        throw std::runtime_error("Failed to load normal map: " + filename);
+    }
+
+    // If a displacement map filename is provided, load and merge into alpha
+    if (!filenameDisp.empty()) {
+        int dWidth, dHeight, dChannels;
+        // Load displacement map as a single-channel image (greyscale)
+        stbi_uc* dispData = stbi_load(filenameDisp.c_str(), &dWidth, &dHeight, &dChannels, 1);
+        if (!dispData) {
+            stbi_image_free(normalData);
+            throw std::runtime_error("Failed to load displacement map: " + filenameDisp);
+        }
+        // Ensure dimensions match
+        if (dWidth != width || dHeight != height) {
+            stbi_image_free(normalData);
+            stbi_image_free(dispData);
+            throw std::runtime_error("Displacement map dimensions do not match normal map dimensions");
+        }
+        // Merge dispData into the alpha channel of normalData
+        int pixelCount = width * height;
+        for (int i = 0; i < pixelCount; ++i) {
+            // normalData has RGBA: 4 bytes per pixel
+            normalData[4 * i + 3] = dispData[i];
+        }
+        stbi_image_free(dispData);
     }
 
     // Describe the texture
@@ -194,35 +213,36 @@ ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device,
     texDesc.Height               = height;
     texDesc.MipLevels            = 1;
     texDesc.ArraySize            = 1;
-    texDesc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM; // important: UNORM, NOT SRGB
+    texDesc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM;
     texDesc.SampleDesc.Count     = 1;
     texDesc.Usage                = D3D11_USAGE_DEFAULT;
     texDesc.BindFlags            = D3D11_BIND_SHADER_RESOURCE;
     texDesc.CPUAccessFlags       = 0;
     texDesc.MiscFlags            = 0;
 
-    // Describe initial data
+    // Provide initial data
     D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem                = imageData;
+    initData.pSysMem                = normalData;
     initData.SysMemPitch            = width * 4;
     initData.SysMemSlicePitch       = 0;
 
-    // Create texture
+    // Create the texture
     ID3D11Texture2D* texture = nullptr;
     HRESULT hr               = device->CreateTexture2D(&texDesc, &initData, &texture);
-    stbi_image_free(imageData); // free image data after creating the texture
+    // Free CPU-side image data
+    stbi_image_free(normalData);
 
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create texture from raw image data");
+    if (FAILED(hr) || !texture) {
+        throw std::runtime_error("Failed to create texture from image data");
     }
 
-    // Create SRV
+    // Create Shader Resource View
     ID3D11ShaderResourceView* srv = nullptr;
     hr                            = device->CreateShaderResourceView(texture, nullptr, &srv);
     texture->Release();
 
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create SRV from normal map texture");
+    if (FAILED(hr) || !srv) {
+        throw std::runtime_error("Failed to create SRV from texture");
     }
 
     return srv;

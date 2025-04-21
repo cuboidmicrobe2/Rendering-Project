@@ -160,6 +160,7 @@
     <ClCompile Include="WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseScene.hpp" />
     <ClInclude Include="BoundingBox.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
