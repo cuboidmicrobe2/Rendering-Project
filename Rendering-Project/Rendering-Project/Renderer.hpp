@@ -20,6 +20,8 @@ class Renderer {
     ID3D11PixelShader* GetDCEMPS() const;
     ID3D11DeviceContext* GetDeviceContext() const;
 
+    Mesh* GetMesh(const std::string& folder, const std::string& objname);
+
   private:
     void Clear();
 
@@ -63,6 +65,8 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11HullShader> hullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader> domainShader;
 
+    std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes;
+
     RenderingResources rr;
 
     static constexpr int MAX_LIGHTS = 32;
@@ -97,7 +101,6 @@ class Renderer {
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
-    //ConstantBuffer viewPos;
     ConstantBuffer tessBuffer;
 };
 

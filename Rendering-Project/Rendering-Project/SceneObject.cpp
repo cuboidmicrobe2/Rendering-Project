@@ -10,7 +10,7 @@ SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform)
                                 this->transform.GetPosition());
 }
 
-void SceneObject::InitBuffer(ID3D11Device* device) {
+void SceneObject::Init(ID3D11Device* device) {
     DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
     this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
 }

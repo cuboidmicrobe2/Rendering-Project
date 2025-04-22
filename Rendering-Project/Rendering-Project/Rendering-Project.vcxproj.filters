@@ -31,6 +31,7 @@
     <ClCompile Include="SubMesh.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="WindowHandler.cpp" />
+    <ClCompile Include="BaseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoundingBox.hpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
     <ClInclude Include="BaseScene.hpp" />
+    <ClInclude Include="testScene.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg" />

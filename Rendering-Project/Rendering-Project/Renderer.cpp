@@ -68,6 +68,17 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
+Mesh* Renderer::GetMesh(const std::string& folder, const std::string& objname) { 
+    std::string key = folder + "/" + objname;
+    auto it         = this->meshes.find(key);
+    if (it != this->meshes.end())
+        return it->second.get();
+    else {
+        this->meshes.emplace(key, std::make_unique<Mesh>(this->device.Get(), folder, objname));
+        return this->meshes.at(key).get();
+    }
+}
+
 void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);

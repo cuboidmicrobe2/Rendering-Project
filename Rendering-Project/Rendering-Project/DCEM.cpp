@@ -27,7 +27,9 @@ DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* 
       SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr) {}
 
 HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
-    this->InitBuffer(device);
+    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
+    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
+
     this->rr.Init(device, size, size);
 
     D3D11_TEXTURE2D_DESC desc;
@@ -61,6 +63,8 @@ HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
             return r;
         }
     }
+
+
 
     return S_OK;
 }

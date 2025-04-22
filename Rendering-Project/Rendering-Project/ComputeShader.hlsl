@@ -13,7 +13,7 @@ Texture2DArray<unorm float> DirShadowMaps : register(t6);
 struct Light
 {
     float3 pos;
-    float intensity;
+    float _padding;
     float4 color;
     float3 direction;
     float cosAngle;

@@ -1,39 +1,53 @@
-#include "WindowHandler.hpp"
-#include "SceneObject.hpp"
-#include "SimpleObject.hpp"
 #include "Camera.hpp"
-#include "Light.hpp"
 #include "DirectionalLight.hpp"
+#include "Light.hpp"
 #include "LightManager.hpp"
 #include "ParticleSystem.hpp"
+#include "SceneObject.hpp"
+#include "SimpleObject.hpp"
+#include "WindowHandler.hpp"
+#include "QuadTree.hpp"
+#include "Renderer.hpp"
 
 class BaseScene {
   public:
-
-	BaseScene(Window& window);
-    ~BaseScene();
-
-    void AddSceneObject(SceneObject* sceneObject);
-    void AddBoundingBox(SceneObject* box);
-
-    void CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11Device* device,
-                      const std::string& folder = ".");
-
-    void AddCameraObject(const Camera& camera);
-    void AddLightObject(const Light& light);
-    void AddDirLight(const DirectionalLight& light);
-    LightManager& GetLightManager();
+    BaseScene(Window& window);
+    virtual ~BaseScene();
 
     HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
-    std::vector<Camera>& getCameras();
-    const std::vector<Light>& getLights();
+    void AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic);
+    void AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh);
+
+    void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle);
+    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height);
+    LightManager& GetLightManager();
+
+    std::vector<Camera>& GetCameras();
     std::vector<SceneObject*>& GetBoundingBoxes();
-    std::vector<SceneObject*>& GetVisibleObjects();
+    std::vector<SceneObject*> GetVisibleObjects(Camera& cam);
 
     ParticleSystem& GetParticleSystem();
 
-    Camera& getMainCam();
+    Camera& GetMainCam();
 
-    void UpdateScene();
+    virtual void UpdateScene() = 0;
+
+  private:
+    Mesh cubeMesh;
+
+    LightManager lm;
+    Camera mainCamera;
+    InputHandler& input;
+    ParticleSystem particleSystem;
+
+    std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes;
+    std::vector<std::unique_ptr<SceneObject>> objects;
+    std::vector<std::unique_ptr<SceneObject>> staticObjects;
+    std::vector<Camera> cameras;
+
+    QuadTree quadTree;
+
+    std::vector<std::unique_ptr<SceneObject>> boundingBoxes;
+    std::vector<SceneObject*> visibleObjects;
 };

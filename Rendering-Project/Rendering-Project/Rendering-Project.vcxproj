@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseScene.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DCEM.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="StructuredBuffer.hpp" />
     <ClInclude Include="SubMesh.hpp" />
+    <ClInclude Include="testScene.hpp" />
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
