@@ -5,6 +5,14 @@
 
 Renderer::Renderer() {}
 
+Renderer::~Renderer() {
+    ID3D11Debug* debug = nullptr;
+    if (SUCCEEDED(this->device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug)))) {
+        debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL | D3D11_RLDO_IGNORE_INTERNAL); // D3D11_RLDO_IGNORE_INTERNAL
+        debug->Release();
+    }
+}
+
 HRESULT Renderer::Init(const Window& window) {
     this->SetViewPort(window);
     HRESULT result = this->CreateDeviceAndSwapChain(window);

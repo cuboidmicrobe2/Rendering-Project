@@ -13,6 +13,7 @@
 class Renderer {
   public:
     Renderer();
+    ~Renderer();
 
     HRESULT Init(const Window& window);
 
