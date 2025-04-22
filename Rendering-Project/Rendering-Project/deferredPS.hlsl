@@ -62,6 +62,16 @@ PixelShaderOutput main(PixelShaderInput input)
         float3x3 TBN = float3x3(tangent, bitangent, input.normal.xyz);
         float3 viewDirTangent = mul(TBN, viewDir);
         
+        
+        //PixelShaderOutput output;
+        //output.diffuse = float4(0, 0, 0, 0);
+        //output.normal = float4(normal, 0);
+        //output.position = input.worldPosition;
+        //output.ambient = float4(viewDir, 0);
+        //output.specular = float4(0, 0, 0, 0);
+
+        //return output;
+        
         // Parallax
         //float layerDepth = 1.0 / parallaxSteps;
         float2 uvOffset = float2(0, 0);

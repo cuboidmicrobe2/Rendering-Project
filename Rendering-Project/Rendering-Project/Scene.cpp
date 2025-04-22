@@ -21,7 +21,7 @@ void Scene::CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11De
 
     // Object
     SimpleObject* object = new SimpleObject(Transform(position), mesh);
-    object->InitBuffer(device);
+    object->Init(device);
 
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
 
@@ -31,7 +31,7 @@ void Scene::CreateObject(Mesh* mesh, const DirectX::XMVECTOR& position, ID3D11De
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                    DirectX::XMLoadFloat3(&boundingBox.Extents)),
                          boxMesh);
-    box->InitBuffer(device);
+    box->Init(device);
 
     this->AddSceneObject(object);
     this->AddBoundingBox(box);

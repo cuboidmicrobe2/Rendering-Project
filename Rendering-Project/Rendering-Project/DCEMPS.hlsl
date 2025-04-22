@@ -8,7 +8,8 @@ SamplerState samplerState : register(s0);
 // Camera buffer (same as vertex shader)
 cbuffer CameraBuffer : register(b1)
 {
-    float4 cameraPosition;
+    float4x4 _waste;
+    float3 cameraPosition;
 };
 
 struct PixelShaderInput
@@ -45,7 +46,6 @@ PixelShaderOutput main(PixelShaderInput input)
     float3 samplevec = normalize(reflect(viewDir, normalize(input.normal.xyz)));
 
     output.ambient = shaderTexture.Sample(samplerState, samplevec);
-    //output.colour = float4(normalize(cameraPosition.xyz), 1);
     output.normal = input.normal;
     output.position = input.worldPosition;
     output.specular = output.specular = hasSpecular ? specularTexture.Sample(samplerState, input.uv) : float4(0, 0, 0, 1);

@@ -15,7 +15,7 @@ inline DirectX::XMVECTOR LookRotation(DirectX::XMVECTOR forward, DirectX::XMVECT
     return XMQuaternionRotationMatrix(rotationMatrix);
 }
 
-DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh)
+DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size)
     : cameras({
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr, &this->rr),
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr, &this->rr),
@@ -24,15 +24,18 @@ DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* 
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, 1}, {0, 1, 0}), nullptr, &this->rr),
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr, &this->rr),
       }),
-      SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS) {}
+      SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr), size(size) {}
 
-HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
-    this->rr.Init(device, size, size);
+void DCEM::Init(ID3D11Device* device) {
+    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
+    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
 
-    D3D11_TEXTURE2D_DESC desc;
-    ZeroMemory(&desc, sizeof(desc));
-    desc.Width              = size;
-    desc.Height             = size;
+    HRESULT hr = this->rr.Init(device, this->size, this->size);
+    if (FAILED(hr)) throw std::runtime_error("Failed to initialize DCEM rendering resources");
+
+    D3D11_TEXTURE2D_DESC desc{};
+    desc.Width              = this->size;
+    desc.Height             = this->size;
     desc.MipLevels          = 1;
     desc.ArraySize          = 6;
     desc.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -43,8 +46,10 @@ HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
     desc.CPUAccessFlags     = 0;
     desc.MiscFlags          = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-    device->CreateTexture2D(&desc, nullptr, this->texture.GetAddressOf());
-    device->CreateShaderResourceView(this->texture.Get(), nullptr, &this->srv);
+    hr = device->CreateTexture2D(&desc, nullptr, this->texture.GetAddressOf());
+    if (FAILED(hr)) throw std::runtime_error("Failed to create DCEM texture");
+    hr = device->CreateShaderResourceView(this->texture.Get(), nullptr, &this->srv);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create DCEM SRV");
 
     CD3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     uavDesc.Format                   = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -57,20 +62,17 @@ HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
         HRESULT r = device->CreateUnorderedAccessView(this->texture.Get(), &uavDesc, this->cameras[i].GetAdressOfUAV());
         if (FAILED(r)) {
             std::cerr << "UAV Creation failed " << __LINE__ << __FILE__ << " Error: " << r << "\n";
-            return r;
+            throw std::runtime_error("Failed to create DCEM");
         }
     }
-
-    return S_OK;
 }
 
-void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) const {
+void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
     context->PSSetShader(this->PS, nullptr, 0);
 
-    ConstantBuffer buffer;
-    DirectX::XMFLOAT4X4 worldMatrix = this->GetWorldMatrix();
-    buffer.Initialize(device, sizeof(worldMatrix), &worldMatrix);
-    context->VSSetConstantBuffers(1, 1, buffer.GetAdressOfBuffer());
+    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
+    this->matrixBuffer.UpdateBuffer(context, &matrix);
+    context->VSSetConstantBuffers(1, 1, this->matrixBuffer.GetAdressOfBuffer());
 
     // Bind verticies to VertexShader
     this->mesh->BindMeshBuffers(context);

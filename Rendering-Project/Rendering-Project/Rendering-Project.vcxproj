@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseScene.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DCEM.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="LightManager.hpp" />
     <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="MeshHandler.hpp" />
     <ClInclude Include="MirrorObject.hpp" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="ParticleBuffer.hpp" />
@@ -187,12 +189,14 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="StructuredBuffer.hpp" />
     <ClInclude Include="SubMesh.hpp" />
+    <ClInclude Include="testScene.hpp" />
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="todo.md" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ComputeShader.hlsl">

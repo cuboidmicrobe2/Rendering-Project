@@ -6,24 +6,30 @@
 #include "Scene.hpp"
 #include "StructuredBuffer.hpp"
 #include "WindowHandler.hpp"
+#include "BaseScene.hpp"
+#include "MeshHandler.hpp"
 #include <d3d11_4.h>
+
 class Renderer {
   public:
     Renderer();
+    ~Renderer();
 
     HRESULT Init(const Window& window);
 
-    void Render(Scene& scene);
+    void Render(BaseScene* scene);
 
     ID3D11Device* GetDevice();
     ID3D11PixelShader* GetPS() const;
     ID3D11PixelShader* GetDCEMPS() const;
     ID3D11DeviceContext* GetDeviceContext() const;
 
+    MeshHandler meshHandler;
+
   private:
     void Clear();
 
-    void Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr);
+    void Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr);
 
     HRESULT CreateDeviceAndSwapChain(const Window& window);
     HRESULT SetInputLayout(const std::string& byteCode);
@@ -35,8 +41,8 @@ class Renderer {
     // void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights);
-    void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
-    void ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj);
+    void RenderParticles(ParticleSystem& particleSystem, Camera& cam, RenderingResources* rr);
+    void ShadowPass(LightManager& lm, std::vector<SceneObject*> obj);
     void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
     HRESULT SetShaders(std::string& byteDataOutput);
@@ -97,7 +103,6 @@ class Renderer {
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
-    ConstantBuffer viewPos;
     ConstantBuffer tessBuffer;
 };
 
