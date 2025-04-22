@@ -8,13 +8,14 @@
 
 class DCEM : public SceneObject {
   public:
-    DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh);
-    HRESULT Init(ID3D11Device* device, UINT size);
+    DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size);
+    void Init(ID3D11Device* device) override;
     void Draw(ID3D11Device* device, ID3D11DeviceContext* context) override;
     void Update() override;
     std::array<Camera, 6>& GetCameras();
 
   private:
+    UINT size;
     RenderingResources rr;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
     ID3D11PixelShader* PS;

@@ -10,11 +10,6 @@ SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform)
                                 this->transform.GetPosition());
 }
 
-void SceneObject::Init(ID3D11Device* device) {
-    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
-    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
-}
-
 void SceneObject::Update() {
     // static float scale = 1;
     // this->transform.Rotate(0, 0.01, 0);

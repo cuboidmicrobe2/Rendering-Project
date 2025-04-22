@@ -16,3 +16,8 @@ void SimpleObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
         this->mesh->PerformSubMeshDrawCall(context, i);
     }
 }
+
+void SimpleObject::Init(ID3D11Device* device) {
+    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
+    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
+}

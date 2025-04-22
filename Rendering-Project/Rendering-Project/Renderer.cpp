@@ -32,29 +32,29 @@ HRESULT Renderer::Init(const Window& window) {
     this->metadataBuffer.Initialize(this->device.Get(), sizeof(CSMetadata), nullptr);
     this->viewProjBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4) * 3, nullptr);
     this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
-    //this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
+    // this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
     this->tessBuffer.Initialize(this->device.Get(), sizeof(TessellationData), nullptr);
 
     return S_OK;
 }
 
-void Renderer::Render(Scene& scene) {
+void Renderer::Render(BaseScene* scene) {
     // this->BindLights(scene.getLights());
-    LightManager& lm = scene.GetLightManager();
-    this->ShadowPass(scene.GetLightManager(), scene.getObjects());
+    LightManager& lm = scene->GetLightManager();
+    this->ShadowPass(scene->GetLightManager(), scene->GetObjects());
     lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
     lm.BindLightData(this->GetDeviceContext(), 7, 8);
 
     std::array<float, 4> clearColor{0, 0, 0, 1};
     for (int i = 0; i < this->renderPasses; i++) {
-        for (auto& cam : scene.getCameras()) {
+        for (auto& cam : scene->GetCameras()) {
             this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
             // clear
             cam.GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
         }
     }
     // Render to backbuffer
-    this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf(), &this->rr);
+    this->Render(scene, scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr);
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
@@ -68,18 +68,7 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
-Mesh* Renderer::GetMesh(const std::string& folder, const std::string& objname) { 
-    std::string key = folder + "/" + objname;
-    auto it         = this->meshes.find(key);
-    if (it != this->meshes.end())
-        return it->second.get();
-    else {
-        this->meshes.emplace(key, std::make_unique<Mesh>(this->device.Get(), folder, objname));
-        return this->meshes.at(key).get();
-    }
-}
-
-void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
+void Renderer::Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);
 
@@ -101,7 +90,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &camdata);
 
     // Draw objects / Bind objects
-    for (SceneObject*& obj : scene.getObjects()) {
+    for (SceneObject*& obj : scene->GetVisibleObjects(cam)) {
         // Calculate distance to object from camera
         float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
@@ -118,24 +107,24 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
 
     // Draw bounding boxes with wireframe fill mode
     this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
-    for (SceneObject*& box : scene.GetBoundingBoxes()) {
+    for (SceneObject*& box : scene->GetBoundingBoxes()) {
         box->Draw(this->device.Get(), this->immediateContext.Get());
     }
     this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     // Render particles using the particle system
-    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
-    this->RenderParticles(scene.GetParticleSystem(), cam, rr);
+    scene->GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
+    this->RenderParticles(scene->GetParticleSystem(), cam, rr);
 
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
-    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()),
-                            scene.GetLightManager().GetDirectionalLights().size());
+    this->BindLightMetaData(cam, static_cast<int>(scene->GetLightManager().GetSpotLights().size()),
+                            static_cast<int>(scene->GetLightManager().GetDirectionalLights().size()));
     rr->BindLightingPass(this->GetDeviceContext());
     // Do lighting pass
     this->LightingPass(UAV, vp);
 }
 
-void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj) {
+void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*> obj) {
     this->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
     const std::vector<Light>& SpotLights = lm.GetSpotLights();
@@ -447,7 +436,7 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam, Rend
     this->immediateContext->RSSetViewports(1, &viewport);
     this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
 
-    //this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->rr.GetDepthStencilView());
+    // this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->rr.GetDepthStencilView());
     this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
 
     this->immediateContext->GSSetShader(nullptr, nullptr, 0);

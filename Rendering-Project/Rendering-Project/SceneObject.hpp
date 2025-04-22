@@ -21,7 +21,7 @@ class SceneObject {
     SceneObject(SceneObject&)                                                   = delete;
 
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;
-    virtual void Init(ID3D11Device* device);
+    virtual void Init(ID3D11Device* device) = 0;
 
     virtual void Update();
 

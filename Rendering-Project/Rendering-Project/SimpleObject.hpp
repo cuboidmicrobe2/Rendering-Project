@@ -8,6 +8,7 @@ class SimpleObject : public SceneObject {
     SimpleObject(Transform transform, Mesh* mesh);
     SimpleObject(SimpleObject&) = default;
     void Draw(ID3D11Device* device, ID3D11DeviceContext* context) override;
+    void Init(ID3D11Device* device) override;
 
   private:
 };

@@ -35,7 +35,7 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
 
     for (const auto& obj : this->boundingBoxes) {
         obj.get()->Init(device);
-    }
+    }    
 
     return S_OK;
 }
@@ -57,8 +57,8 @@ void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic) {
     }
 }
 
-void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh) {
-    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh);
+void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size) {
+    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
@@ -116,6 +116,18 @@ std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
         objects.emplace_back(obj.get());
     }
     return objects; 
+}
+
+std::vector<SceneObject*> BaseScene::GetObjects() { 
+    std::vector<SceneObject*> objects;
+    objects.reserve(this->objects.size() + this->staticObjects.size());
+    for (const auto& obj : this->objects) {
+        objects.emplace_back(obj.get());
+    }
+    for (const auto& obj : this->staticObjects) {
+        objects.emplace_back(obj.get());
+    }
+    return objects;
 }
 
 ParticleSystem& BaseScene::GetParticleSystem() { return this->particleSystem; }
