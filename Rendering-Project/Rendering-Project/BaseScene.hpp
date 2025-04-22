@@ -27,7 +27,7 @@ class BaseScene {
     void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height);
     LightManager& GetLightManager();
 
-    std::vector<Camera>& GetCameras();
+    std::vector<Camera*>& GetCameras();
     std::vector<SceneObject*> GetBoundingBoxes();
     std::vector<SceneObject*> GetVisibleObjects(Camera& cam);
     std::vector<SceneObject*> GetObjects();
@@ -49,7 +49,7 @@ class BaseScene {
     std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes;
     std::vector<std::unique_ptr<SceneObject>> objects;
     std::vector<std::unique_ptr<SceneObject>> staticObjects;
-    std::vector<Camera> cameras;
+    std::vector<Camera*> cameras;
 
     QuadTree quadTree;
 

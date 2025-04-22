@@ -48,9 +48,9 @@ void Renderer::Render(BaseScene* scene) {
     std::array<float, 4> clearColor{0, 0, 0, 1};
     for (int i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene->GetCameras()) {
-            this->Render(scene, cam, cam.GetAdressOfUAV(), cam.GetRenderResources());
+            this->Render(scene, *cam, cam->GetAdressOfUAV(), cam->GetRenderResources());
             // clear
-            cam.GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
+            cam->GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
         }
     }
     // Render to backbuffer

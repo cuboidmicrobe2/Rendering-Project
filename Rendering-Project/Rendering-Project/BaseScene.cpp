@@ -72,8 +72,8 @@ void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11
     this->quadTree.AddElement(object);
     this->quadTree.AddElement(box);
 
-    for (const Camera& cam : object->GetCameras())
-        this->cameras.emplace_back(cam);
+    for (Camera& cam : object->GetCameras())
+        this->cameras.push_back(&cam);
 }
 
 void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle) {
@@ -88,7 +88,7 @@ void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float 
 
 LightManager& BaseScene::GetLightManager() { return this->lm; }
 
-std::vector<Camera>& BaseScene::GetCameras() { return this->cameras; }
+std::vector<Camera*>& BaseScene::GetCameras() { return this->cameras; }
 
 std::vector<SceneObject*> BaseScene::GetBoundingBoxes() {
     std::vector<SceneObject*> boxes;

@@ -3,7 +3,6 @@
 #include "DirectionalLight.hpp"
 #include "Mesh.hpp"
 #include "Renderer.hpp"
-#include "Scene.hpp"
 #include "SimpleObject.hpp"
 #include "SimpleVertex.hpp"
 #include "WindowHandler.hpp"
