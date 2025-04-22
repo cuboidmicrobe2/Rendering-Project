@@ -30,7 +30,7 @@ cbuffer MetaData : register(b0)
     float parallaxHeightScale;
     float3 padding;
 }
-cbuffer CameraData : register(b2)
+cbuffer CameraData : register(b1)
 {
     float4x4 _viewProj;
     float3 camPos;

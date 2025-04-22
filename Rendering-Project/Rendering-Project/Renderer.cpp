@@ -82,7 +82,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
     this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-    this->immediateContext->PSSetConstantBuffers(2, 1, this->cameraBuffer.GetAdressOfBuffer());
+    this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     CameraBufferData camdata{};
     DirectX::XMStoreFloat4x4(&camdata.viewProjection,
                              DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
@@ -90,7 +90,7 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &camdata);
 
     // Draw objects / Bind objects
-    for (SceneObject*& obj : scene.GetVisibleObjects()) {
+    for (SceneObject*& obj : scene.getObjects()) {
         // Calculate distance to object from camera
         float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));

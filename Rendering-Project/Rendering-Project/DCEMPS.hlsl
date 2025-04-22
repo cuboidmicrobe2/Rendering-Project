@@ -8,7 +8,8 @@ SamplerState samplerState : register(s0);
 // Camera buffer (same as vertex shader)
 cbuffer CameraBuffer : register(b1)
 {
-    float4 cameraPosition;
+    float4x4 _waste;
+    float3 cameraPosition;
 };
 
 struct PixelShaderInput
