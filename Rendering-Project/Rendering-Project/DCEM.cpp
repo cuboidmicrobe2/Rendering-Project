@@ -30,11 +30,12 @@ void DCEM::Init(ID3D11Device* device) {
     DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
     this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
 
-    this->rr.Init(device, size, size);
+    HRESULT hr = this->rr.Init(device, this->size, this->size);
+    if (FAILED(hr)) throw std::runtime_error("Failed to initialize DCEM rendering resources");
 
     D3D11_TEXTURE2D_DESC desc{};
-    desc.Width              = size;
-    desc.Height             = size;
+    desc.Width              = this->size;
+    desc.Height             = this->size;
     desc.MipLevels          = 1;
     desc.ArraySize          = 6;
     desc.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -45,8 +46,10 @@ void DCEM::Init(ID3D11Device* device) {
     desc.CPUAccessFlags     = 0;
     desc.MiscFlags          = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-    device->CreateTexture2D(&desc, nullptr, this->texture.GetAddressOf());
-    device->CreateShaderResourceView(this->texture.Get(), nullptr, &this->srv);
+    hr = device->CreateTexture2D(&desc, nullptr, this->texture.GetAddressOf());
+    if (FAILED(hr)) throw std::runtime_error("Failed to create DCEM texture");
+    hr = device->CreateShaderResourceView(this->texture.Get(), nullptr, &this->srv);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create DCEM SRV");
 
     CD3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     uavDesc.Format                   = DXGI_FORMAT_B8G8R8A8_UNORM;

@@ -123,6 +123,7 @@ HRESULT LightManager::Init(ID3D11Device* device) {
         std::vector<LightData> data = this->GetDirLightData();
         this->dirLightBuffer.Initialize(device, sizeof(LightData), data.size(), data.data());
     }
+    return S_OK;
 }
 
 std::vector<LightData> LightManager::GetSpotLightData() const {

@@ -4,12 +4,12 @@
 #include "BaseScene.hpp"
 class TestScene : public BaseScene {
   public:
-    TestScene(Window& window, ID3D11Device* device, ID3D11DeviceContext* context, MeshHandler& renderer,
+    TestScene(Window& window, ID3D11Device* device, ID3D11DeviceContext* context, MeshHandler& meshHandler,
               ID3D11PixelShader* basePS, ID3D11PixelShader* DCEMPS)
         : BaseScene(window) {
-        Mesh* sphereMesh = renderer.GetMesh("./sphere", "icoSphere.obj", device);
-        Mesh* boatMesh   = renderer.GetMesh("./boat", "boat.obj", device);
-        Mesh* cubeMesh   = renderer.GetMesh("./NPCube2", "cube.obj", device);
+        Mesh* sphereMesh = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
+        Mesh* boatMesh   = meshHandler.GetMesh("./boat", "boat.obj", device);
+        Mesh* cubeMesh   = meshHandler.GetMesh("./NPCube2", "cube.obj", device);
 
         this->AddDCEM(Transform({20, 3, 0}), basePS, DCEMPS, sphereMesh, 256);
         this->AddDirLight(Transform({0, 0, 0}, 90 + 45, 0), {1, 1, 1}, 100, 100);

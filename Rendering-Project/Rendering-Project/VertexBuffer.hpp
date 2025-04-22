@@ -16,7 +16,7 @@ public:
 	~VertexBuffer();
 	VertexBuffer(const VertexBuffer& other) = delete;
 	VertexBuffer& operator=(const VertexBuffer& other) = delete;
-	VertexBuffer(VertexBuffer&& other) = delete;
+	VertexBuffer(VertexBuffer&& other) = default;
 	VertexBuffer& operator=(VertexBuffer&& other) = delete;
 
 	void Initialize(ID3D11Device* device, UINT sizeOfVertex,

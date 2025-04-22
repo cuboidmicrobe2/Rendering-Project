@@ -29,6 +29,8 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
         return result;
     }
 
+    this->cubeMesh.Initialize(device, "./cube", "cube.obj");
+
     for (const auto& obj : this->objects) {
         obj.get()->Init(device);
     }
@@ -88,7 +90,7 @@ LightManager& BaseScene::GetLightManager() { return this->lm; }
 
 std::vector<Camera>& BaseScene::GetCameras() { return this->cameras; }
 
-std::vector<SceneObject*>& BaseScene::GetBoundingBoxes() {
+std::vector<SceneObject*> BaseScene::GetBoundingBoxes() {
     std::vector<SceneObject*> boxes;
     boxes.reserve(this->boundingBoxes.size());
     for (const auto& box : this->boundingBoxes) {

@@ -50,8 +50,8 @@ class Mesh {
     ~Mesh()                            = default;
     Mesh(const Mesh& other)            = delete;
     Mesh& operator=(const Mesh& other) = delete;
-    Mesh(Mesh&& other)                 = delete;
-    Mesh& operator=(Mesh&& other)      = delete;
+    Mesh(Mesh&& other)                 = default;
+    Mesh& operator=(Mesh&& other)      = default;
 
     void Initialize(ID3D11Device* device, const MeshData& meshInfo);
     void Initialize(ID3D11Device* device, const std::string& folderpath, const std::string& objname);

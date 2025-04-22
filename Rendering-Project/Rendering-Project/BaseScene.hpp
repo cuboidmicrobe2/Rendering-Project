@@ -28,7 +28,7 @@ class BaseScene {
     LightManager& GetLightManager();
 
     std::vector<Camera>& GetCameras();
-    std::vector<SceneObject*>& GetBoundingBoxes();
+    std::vector<SceneObject*> GetBoundingBoxes();
     std::vector<SceneObject*> GetVisibleObjects(Camera& cam);
     std::vector<SceneObject*> GetObjects();
 
