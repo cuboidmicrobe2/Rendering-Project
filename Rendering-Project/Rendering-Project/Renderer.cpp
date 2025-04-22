@@ -32,7 +32,7 @@ HRESULT Renderer::Init(const Window& window) {
     this->metadataBuffer.Initialize(this->device.Get(), sizeof(CSMetadata), nullptr);
     this->viewProjBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4) * 3, nullptr);
     this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
-    this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
+    //this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
     this->tessBuffer.Initialize(this->device.Get(), sizeof(TessellationData), nullptr);
 
     return S_OK;
@@ -45,10 +45,6 @@ void Renderer::Render(Scene& scene) {
     lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
     lm.BindLightData(this->GetDeviceContext(), 7, 8);
 
-    DirectX::XMVECTOR pos = scene.getMainCam().transform.GetPosition();
-    this->viewPos.UpdateBuffer(this->GetDeviceContext(), &pos);
-    this->immediateContext->PSSetConstantBuffers(1, 1, this->viewPos.GetAdressOfBuffer());
-    // Render all extra cameras to their texures
     std::array<float, 4> clearColor{0, 0, 0, 1};
     for (int i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene.getCameras()) {
@@ -59,10 +55,6 @@ void Renderer::Render(Scene& scene) {
     }
     // Render to backbuffer
     this->Render(scene, scene.getMainCam(), this->UAV.GetAddressOf(), &this->rr);
-
-    // Render particles using the particle system
-    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
-    this->RenderParticles(scene.GetParticleSystem(), scene.getMainCam());
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
@@ -81,16 +73,21 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     this->immediateContext->RSSetViewports(1, &vp);
 
     rr->BindGeometryPass(this->GetDeviceContext());
-    this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
     this->BindViewAndProjMatrixes(cam);
-    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()),
-                            scene.GetLightManager().GetDirectionalLights().size());
+
+    // Bind and update camera buffer
 
     // Tessellation ON
     this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
     this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
     this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+    this->immediateContext->PSSetConstantBuffers(2, 1, this->cameraBuffer.GetAdressOfBuffer());
+    CameraBufferData camdata{};
+    DirectX::XMStoreFloat4x4(&camdata.viewProjection,
+                             DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
+    XMStoreFloat3(&camdata.cameraPosition, cam.transform.GetPosition());
+    this->cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &camdata);
 
     // Draw objects / Bind objects
     for (SceneObject*& obj : scene.GetVisibleObjects()) {
@@ -106,17 +103,23 @@ void Renderer::Render(Scene& scene, Camera& cam, ID3D11UnorderedAccessView** UAV
     // Tessellation OFF
     this->immediateContext->HSSetShader(nullptr, nullptr, 0);
     this->immediateContext->DSSetShader(nullptr, nullptr, 0);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // Draw bounding boxes with wireframe fill mode
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
     for (SceneObject*& box : scene.GetBoundingBoxes()) {
         box->Draw(this->device.Get(), this->immediateContext.Get());
     }
     this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
+    // Render particles using the particle system
+    scene.GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
+    this->RenderParticles(scene.GetParticleSystem(), cam, rr);
+
+    this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
+    this->BindLightMetaData(cam, static_cast<int>(scene.getLights().size()),
+                            scene.GetLightManager().GetDirectionalLights().size());
     rr->BindLightingPass(this->GetDeviceContext());
-    this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     // Do lighting pass
     this->LightingPass(UAV, vp);
 }
@@ -405,14 +408,15 @@ void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT view
 }
 
 void Renderer::BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights) {
-    float* t = cam.transform.GetPosition().m128_f32;
-    CSMetadata metaData{.nrofLights = nrOfLights, .nrofDirLights = nrOfDirLights, .cameraPos = {t[0], t[1], t[2]}};
+    float* pos = cam.transform.GetPosition().m128_f32;
+    CSMetadata metaData{
+        .nrofLights = nrOfLights, .nrofDirLights = nrOfDirLights, .cameraPos = {pos[0], pos[1], pos[2]}};
 
     this->metadataBuffer.UpdateBuffer(this->immediateContext.Get(), &metaData);
     this->immediateContext.Get()->CSSetConstantBuffers(0, 1, this->metadataBuffer.GetAdressOfBuffer());
 }
 
-void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
+void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam, RenderingResources* rr) {
     this->immediateContext->IASetInputLayout(nullptr);
     this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
     this->immediateContext->VSSetShader(particleSystem.GetVertexShader(), nullptr, 0);
@@ -428,10 +432,11 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam) {
     this->immediateContext->GSSetShader(particleSystem.GetGeometryShader(), nullptr, 0);
     this->immediateContext->GSSetConstantBuffers(1, 1, cameraBuffer.GetAdressOfBuffer());
 
-    this->immediateContext->RSSetViewports(1, &this->viewport);
+    D3D11_VIEWPORT viewport = rr->GetViewPort();
+    this->immediateContext->RSSetViewports(1, &viewport);
     this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
 
-    this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->rr.GetDepthStencilView());
+    //this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->rr.GetDepthStencilView());
     this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
 
     this->immediateContext->GSSetShader(nullptr, nullptr, 0);

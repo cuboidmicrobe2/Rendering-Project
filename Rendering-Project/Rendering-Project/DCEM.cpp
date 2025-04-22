@@ -24,9 +24,10 @@ DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* 
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, 1}, {0, 1, 0}), nullptr, &this->rr),
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr, &this->rr),
       }),
-      SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS) {}
+      SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr) {}
 
 HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
+    this->InitBuffer(device);
     this->rr.Init(device, size, size);
 
     D3D11_TEXTURE2D_DESC desc;
@@ -64,13 +65,12 @@ HRESULT DCEM::Init(ID3D11Device* device, UINT size) {
     return S_OK;
 }
 
-void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) const {
+void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
     context->PSSetShader(this->PS, nullptr, 0);
 
-    ConstantBuffer buffer;
-    DirectX::XMFLOAT4X4 worldMatrix = this->GetWorldMatrix();
-    buffer.Initialize(device, sizeof(worldMatrix), &worldMatrix);
-    context->VSSetConstantBuffers(1, 1, buffer.GetAdressOfBuffer());
+    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
+    this->matrixBuffer.UpdateBuffer(context, &matrix);
+    context->VSSetConstantBuffers(1, 1, this->matrixBuffer.GetAdressOfBuffer());
 
     // Bind verticies to VertexShader
     this->mesh->BindMeshBuffers(context);

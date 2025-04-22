@@ -3,9 +3,19 @@ struct PSInput
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD0;
     float4 color : COLOR0;
+    float4 normal : NORMAL;
 };
 
-float4 main(PSInput input) : SV_TARGET
+struct PixelShaderOutput
+{
+    float4 position : SV_Target0;
+    float4 diffuse : SV_Target1;
+    float4 normal : SV_Target2;
+    float4 ambient : SV_Target3;
+    float4 specular : SV_Target4;
+};
+
+PixelShaderOutput main(PSInput input) : SV_TARGET
 {
     // Create a procedural pattern using only UV coordinates
     float2 uv = input.texCoord;
@@ -39,6 +49,13 @@ float4 main(PSInput input) : SV_TARGET
     
     // Set alpha based on the procedural pattern and lifetime
     finalColor.a *= alphaMask;
+    PixelShaderOutput psout;
     
-    return finalColor;
+    psout.ambient = finalColor;
+    psout.diffuse = finalColor;
+    psout.specular = finalColor;
+    psout.position = input.position;
+    psout.normal = input.normal;
+    
+    return psout;
 }

@@ -10,7 +10,7 @@ class DCEM : public SceneObject {
   public:
     DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh);
     HRESULT Init(ID3D11Device* device, UINT size);
-    void Draw(ID3D11Device* device, ID3D11DeviceContext* context) const override;
+    void Draw(ID3D11Device* device, ID3D11DeviceContext* context) override;
     void Update() override;
     std::array<Camera, 6>& GetCameras();
 

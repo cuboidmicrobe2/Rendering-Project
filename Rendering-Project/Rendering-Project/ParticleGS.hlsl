@@ -12,6 +12,7 @@ struct GSOutput
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD0;
     float4 color : COLOR0;
+    float4 normal : NORMAL;
 };
 
 // Camera buffer (same as vertex shader)
@@ -55,21 +56,25 @@ void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> outp
     vertices[0].position = mul(float4(particlePos - right + up, 1.0f), viewProjection);
     vertices[0].texCoord = float2(0, 0);
     vertices[0].color = particleColor;
+    vertices[0].normal = float4(look, 0);
 
     // Bottom left
     vertices[1].position = mul(float4(particlePos - right - up, 1.0f), viewProjection);
     vertices[1].texCoord = float2(0, 1);
     vertices[1].color = particleColor;
+    vertices[1].normal = float4(look, 0);
 
     // Top right
     vertices[2].position = mul(float4(particlePos + right + up, 1.0f), viewProjection);
     vertices[2].texCoord = float2(1, 0);
     vertices[2].color = particleColor;
+    vertices[2].normal = float4(look, 0);
 
     // Bottom right
     vertices[3].position = mul(float4(particlePos + right - up, 1.0f), viewProjection);
     vertices[3].texCoord = float2(1, 1);
     vertices[3].color = particleColor;
+    vertices[3].normal = float4(look, 0);
     
     // First triangle (top left, bottom left, top right)
     output.Append(vertices[0]);
@@ -81,5 +86,6 @@ void main(point GSInput input[1] : POSITION, inout TriangleStream<GSOutput> outp
     output.Append(vertices[2]);
     output.Append(vertices[1]);
     output.Append(vertices[3]);
+    
     output.RestartStrip();
 }

@@ -2,12 +2,11 @@
 
 SimpleObject::SimpleObject(Transform transform, Mesh* mesh) : SceneObject(transform, mesh) {}
 
-void SimpleObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) const {
+void SimpleObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
     // Write Object Worldmatrix to vertexShader
-    ConstantBuffer buffer;
     DirectX::XMFLOAT4X4 worldMatrix = this->GetWorldMatrix();
-    buffer.Initialize(device, sizeof(worldMatrix), &worldMatrix);
-    context->VSSetConstantBuffers(1, 1, buffer.GetAdressOfBuffer());
+    this->matrixBuffer.UpdateBuffer(context, &worldMatrix);
+    context->VSSetConstantBuffers(1, 1, this->matrixBuffer.GetAdressOfBuffer());
 
     // Bind verticies to VertexShader
     this->mesh->BindMeshBuffers(context);

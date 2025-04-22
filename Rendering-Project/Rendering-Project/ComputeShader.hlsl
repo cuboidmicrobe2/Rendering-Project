@@ -86,7 +86,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         
         if (lit)
         {
-            float4 LightToHit = pixelPosition - float4(cl.pos, 0);
             float4 lightDir = float4(normalize(cl.direction), 0);
             float intensity =  max(0.0f, dot(-lightDir, normal));
             diffuse += intensity;

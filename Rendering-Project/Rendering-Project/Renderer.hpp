@@ -35,7 +35,7 @@ class Renderer {
     // void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights);
-    void RenderParticles(ParticleSystem& particleSystem, Camera& cam);
+    void RenderParticles(ParticleSystem& particleSystem, Camera& cam, RenderingResources* rr);
     void ShadowPass(LightManager& lm, std::vector<SceneObject*>& obj);
     void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
@@ -97,7 +97,7 @@ class Renderer {
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
-    ConstantBuffer viewPos;
+    //ConstantBuffer viewPos;
     ConstantBuffer tessBuffer;
 };
 

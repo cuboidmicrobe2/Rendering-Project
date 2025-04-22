@@ -30,7 +30,7 @@ cbuffer MetaData : register(b0)
     float parallaxHeightScale;
     float3 padding;
 }
-cbuffer CameraData : register(b1)
+cbuffer CameraData : register(b2)
 {
     float4x4 _viewProj;
     float3 camPos;
@@ -61,6 +61,16 @@ PixelShaderOutput main(PixelShaderInput input)
         float3 viewDir = normalize(input.worldPosition.xyz - camPos);
         float3x3 TBN = float3x3(tangent, bitangent, input.normal.xyz);
         float3 viewDirTangent = mul(TBN, viewDir);
+        
+        
+        //PixelShaderOutput output;
+        //output.diffuse = float4(0, 0, 0, 0);
+        //output.normal = float4(normal, 0);
+        //output.position = input.worldPosition;
+        //output.ambient = float4(viewDir, 0);
+        //output.specular = float4(0, 0, 0, 0);
+
+        //return output;
         
         // Parallax
         //float layerDepth = 1.0 / parallaxSteps;

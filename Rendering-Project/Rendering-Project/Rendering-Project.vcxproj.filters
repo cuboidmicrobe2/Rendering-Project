@@ -69,5 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="todo.md" />
   </ItemGroup>
 </Project>
