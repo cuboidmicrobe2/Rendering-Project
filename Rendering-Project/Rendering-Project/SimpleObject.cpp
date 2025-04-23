@@ -1,6 +1,6 @@
 #include "SimpleObject.hpp"
 
-SimpleObject::SimpleObject(Transform transform, Mesh* mesh, bool tesselate = true) : SceneObject(transform, mesh, tesselate) {}
+SimpleObject::SimpleObject(Transform transform, Mesh* mesh, bool tesselate) : SceneObject(transform, mesh, tesselate) {}
 
 void SimpleObject::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
     // Bind verticies to VertexShader

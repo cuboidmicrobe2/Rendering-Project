@@ -16,7 +16,7 @@ inline DirectX::XMVECTOR LookRotation(DirectX::XMVECTOR forward, DirectX::XMVECT
 }
 
 DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size,
-           bool tesselate = true)
+           bool tesselate)
     : cameras({
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr, &this->rr, this),
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr, &this->rr,
