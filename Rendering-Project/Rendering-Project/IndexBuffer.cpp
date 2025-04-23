@@ -26,6 +26,13 @@ IndexBuffer::~IndexBuffer() {
     if (this->buffer) this->buffer->Release();
 }
 
+IndexBuffer::IndexBuffer(IndexBuffer&& other) noexcept {
+    this->buffer      = other.buffer;
+    this->nrOfIndices = other.nrOfIndices;
+    other.buffer      = nullptr;
+    other.nrOfIndices = 0;
+}
+
 void IndexBuffer::Initialize(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint32_t* indexData) {
     this->nrOfIndices = nrOfIndicesInBuffer;
     D3D11_BUFFER_DESC desc{

@@ -27,9 +27,6 @@ DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* 
       SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr), size(size) {}
 
 void DCEM::Init(ID3D11Device* device) {
-    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
-    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
-
     HRESULT hr = this->rr.Init(device, this->size, this->size);
     if (FAILED(hr)) throw std::runtime_error("Failed to initialize DCEM rendering resources");
 
@@ -69,11 +66,6 @@ void DCEM::Init(ID3D11Device* device) {
 
 void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
     context->PSSetShader(this->PS, nullptr, 0);
-
-    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
-    this->matrixBuffer.UpdateBuffer(context, &matrix);
-    context->VSSetConstantBuffers(1, 1, this->matrixBuffer.GetAdressOfBuffer());
-
     // Bind verticies to VertexShader
     this->mesh->BindMeshBuffers(context);
 

@@ -3,7 +3,6 @@
 #include "Camera.hpp"
 #include "Gbuffer.hpp"
 #include "LightManager.hpp"
-#include "Scene.hpp"
 #include "StructuredBuffer.hpp"
 #include "WindowHandler.hpp"
 #include "BaseScene.hpp"
@@ -38,7 +37,6 @@ class Renderer {
     HRESULT SetupRasterizerStates();
 
     void LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport);
-    // void BindLights(const std::vector<Light>& lights);
     void BindViewAndProjMatrixes(const Camera& cam);
     void BindLightMetaData(const Camera& cam, int nrOfLights, int nrOfDirLights);
     void RenderParticles(ParticleSystem& particleSystem, Camera& cam, RenderingResources* rr);
@@ -65,7 +63,6 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaderDCEM;
     Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
     Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
     Microsoft::WRL::ComPtr<ID3D11HullShader> hullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader> domainShader;
 
@@ -104,6 +101,7 @@ class Renderer {
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
     ConstantBuffer tessBuffer;
+    ConstantBuffer worldMatrixBuffer;
 };
 
 #endif

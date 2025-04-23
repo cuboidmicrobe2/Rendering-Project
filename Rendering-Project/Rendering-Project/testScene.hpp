@@ -11,10 +11,10 @@ class TestScene : public BaseScene {
         Mesh* boatMesh   = meshHandler.GetMesh("./boat", "boat.obj", device);
         Mesh* cubeMesh   = meshHandler.GetMesh("./NPCube2", "cube.obj", device);
 
-        this->AddDCEM(Transform({20, 3, 0}), basePS, DCEMPS, sphereMesh, 256);
-        this->AddDirLight(Transform({0, 0, 0}, 90 + 45, 0), {1, 1, 1}, 100, 100);
-        this->AddSimpleObject(Transform({20, 0, 0}), boatMesh, false);
-        this->AddSimpleObject(Transform({10, 0, 0}), cubeMesh, false);
+        //this->AddDCEM(Transform({20, 3, 0}), basePS, DCEMPS, sphereMesh, 256);
+        //this->AddDirLight(Transform({0, 0, 0}, 90 + 45, 0), {1, 1, 1}, 100, 100);
+        //this->AddSimpleObject(Transform({20, 0, 0}), boatMesh, false);
+        //this->AddSimpleObject(Transform({10, 0, 0}), cubeMesh, false);
 
 
         HRESULT hr = this->Init(device, context);
@@ -23,6 +23,7 @@ class TestScene : public BaseScene {
     void UpdateScene() override { 
         this->mainCamera.Update(this->input);
     }
+    ~TestScene() {}
 };
 
 #endif

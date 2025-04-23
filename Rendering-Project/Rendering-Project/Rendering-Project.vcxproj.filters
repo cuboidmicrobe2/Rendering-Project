@@ -15,7 +15,6 @@
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DCEM.cpp" />
-    <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -24,7 +23,6 @@
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SimpleObject.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
@@ -38,7 +36,6 @@
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DCEM.hpp" />
-    <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Gbuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
@@ -53,7 +50,6 @@
     <ClInclude Include="QuadTree.hpp" />
     <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Renderer.hpp" />
-    <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
     <ClInclude Include="SimpleObject.hpp" />
     <ClInclude Include="SimpleVertex.hpp" />

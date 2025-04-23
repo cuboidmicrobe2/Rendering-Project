@@ -18,6 +18,7 @@ class SceneObject {
     virtual ~SceneObject() {};
 
     virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) = 0;
+    void DrawMesh(ID3D11DeviceContext* context);
     SceneObject(SceneObject&)                                                   = delete;
 
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;
@@ -29,7 +30,6 @@ class SceneObject {
     DirectX::BoundingBox GetBoundingBox() const;
 
   protected:
-    ConstantBuffer matrixBuffer;
     DirectX::BoundingBox boundingBox;
     Mesh* mesh;
 };

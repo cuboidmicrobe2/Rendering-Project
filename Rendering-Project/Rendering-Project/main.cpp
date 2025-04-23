@@ -31,6 +31,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
         scene.UpdateScene();
         renderer.Render(&scene);
+        return 0;
     }
 
     return 0;

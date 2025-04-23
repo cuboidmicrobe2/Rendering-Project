@@ -13,21 +13,21 @@ class RenderingResources {
   public:
     RenderingResources() : viewport({}) {}
 
-    HRESULT Init(ID3D11Device* device, FLOAT width, FLOAT height) {
+    HRESULT Init(ID3D11Device* device, UINT width, UINT height) {
         this->viewport = D3D11_VIEWPORT{
             .TopLeftX = 0,
             .TopLeftY = 0,
-            .Width    = width,
-            .Height   = height,
+            .Width    = static_cast<FLOAT>(width),
+            .Height   = static_cast<FLOAT>(height),
             .MinDepth = 0.0f,
             .MaxDepth = 1.0f,
         };
 
-        this->position.Init(device, this->viewport.Width, this->viewport.Height);
-        this->diffuse.Init(device, this->viewport.Width, this->viewport.Height);
-        this->normal.Init(device, this->viewport.Width, this->viewport.Height);
-        this->ambient.Init(device, this->viewport.Width, this->viewport.Height);
-        this->specular.Init(device, this->viewport.Width, this->viewport.Height);
+        this->position.Init(device, width, height);
+        this->diffuse.Init(device, width, height);
+        this->normal.Init(device, width, height);
+        this->ambient.Init(device, width, height);
+        this->specular.Init(device, width, height);
 
         D3D11_TEXTURE2D_DESC depthStencilDesc = {
             depthStencilDesc.Width              = width,

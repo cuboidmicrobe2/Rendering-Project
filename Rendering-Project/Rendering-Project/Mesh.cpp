@@ -17,22 +17,28 @@ Mesh::Mesh(ID3D11Device* device, const std::string& folderpath, const std::strin
     this->Initialize(device, folderpath, objname);
 }
 
-void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
-    this->subMeshes.reserve(meshInfo.subMeshInfo.size());
-    for (const MeshData::SubMeshInfo& subMeshInfo : meshInfo.subMeshInfo) {
-        SubMesh newSubMesh;
-        newSubMesh.Initialize(device, subMeshInfo.startIndexValue, subMeshInfo.nrOfIndicesInSubMesh,
-                              subMeshInfo.ambientTextureSRV, subMeshInfo.diffuseTextureSRV,
-                              subMeshInfo.specularTextureSRV, subMeshInfo.normalMapSRV, subMeshInfo.parallaxFactor);
-        this->subMeshes.emplace_back(std::move(newSubMesh));
-    }
+Mesh::Mesh(Mesh&& other) noexcept
+    : subMeshes(std::move(other.subMeshes)), indexBuffer(std::move(other.indexBuffer)),
+      vertexBuffer(std::move(other.vertexBuffer)), boundingBox(std::move(other.boundingBox)) {
 
-    this->vertexBuffer.Initialize(device, static_cast<UINT>(meshInfo.vertexInfo.sizeOfVertex),
-                                  static_cast<UINT>(meshInfo.vertexInfo.nrOfVerticesInBuffer),
-                                  meshInfo.vertexInfo.vertexData);
-
-    this->indexBuffer.Initialize(device, meshInfo.indexInfo.nrOfIndicesInBuffer, meshInfo.indexInfo.indexData);
 }
+
+//void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
+//    this->subMeshes.reserve(meshInfo.subMeshInfo.size());
+//    for (const MeshData::SubMeshInfo& subMeshInfo : meshInfo.subMeshInfo) {
+//        SubMesh newSubMesh;
+//        newSubMesh.Initialize(device, subMeshInfo.startIndexValue, subMeshInfo.nrOfIndicesInSubMesh,
+//                              subMeshInfo.ambientTextureSRV, subMeshInfo.diffuseTextureSRV,
+//                              subMeshInfo.specularTextureSRV, subMeshInfo.normalMapSRV, subMeshInfo.parallaxFactor);
+//        this->subMeshes.emplace_back(std::move(newSubMesh));
+//    }
+//
+//    this->vertexBuffer.Initialize(device, static_cast<UINT>(meshInfo.vertexInfo.sizeOfVertex),
+//                                  static_cast<UINT>(meshInfo.vertexInfo.nrOfVerticesInBuffer),
+//                                  meshInfo.vertexInfo.vertexData);
+//
+//    this->indexBuffer.Initialize(device, meshInfo.indexInfo.nrOfIndicesInBuffer, meshInfo.indexInfo.indexData);
+//}
 
 void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const std::string& objname) {
     objl::Loader loader;
@@ -100,7 +106,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
                 std::string dispPath;
                 if (!mesh.MeshMaterial.map_d.empty()) {
                     dispPath = folderpath + "/" + mesh.MeshMaterial.map_d;
-                    parallaxFactor = 0.05;
+                    parallaxFactor = 0.05f;
                 }
                 normalMap = LoadNormal(device, path, dispPath);
             }
@@ -108,12 +114,13 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             // Initialize and add submesh
             submesh.Initialize(device, meshStartIndex, mesh.Indices.size(), ambientSrv, diffuseSrv, specularSrv,
                                normalMap, parallaxFactor);
+
             this->subMeshes.emplace_back(std::move(submesh));
 
             // Add indices to temp index buffer
             tempIndexBuffer.reserve(mesh.Indices.size());
             for (auto& indice : mesh.Indices) {
-                tempIndexBuffer.emplace_back(indice + meshStartIndex);
+                tempIndexBuffer.emplace_back(indice + (unsigned int)meshStartIndex);
             }
             meshStartIndex += mesh.Indices.size();
 
@@ -127,9 +134,8 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
         }
 
         // Initialize buffers
-        this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), tempVertexBuffer.size(), tempVertexBuffer.data());
+        this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), (UINT)tempVertexBuffer.size(), tempVertexBuffer.data());
         this->indexBuffer.Initialize(device, tempIndexBuffer.size(), tempIndexBuffer.data());
-
         this->boundingBox.CreateFromPoints(this->boundingBox, vertexPositions.size(), vertexPositions.data(),
                                            sizeof(DirectX::XMFLOAT3));
 

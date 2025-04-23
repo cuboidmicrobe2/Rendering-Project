@@ -12,30 +12,30 @@
 #include <DirectXCollision.h>
 #include <filesystem>
 
-struct MeshData {
-    struct VertexInfo {
-        size_t sizeOfVertex;
-        size_t nrOfVerticesInBuffer;
-        void* vertexData;
-    } vertexInfo;
-
-    struct IndexInfo {
-        size_t nrOfIndicesInBuffer;
-        uint32_t* indexData;
-    } indexInfo;
-
-    struct SubMeshInfo {
-        size_t startIndexValue;
-        size_t nrOfIndicesInSubMesh;
-        ID3D11ShaderResourceView* ambientTextureSRV;
-        ID3D11ShaderResourceView* diffuseTextureSRV;
-        ID3D11ShaderResourceView* specularTextureSRV;
-        ID3D11ShaderResourceView* normalMapSRV;
-        float parallaxFactor = 0;
-    };
-
-    std::vector<SubMeshInfo> subMeshInfo;
-};
+//struct MeshData {
+//    struct VertexInfo {
+//        size_t sizeOfVertex;
+//        size_t nrOfVerticesInBuffer;
+//        void* vertexData;
+//    } vertexInfo;
+//
+//    struct IndexInfo {
+//        size_t nrOfIndicesInBuffer;
+//        uint32_t* indexData;
+//    } indexInfo;
+//
+//    struct SubMeshInfo {
+//        size_t startIndexValue;
+//        size_t nrOfIndicesInSubMesh;
+//        ID3D11ShaderResourceView* ambientTextureSRV;
+//        ID3D11ShaderResourceView* diffuseTextureSRV;
+//        ID3D11ShaderResourceView* specularTextureSRV;
+//        ID3D11ShaderResourceView* normalMapSRV;
+//        float parallaxFactor = 0;
+//    };
+//
+//    std::vector<SubMeshInfo> subMeshInfo;
+//};
 
 class Mesh {
   private:
@@ -50,10 +50,10 @@ class Mesh {
     ~Mesh()                            = default;
     Mesh(const Mesh& other)            = delete;
     Mesh& operator=(const Mesh& other) = delete;
-    Mesh(Mesh&& other)                 = default;
-    Mesh& operator=(Mesh&& other)      = default;
+    Mesh(Mesh&& other) noexcept;
+    Mesh& operator=(Mesh&& other)      = delete;
 
-    void Initialize(ID3D11Device* device, const MeshData& meshInfo);
+    //void Initialize(ID3D11Device* device, const MeshData& meshInfo);
     void Initialize(ID3D11Device* device, const std::string& folderpath, const std::string& objname);
 
     void BindMeshBuffers(ID3D11DeviceContext* context) const;

@@ -6,7 +6,6 @@
 #include <wrl/client.h>
 #include "StructuredBuffer.hpp"
 #include "DirectionalLight.hpp"
-#include "DepthBuffer.hpp"
 
 struct LightData {
     float pos[3];
