@@ -15,11 +15,11 @@ class SceneObject {
     Transform transform;
 
     SceneObject(Transform transform, Mesh* mesh);
-    virtual ~SceneObject() {};
+    virtual ~SceneObject() = 0;
 
     virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) = 0;
     void DrawMesh(ID3D11DeviceContext* context);
-    SceneObject(SceneObject&)                                                   = delete;
+    SceneObject(SceneObject&) = delete;
 
     DirectX::XMFLOAT4X4 GetWorldMatrix() const;
     virtual void Init(ID3D11Device* device) = 0;

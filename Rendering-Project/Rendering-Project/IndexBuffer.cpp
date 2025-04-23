@@ -21,10 +21,7 @@ IndexBuffer::IndexBuffer(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint3
         throw std::runtime_error("Failed to create index buffer");
 }
 
-// Pointer Train go Chu Chu!
-IndexBuffer::~IndexBuffer() {
-    if (this->buffer) this->buffer->Release();
-}
+IndexBuffer::~IndexBuffer() {}
 
 IndexBuffer::IndexBuffer(IndexBuffer&& other) noexcept {
     this->buffer      = other.buffer;
@@ -44,15 +41,15 @@ void IndexBuffer::Initialize(ID3D11Device* device, size_t nrOfIndicesInBuffer, u
         .StructureByteStride = 0,
     };
 
-    D3D11_SUBRESOURCE_DATA data;
+    D3D11_SUBRESOURCE_DATA data{};
     data.pSysMem          = indexData;
     data.SysMemPitch      = 0;
     data.SysMemSlicePitch = 0;
 
-    if (FAILED(device->CreateBuffer(&desc, &data, &this->buffer)))
+    if (FAILED(device->CreateBuffer(&desc, &data, this->buffer.GetAddressOf())))
         throw std::runtime_error("Failed to create index buffer");
 }
 
 size_t IndexBuffer::GetNrOfIndices() const { return this->nrOfIndices; }
 
-ID3D11Buffer* IndexBuffer::GetBuffer() const { return this->buffer; }
+ID3D11Buffer* IndexBuffer::GetBuffer() const { return this->buffer.Get(); }

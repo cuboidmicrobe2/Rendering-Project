@@ -8,10 +8,14 @@
 #include <array>
 #include <d3d11_4.h>
 #include <wrl/client.h>
+#include "SceneObject.hpp"
 
 class RenderingResources {
   public:
     RenderingResources() : viewport({}) {}
+    ~RenderingResources() {
+
+    }
 
     HRESULT Init(ID3D11Device* device, UINT width, UINT height) {
         this->viewport = D3D11_VIEWPORT{
@@ -52,7 +56,7 @@ class RenderingResources {
     void BindLightingPass(ID3D11DeviceContext* context) {
         // Unbind Gbuffers from write
         ID3D11RenderTargetView* rVResetter[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
-        context->OMSetRenderTargets(3, rVResetter, nullptr);
+        context->OMSetRenderTargets(5, rVResetter, nullptr);
 
         // Bind to Compute
         ID3D11ShaderResourceView* srvs[5]{
@@ -101,7 +105,7 @@ class RenderingResources {
 class Camera {
   public:
     inline Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ, DirectX::XMVECTOR position,
-                  DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV, RenderingResources* rr);
+                  DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV, RenderingResources* rr, SceneObject* owner = nullptr);
     inline ~Camera() = default;
 
     Transform transform;
@@ -116,6 +120,8 @@ class Camera {
     inline RenderingResources* GetRenderResources() const;
     inline D3D11_VIEWPORT GetViewPort() const;
 
+    inline SceneObject* GetOwner() const;
+
     inline void Update(InputHandler& input);
 
     inline ID3D11UnorderedAccessView** GetAdressOfUAV();
@@ -124,8 +130,9 @@ class Camera {
     inline float GetFOV() const;
 
   private:
+    SceneObject* owner;
     RenderingResources* rr;
-    ID3D11UnorderedAccessView* UAV;
+    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UAV;
 
     float verticalFOVRadians;
     float aspectRatio;
@@ -139,9 +146,9 @@ class Camera {
 
 inline Camera::Camera(float horizontalFOVDegrees, float aspectRatio, float nearZ, float farZ,
                       DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion, ID3D11UnorderedAccessView* UAV,
-                      RenderingResources* rr)
+                      RenderingResources* rr, SceneObject* owner)
     : aspectRatio(aspectRatio), nearZ(nearZ), farZ(farZ), transform(position, quaternion, {1, 1, 1}), xRotation(0.0f),
-      yRotation(0.0f), UAV(UAV), rr(rr) {
+      yRotation(0.0f), UAV(UAV), rr(rr), owner(owner) {
     this->verticalFOVRadians = DirectX::XMConvertToRadians(horizontalFOVDegrees / aspectRatio);
 }
 
@@ -169,7 +176,9 @@ inline RenderingResources* Camera::GetRenderResources() const { return this->rr;
 
 inline D3D11_VIEWPORT Camera::GetViewPort() const { return this->rr->GetViewPort(); }
 
-inline ID3D11UnorderedAccessView** Camera::GetAdressOfUAV() { return &this->UAV; }
+inline SceneObject* Camera::GetOwner() const { return this->owner; }
+
+inline ID3D11UnorderedAccessView** Camera::GetAdressOfUAV() { return this->UAV.GetAddressOf(); }
 
 inline void Camera::SetFOV(float degrees) {
     this->verticalFOVRadians = DirectX::XMConvertToRadians(degrees / this->aspectRatio);

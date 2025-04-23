@@ -6,11 +6,8 @@
 Renderer::Renderer() {}
 
 Renderer::~Renderer() {
-    ID3D11Debug* debug = nullptr;
-    if (SUCCEEDED(this->device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug)))) {
-        debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL | D3D11_RLDO_IGNORE_INTERNAL); // D3D11_RLDO_IGNORE_INTERNAL
-        debug->Release();
-    }
+    this->immediateContext->ClearState();
+    this->immediateContext->Flush();
 }
 
 HRESULT Renderer::Init(const Window& window) {
@@ -27,7 +24,6 @@ HRESULT Renderer::Init(const Window& window) {
 
     result = this->rr.Init(this->device.Get(), window.GetWidth(), window.GetHeight());
     if (FAILED(result)) return result;
-
 
     result = CreateUAV();
     if (FAILED(result)) return result;
@@ -56,17 +52,17 @@ void Renderer::Render(BaseScene* scene) {
     std::array<float, 4> clearColor{0, 0, 0, 1};
     for (uint32_t i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene->GetCameras()) {
-            this->Render(scene, *cam, cam->GetAdressOfUAV(), cam->GetRenderResources());
+            this->Render(scene, cam, cam->GetAdressOfUAV(), cam->GetRenderResources());
             // clear
             cam->GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
         }
     }
     // Render to backbuffer
-    this->Render(scene, scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr);
+    this->Render(scene, &scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr);
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
-    // lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
+    lm.UnbindDepthTextures(this->immediateContext.Get(), 5, 6);
 
     // Present
     this->swapChain->Present(1, 0);
@@ -76,13 +72,13 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
-void Renderer::Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
+void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);
 
     rr->BindGeometryPass(this->GetDeviceContext());
     this->immediateContext->VSSetConstantBuffers(1, 1, this->worldMatrixBuffer.GetAdressOfBuffer());
-    this->BindViewAndProjMatrixes(cam);
+    this->BindViewAndProjMatrixes(*cam);
 
     // Bind and update camera buffer
 
@@ -93,22 +89,24 @@ void Renderer::Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView**
     this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
     this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     CameraBufferData camdata{};
-    DirectX::XMStoreFloat4x4(&camdata.viewProjection,
-                             DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
-    XMStoreFloat3(&camdata.cameraPosition, cam.transform.GetPosition());
+    DirectX::XMStoreFloat4x4(&camdata.viewProjection, DirectX::XMMatrixMultiplyTranspose(
+                                                          cam->createViewMatrix(), cam->createProjectionMatrix()));
+    XMStoreFloat3(&camdata.cameraPosition, cam->transform.GetPosition());
     this->cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &camdata);
 
     // Draw objects / Bind objects
-    for (SceneObject*& obj : scene->GetVisibleObjects(cam)) {
-        // Calculate distance to object from camera
-        float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
-            DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
-        this->tessBuffer.UpdateBuffer(this->GetDeviceContext(), &distance);
+    for (SceneObject*& obj : scene->GetVisibleObjects(*cam)) {
+        if (cam->GetOwner() != obj) {
+            // Calculate distance to object from camera
+            float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
+                DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam->transform.GetPosition())));
+            this->tessBuffer.UpdateBuffer(this->GetDeviceContext(), &distance);
 
-        // Draw object
-        DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
-        this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
-        obj->Draw(this->device.Get(), this->immediateContext.Get());
+            // Draw object
+            DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
+            this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
+            obj->Draw(this->device.Get(), this->immediateContext.Get());
+        }
     }
 
     // Tessellation OFF
@@ -127,13 +125,14 @@ void Renderer::Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView**
 
     // Render particles using the particle system
     scene->GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
-    this->RenderParticles(scene->GetParticleSystem(), cam, rr);
+    this->RenderParticles(scene->GetParticleSystem(), *cam, rr);
 
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
-    this->BindLightMetaData(cam, static_cast<int>(scene->GetLightManager().GetSpotLights().size()),
+    this->BindLightMetaData(*cam, static_cast<int>(scene->GetLightManager().GetSpotLights().size()),
                             static_cast<int>(scene->GetLightManager().GetDirectionalLights().size()));
-    rr->BindLightingPass(this->GetDeviceContext());
+
     // Do lighting pass
+    rr->BindLightingPass(this->GetDeviceContext());
     this->LightingPass(UAV, vp);
 }
 
@@ -145,7 +144,7 @@ void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*> obj) {
     for (const Light& light : SpotLights) {
         this->immediateContext->ClearDepthStencilView(light.GetDepthStencilVeiw(), D3D11_CLEAR_DEPTH, 1, 0);
         this->BindShadowViewAndProjection(light.CreateViewMatrix(), light.CreateProjectionMatrix());
-        this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
+        this->immediateContext->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
         for (auto& obj : obj) {
             DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
             this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
@@ -166,9 +165,10 @@ void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*> obj) {
         }
     }
 
-    this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, this->rr.GetDepthStencilView());
-    this->GetDeviceContext()->PSSetShader(this->pixelShader.Get(), nullptr, 0);
-    this->GetDeviceContext()->CSSetShaderResources(3, static_cast<UINT>(SpotLights.size()), lm.GetAdressOfSpotlightDSSRV());
+    this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
+    this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
+    this->immediateContext->CSSetShaderResources(3, static_cast<UINT>(SpotLights.size()),
+                                                 lm.GetAdressOfSpotlightDSSRV());
 }
 
 void Renderer::BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix) {
@@ -189,7 +189,7 @@ void Renderer::Clear() {
 }
 
 HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
-    
+
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
     swapChainDesc.BufferCount                        = 2;
     swapChainDesc.BufferDesc.Width                   = 0;
@@ -205,9 +205,10 @@ HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     swapChainDesc.SwapEffect                         = DXGI_SWAP_EFFECT_DISCARD;
     swapChainDesc.Flags                              = 0;
 
-    HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr,
-                                         0, D3D11_SDK_VERSION, &swapChainDesc, this->swapChain.GetAddressOf(),
-                                         this->device.GetAddressOf(), nullptr, this->immediateContext.GetAddressOf());
+    HRESULT hr =
+        D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0,
+                                      D3D11_SDK_VERSION, &swapChainDesc, this->swapChain.GetAddressOf(),
+                                      this->device.GetAddressOf(), nullptr, this->immediateContext.GetAddressOf());
     if (FAILED(hr)) {
         std::cerr << "Failed to create device and swapchain, Error: " << hr << "\n";
         return hr;

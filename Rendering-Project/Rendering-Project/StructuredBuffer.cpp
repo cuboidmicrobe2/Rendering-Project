@@ -6,14 +6,7 @@ StructuredBuffer::StructuredBuffer(ID3D11Device* device, UINT sizeOfElement, siz
     this->Initialize(device, sizeOfElement, nrOfElementsInBuffer, bufferData, dynamic);
 }
 
-StructuredBuffer::~StructuredBuffer() {
-    if (this->buffer) {
-        this->buffer->Release();
-    }
-    if (this->srv) {
-        this->srv->Release();
-    }
-}
+StructuredBuffer::~StructuredBuffer() {}
 
 void StructuredBuffer::Initialize(ID3D11Device* device, UINT sizeOfElement, size_t nrOfElementsInBuffer,
                                   void* bufferData, bool dynamic) {
@@ -33,7 +26,7 @@ void StructuredBuffer::Initialize(ID3D11Device* device, UINT sizeOfElement, size
         .pSysMem = bufferData,
     };
 
-    HRESULT hr = device->CreateBuffer(&bufferDesc, bufferData ? &initData : nullptr, &this->buffer);
+    HRESULT hr = device->CreateBuffer(&bufferDesc, bufferData ? &initData : nullptr, this->buffer.GetAddressOf());
     if (FAILED(hr)) {
         throw std::runtime_error("Failed to create structured buffer");
     }
@@ -46,7 +39,7 @@ void StructuredBuffer::Initialize(ID3D11Device* device, UINT sizeOfElement, size
 
     };
 
-    hr = device->CreateShaderResourceView(this->buffer, &srvDesc, &this->srv);
+    hr = device->CreateShaderResourceView(this->buffer.Get(), &srvDesc, &this->srv);
     if (FAILED(hr)) {
         throw std::runtime_error("Failed to create shader resource view for structured buffer");
     }
@@ -54,19 +47,19 @@ void StructuredBuffer::Initialize(ID3D11Device* device, UINT sizeOfElement, size
 
 void StructuredBuffer::UpdateBuffer(ID3D11DeviceContext* context, void* data) {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    HRESULT hr = context->Map(this->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    HRESULT hr = context->Map(this->buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(hr)) {
         throw std::runtime_error("Failed to map structured buffer");
     }
 
     memcpy(mappedResource.pData, data, this->elementSize * this->nrOfElements);
-    context->Unmap(this->buffer, 0);
+    context->Unmap(this->buffer.Get(), 0);
 }
 
 UINT StructuredBuffer::GetElementSize() const { return this->elementSize; }
 
 size_t StructuredBuffer::GetNrOfElements() const { return this->nrOfElements; }
 
-ID3D11ShaderResourceView* StructuredBuffer::GetSRV() const { return this->srv; }
+ID3D11ShaderResourceView* StructuredBuffer::GetSRV() const { return this->srv.Get(); }
 
-ID3D11ShaderResourceView** StructuredBuffer::GetAdressOfSRV() { return &this->srv; }
+ID3D11ShaderResourceView** StructuredBuffer::GetAdressOfSRV() { return this->srv.GetAddressOf(); }

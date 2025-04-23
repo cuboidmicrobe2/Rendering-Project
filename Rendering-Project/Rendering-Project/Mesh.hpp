@@ -12,31 +12,6 @@
 #include <DirectXCollision.h>
 #include <filesystem>
 
-//struct MeshData {
-//    struct VertexInfo {
-//        size_t sizeOfVertex;
-//        size_t nrOfVerticesInBuffer;
-//        void* vertexData;
-//    } vertexInfo;
-//
-//    struct IndexInfo {
-//        size_t nrOfIndicesInBuffer;
-//        uint32_t* indexData;
-//    } indexInfo;
-//
-//    struct SubMeshInfo {
-//        size_t startIndexValue;
-//        size_t nrOfIndicesInSubMesh;
-//        ID3D11ShaderResourceView* ambientTextureSRV;
-//        ID3D11ShaderResourceView* diffuseTextureSRV;
-//        ID3D11ShaderResourceView* specularTextureSRV;
-//        ID3D11ShaderResourceView* normalMapSRV;
-//        float parallaxFactor = 0;
-//    };
-//
-//    std::vector<SubMeshInfo> subMeshInfo;
-//};
-
 class Mesh {
   private:
     std::vector<SubMesh> subMeshes;
@@ -47,7 +22,9 @@ class Mesh {
   public:
     Mesh() = default;
     Mesh(ID3D11Device* device, const std::string& folderpath, const std::string& objname);
-    ~Mesh()                            = default;
+    ~Mesh(){
+    
+    }
     Mesh(const Mesh& other)            = delete;
     Mesh& operator=(const Mesh& other) = delete;
     Mesh(Mesh&& other) noexcept;

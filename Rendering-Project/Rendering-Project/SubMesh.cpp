@@ -12,9 +12,10 @@ SubMesh::SubMesh(SubMesh&& other) noexcept {
 }
 
 void SubMesh::Initialize(ID3D11Device* device, size_t startIndexValue, size_t nrOfIndicesInSubMesh,
-                         ID3D11ShaderResourceView* ambientTextureSRV, ID3D11ShaderResourceView* diffuseTextureSRV,
-                         ID3D11ShaderResourceView* specularTextureSRV,
-                         ID3D11ShaderResourceView* normalMapTexture, float  parallaxFactor) {
+                         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ambientTextureSRV,
+                         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseTextureSRV,
+                         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularTextureSRV,
+                         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMapTexture, float parallaxFactor) {
     this->startIndex       = startIndexValue;
     this->nrOfIndices      = nrOfIndicesInSubMesh;
     this->ambientTexture   = ambientTextureSRV;
@@ -40,7 +41,7 @@ void SubMesh::PerformDrawCall(ID3D11DeviceContext* context) {
     context->PSSetShaderResources(2, 1, this->specularTexture.GetAddressOf());
     context->PSSetShaderResources(3, 1, this->normalMapTexture.GetAddressOf());
 
-    context->DrawIndexed(this->nrOfIndices, this->startIndex, 0);
+    context->DrawIndexed((UINT)this->nrOfIndices, this->startIndex, 0);
 }
 
 ID3D11ShaderResourceView* SubMesh::GetAmbientSRV() const { return this->ambientTexture.Get(); }

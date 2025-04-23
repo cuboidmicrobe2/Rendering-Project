@@ -8,15 +8,19 @@
 class SubMesh {
   public:
     SubMesh()                                = default;
-    ~SubMesh()                               = default;
+    ~SubMesh() {
+    
+    };
     SubMesh(const SubMesh& other)            = delete;
     SubMesh& operator=(const SubMesh& other) = delete;
     SubMesh(SubMesh&& other) noexcept;
     SubMesh& operator=(SubMesh&& other)      = default;
 
     void Initialize(ID3D11Device* device, size_t startIndexValue, size_t nrOfIndicesInSubMesh,
-                    ID3D11ShaderResourceView* ambientTextureSRV, ID3D11ShaderResourceView* diffuseTextureSRV,
-                    ID3D11ShaderResourceView* specularTextureSRV, ID3D11ShaderResourceView* normalMapTexture,
+                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ambientTextureSRV,
+                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseTextureSRV,
+                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularTextureSRV,
+                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMapTexture,
                     float parallaxFactor);
 
     void PerformDrawCall(ID3D11DeviceContext* context);

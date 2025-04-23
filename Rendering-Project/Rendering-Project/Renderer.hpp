@@ -25,10 +25,12 @@ class Renderer {
 
     MeshHandler meshHandler;
 
+    
+    Microsoft::WRL::ComPtr<ID3D11Device> GetDeviceCOMPTR() { return this->device; }
   private:
     void Clear();
 
-    void Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr);
+    void Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr);
 
     HRESULT CreateDeviceAndSwapChain(const Window& window);
     HRESULT SetInputLayout(const std::string& byteCode);

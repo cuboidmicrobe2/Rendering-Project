@@ -13,6 +13,8 @@ SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform)
     this->boundingBox.Transform(this->boundingBox, matrix);
 }
 
+SceneObject::~SceneObject() {}
+
 void SceneObject::Update() {}
 
 void SceneObject::SetBoundingBox(DirectX::BoundingBox& boundingBox) { this->boundingBox = boundingBox; }

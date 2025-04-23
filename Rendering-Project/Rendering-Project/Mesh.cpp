@@ -8,9 +8,10 @@
 #include <WICTextureLoader.h>
 #include <filesystem>
 #include <fstream>
+#include <wrl/client.h>
 
 namespace fs = std::filesystem;
-ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device, const std::string& filename,
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> LoadNormal(ID3D11Device* device, const std::string& filename,
                                      const std::string& filenameDisp);
 
 Mesh::Mesh(ID3D11Device* device, const std::string& folderpath, const std::string& objname) {
@@ -19,26 +20,7 @@ Mesh::Mesh(ID3D11Device* device, const std::string& folderpath, const std::strin
 
 Mesh::Mesh(Mesh&& other) noexcept
     : subMeshes(std::move(other.subMeshes)), indexBuffer(std::move(other.indexBuffer)),
-      vertexBuffer(std::move(other.vertexBuffer)), boundingBox(std::move(other.boundingBox)) {
-
-}
-
-//void Mesh::Initialize(ID3D11Device* device, const MeshData& meshInfo) {
-//    this->subMeshes.reserve(meshInfo.subMeshInfo.size());
-//    for (const MeshData::SubMeshInfo& subMeshInfo : meshInfo.subMeshInfo) {
-//        SubMesh newSubMesh;
-//        newSubMesh.Initialize(device, subMeshInfo.startIndexValue, subMeshInfo.nrOfIndicesInSubMesh,
-//                              subMeshInfo.ambientTextureSRV, subMeshInfo.diffuseTextureSRV,
-//                              subMeshInfo.specularTextureSRV, subMeshInfo.normalMapSRV, subMeshInfo.parallaxFactor);
-//        this->subMeshes.emplace_back(std::move(newSubMesh));
-//    }
-//
-//    this->vertexBuffer.Initialize(device, static_cast<UINT>(meshInfo.vertexInfo.sizeOfVertex),
-//                                  static_cast<UINT>(meshInfo.vertexInfo.nrOfVerticesInBuffer),
-//                                  meshInfo.vertexInfo.vertexData);
-//
-//    this->indexBuffer.Initialize(device, meshInfo.indexInfo.nrOfIndicesInBuffer, meshInfo.indexInfo.indexData);
-//}
+      vertexBuffer(std::move(other.vertexBuffer)), boundingBox(std::move(other.boundingBox)) {}
 
 void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const std::string& objname) {
     objl::Loader loader;
@@ -55,11 +37,11 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
 
         for (auto& mesh : loader.LoadedMeshes) {
             SubMesh submesh;
-            ID3D11ShaderResourceView* ambientSrv  = nullptr;
-            ID3D11ShaderResourceView* diffuseSrv  = nullptr;
-            ID3D11ShaderResourceView* specularSrv = nullptr;
-            ID3D11ShaderResourceView* normalMap   = nullptr;
-            float parallaxFactor                  = 0;
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ambientSrv  = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseSrv  = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularSrv = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMap   = nullptr;
+            float parallaxFactor                                         = 0;
 
             std::cout << mesh.MeshMaterial.map_Ka << "\n";
 
@@ -69,7 +51,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Ka;
                 std::wstring wpath(path.begin(), path.end());
                 HRESULT createShaderResult =
-                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, &ambientSrv);
+                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, ambientSrv.GetAddressOf());
 
                 if (FAILED(createShaderResult)) {
                     std::cerr << createShaderResult << "\n";
@@ -83,7 +65,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Kd;
                 std::wstring wpath(path.begin(), path.end());
                 HRESULT createShaderResult =
-                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, &diffuseSrv);
+                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, diffuseSrv.GetAddressOf());
 
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
             }
@@ -94,7 +76,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Ks;
                 std::wstring wpath(path.begin(), path.end());
                 HRESULT createShaderResult =
-                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, &specularSrv);
+                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, specularSrv.GetAddressOf());
 
                 if (FAILED(createShaderResult)) throw std::runtime_error("failed to load specular texture");
             }
@@ -105,7 +87,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_bump;
                 std::string dispPath;
                 if (!mesh.MeshMaterial.map_d.empty()) {
-                    dispPath = folderpath + "/" + mesh.MeshMaterial.map_d;
+                    dispPath       = folderpath + "/" + mesh.MeshMaterial.map_d;
                     parallaxFactor = 0.05f;
                 }
                 normalMap = LoadNormal(device, path, dispPath);
@@ -120,7 +102,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             // Add indices to temp index buffer
             tempIndexBuffer.reserve(mesh.Indices.size());
             for (auto& indice : mesh.Indices) {
-                tempIndexBuffer.emplace_back(indice + (unsigned int)meshStartIndex);
+                tempIndexBuffer.emplace_back(indice + (unsigned int) meshStartIndex);
             }
             meshStartIndex += mesh.Indices.size();
 
@@ -134,7 +116,8 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
         }
 
         // Initialize buffers
-        this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), (UINT)tempVertexBuffer.size(), tempVertexBuffer.data());
+        this->vertexBuffer.Initialize(device, sizeof(SimpleVertex), (UINT) tempVertexBuffer.size(),
+                                      tempVertexBuffer.data());
         this->indexBuffer.Initialize(device, tempIndexBuffer.size(), tempIndexBuffer.data());
         this->boundingBox.CreateFromPoints(this->boundingBox, vertexPositions.size(), vertexPositions.data(),
                                            sizeof(DirectX::XMFLOAT3));
@@ -180,40 +163,36 @@ ID3D11ShaderResourceView* Mesh::GetNormalMapSRV(size_t subMeshIndex) const {
     return this->subMeshes.at(subMeshIndex).GetNormalMapSRV();
 }
 
-ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device, const std::string& filename,
-                                     const std::string& filenameDisp) {
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> LoadNormal(ID3D11Device* device, const std::string& filename,
+                                                            const std::string& filenameDisp) {
     int width, height, channels;
-    // Load normal map with RGBA output
     stbi_uc* normalData = stbi_load(filename.c_str(), &width, &height, &channels, 4);
     if (!normalData) {
         throw std::runtime_error("Failed to load normal map: " + filename);
     }
 
-    // If a displacement map filename is provided, load and merge into alpha
     if (!filenameDisp.empty()) {
         int dWidth, dHeight, dChannels;
-        // Load displacement map as a single-channel image (greyscale)
         stbi_uc* dispData = stbi_load(filenameDisp.c_str(), &dWidth, &dHeight, &dChannels, 1);
         if (!dispData) {
             stbi_image_free(normalData);
             throw std::runtime_error("Failed to load displacement map: " + filenameDisp);
         }
-        // Ensure dimensions match
+
         if (dWidth != width || dHeight != height) {
             stbi_image_free(normalData);
             stbi_image_free(dispData);
             throw std::runtime_error("Displacement map dimensions do not match normal map dimensions");
         }
-        // Merge dispData into the alpha channel of normalData
+
         int pixelCount = width * height;
         for (int i = 0; i < pixelCount; ++i) {
-            // normalData has RGBA: 4 bytes per pixel
-            normalData[4 * i + 3] = dispData[i];
+            normalData[4 * i + 3] = dispData[i]; // Replace alpha with displacement
         }
+
         stbi_image_free(dispData);
     }
 
-    // Describe the texture
     D3D11_TEXTURE2D_DESC texDesc = {};
     texDesc.Width                = width;
     texDesc.Height               = height;
@@ -226,31 +205,26 @@ ID3D11ShaderResourceView* LoadNormal(ID3D11Device* device, const std::string& fi
     texDesc.CPUAccessFlags       = 0;
     texDesc.MiscFlags            = 0;
 
-    // Provide initial data
     D3D11_SUBRESOURCE_DATA initData = {};
     initData.pSysMem                = normalData;
     initData.SysMemPitch            = width * 4;
-    initData.SysMemSlicePitch       = 0;
 
-    // Create the texture
-    ID3D11Texture2D* texture = nullptr;
-    HRESULT hr               = device->CreateTexture2D(&texDesc, &initData, &texture);
-    // Free CPU-side image data
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+    HRESULT hr = device->CreateTexture2D(&texDesc, &initData, &texture);
     stbi_image_free(normalData);
 
     if (FAILED(hr) || !texture) {
         throw std::runtime_error("Failed to create texture from image data");
     }
 
-    // Create Shader Resource View
-    ID3D11ShaderResourceView* srv = nullptr;
-    hr                            = device->CreateShaderResourceView(texture, nullptr, &srv);
-    texture->Release();
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    hr = device->CreateShaderResourceView(texture.Get(), nullptr, &srv);
 
     if (FAILED(hr) || !srv) {
         throw std::runtime_error("Failed to create SRV from texture");
     }
 
-    return srv;
+    return srv; // caller is responsible for releasing
 }
+
 DirectX::BoundingBox Mesh::GetBoundingBox() const { return this->boundingBox; }
