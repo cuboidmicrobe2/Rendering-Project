@@ -40,8 +40,8 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
     return S_OK;
 }
 
-void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic) {
-    SimpleObject* object             = new SimpleObject(transform, mesh);
+void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate = true) {
+    SimpleObject* object             = new SimpleObject(transform, mesh, tesselate);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     if (!dynamic) {
         SimpleObject* box =
@@ -57,8 +57,9 @@ void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic) {
     }
 }
 
-void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size) {
-    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size);
+void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh,
+                        UINT size, bool tesselate = true) {
+    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size, tesselate);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),

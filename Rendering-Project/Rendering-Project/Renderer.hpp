@@ -45,6 +45,9 @@ class Renderer {
     void ShadowPass(LightManager& lm, std::vector<SceneObject*> obj);
     void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
+    void SetTesselation(bool value);
+    bool tesselationStatus = false;
+
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
 
