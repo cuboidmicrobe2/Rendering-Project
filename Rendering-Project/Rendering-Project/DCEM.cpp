@@ -17,19 +17,20 @@ inline DirectX::XMVECTOR LookRotation(DirectX::XMVECTOR forward, DirectX::XMVECT
 
 DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size)
     : cameras({
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr, &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr, &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 1, 0}, {0, 0, -1}), nullptr, &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, -1, 0}, {0, 0, 1}), nullptr, &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, 1}, {0, 1, 0}), nullptr, &this->rr),
-          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr, &this->rr),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr, &this->rr, this),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr, &this->rr,
+                 this),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 1, 0}, {0, 0, -1}), nullptr, &this->rr,
+                 this),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, -1, 0}, {0, 0, 1}), nullptr, &this->rr,
+                 this),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, 1}, {0, 1, 0}), nullptr, &this->rr, this),
+          Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr, &this->rr,
+                 this),
       }),
       SceneObject(transform, mesh), PS(DCEMPS), normalPS(normalPS), srv(nullptr), size(size) {}
 
 void DCEM::Init(ID3D11Device* device) {
-    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
-    this->matrixBuffer.Initialize(device, sizeof(matrix), &matrix);
-
     HRESULT hr = this->rr.Init(device, this->size, this->size);
     if (FAILED(hr)) throw std::runtime_error("Failed to initialize DCEM rendering resources");
 
@@ -48,7 +49,7 @@ void DCEM::Init(ID3D11Device* device) {
 
     hr = device->CreateTexture2D(&desc, nullptr, this->texture.GetAddressOf());
     if (FAILED(hr)) throw std::runtime_error("Failed to create DCEM texture");
-    hr = device->CreateShaderResourceView(this->texture.Get(), nullptr, &this->srv);
+    hr = device->CreateShaderResourceView(this->texture.Get(), nullptr, this->srv.GetAddressOf());
     if (FAILED(hr)) throw std::runtime_error("Failed to create DCEM SRV");
 
     CD3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
@@ -69,20 +70,18 @@ void DCEM::Init(ID3D11Device* device) {
 
 void DCEM::Draw(ID3D11Device* device, ID3D11DeviceContext* context) {
     context->PSSetShader(this->PS, nullptr, 0);
-
-    DirectX::XMFLOAT4X4 matrix = this->GetWorldMatrix();
-    this->matrixBuffer.UpdateBuffer(context, &matrix);
-    context->VSSetConstantBuffers(1, 1, this->matrixBuffer.GetAdressOfBuffer());
-
     // Bind verticies to VertexShader
     this->mesh->BindMeshBuffers(context);
 
-    context->PSSetShaderResources(4, 1, &this->srv);
+    context->PSSetShaderResources(4, 1, this->srv.GetAddressOf());
 
     // Draw all submeshes
     for (size_t i = 0; i < this->mesh->GetNrOfSubMeshes(); i++) {
         this->mesh->PerformSubMeshDrawCall(context, i);
     }
+
+    ID3D11ShaderResourceView* nullsrv = nullptr;
+    context->PSSetShaderResources(4, 1, &nullsrv);
 
     context->PSSetShader(this->normalPS, nullptr, 0);
 }

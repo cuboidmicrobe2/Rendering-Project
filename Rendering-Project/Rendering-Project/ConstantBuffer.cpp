@@ -12,7 +12,7 @@ ConstantBuffer::ConstantBuffer(ID3D11Device* device, size_t byteSize, void* init
         .StructureByteStride = 0,
     };
 
-    D3D11_SUBRESOURCE_DATA data;
+    D3D11_SUBRESOURCE_DATA data{};
     data.pSysMem          = initialData;
     data.SysMemPitch      = 0;
     data.SysMemSlicePitch = 0;
@@ -20,26 +20,19 @@ ConstantBuffer::ConstantBuffer(ID3D11Device* device, size_t byteSize, void* init
         throw std::runtime_error("Falied to create constant buffer");
 }
 
-// Pointer Train go Chu Chu!
-ConstantBuffer::~ConstantBuffer() { 
-    if (this->buffer)
-        this->buffer->Release(); 
-}
+ConstantBuffer::~ConstantBuffer() {}
 
 ConstantBuffer::ConstantBuffer(ConstantBuffer&& other) noexcept {
-    this->buffer     = other.buffer;
+    this->buffer     = std::move(other.buffer);
     this->bufferSize = other.bufferSize;
-    other.buffer     = nullptr;
     other.bufferSize = 0;
 }
 
 ConstantBuffer& ConstantBuffer::operator=(ConstantBuffer&& other) noexcept {
     if (this != &other) {
-        if (this->buffer) this->buffer->Release();
-        this->buffer     = other.buffer;
+        this->buffer = std::move(other.buffer);
         this->bufferSize = other.bufferSize;
-        other.buffer     = nullptr;
-        other.bufferSize = 0;
+        other.bufferSize = 0;    
     }
     return *this;
 }
@@ -55,7 +48,6 @@ void ConstantBuffer::Initialize(ID3D11Device* device, size_t byteSize, void* ini
         .StructureByteStride = 0,
     };
 
-    HRESULT result;
     D3D11_SUBRESOURCE_DATA data{
         .pSysMem          = initialData,
         .SysMemPitch      = 0,
@@ -71,17 +63,17 @@ void ConstantBuffer::Initialize(ID3D11Device* device, size_t byteSize, void* ini
 
 size_t ConstantBuffer::GetSize() const { return this->bufferSize; }
 
-ID3D11Buffer* ConstantBuffer::GetBuffer() const { return this->buffer; }
+ID3D11Buffer* ConstantBuffer::GetBuffer() const { return this->buffer.Get(); }
 
-ID3D11Buffer** ConstantBuffer::GetAdressOfBuffer() { return &this->buffer; }
+ID3D11Buffer** ConstantBuffer::GetAdressOfBuffer() { return this->buffer.GetAddressOf(); }
 
 void ConstantBuffer::UpdateBuffer(ID3D11DeviceContext* context, void* data) {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     ZeroMemory(&mappedResource, sizeof(mappedResource));
 
-    if (FAILED(context->Map(this->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+    if (FAILED(context->Map(this->buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
         throw std::runtime_error("Failed to update buffer");
 
     memcpy(mappedResource.pData, data, this->bufferSize);
-    context->Unmap(this->buffer, 0);
+    context->Unmap(this->buffer.Get(), 0);
 }

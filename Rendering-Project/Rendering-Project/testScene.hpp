@@ -23,6 +23,7 @@ class TestScene : public BaseScene {
     void UpdateScene() override { 
         this->mainCamera.Update(this->input);
     }
+    ~TestScene() {}
 };
 
 #endif

@@ -6,16 +6,20 @@
 Renderer::Renderer() {}
 
 Renderer::~Renderer() {
-    ID3D11Debug* debug = nullptr;
-    if (SUCCEEDED(this->device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug)))) {
-        debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL | D3D11_RLDO_IGNORE_INTERNAL); // D3D11_RLDO_IGNORE_INTERNAL
-        debug->Release();
-    }
+    this->immediateContext->ClearState();
+    this->immediateContext->Flush();
 }
 
 HRESULT Renderer::Init(const Window& window) {
     this->SetViewPort(window);
     HRESULT result = this->CreateDeviceAndSwapChain(window);
+    if (FAILED(result)) return result;
+
+    std::string byteData;
+    result = this->SetShaders(byteData);
+    if (FAILED(result)) return result;
+
+    result = this->SetInputLayout(byteData);
     if (FAILED(result)) return result;
 
     result = this->rr.Init(this->device.Get(), window.GetWidth(), window.GetHeight());
@@ -27,46 +31,38 @@ HRESULT Renderer::Init(const Window& window) {
     result = this->SetupRasterizerStates();
     if (FAILED(result)) return result;
 
-    std::string byteData;
-    result = this->SetShaders(byteData);
-    if (FAILED(result)) return result;
-
-    result = this->SetInputLayout(byteData);
-    if (FAILED(result)) return result;
-
     result = this->SetSamplers();
     if (FAILED(result)) return result;
 
     this->metadataBuffer.Initialize(this->device.Get(), sizeof(CSMetadata), nullptr);
     this->viewProjBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4) * 3, nullptr);
     this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
-    // this->viewPos.Initialize(this->device.Get(), sizeof(DirectX::XMVECTOR), nullptr);
     this->tessBuffer.Initialize(this->device.Get(), sizeof(TessellationData), nullptr);
-
+    this->worldMatrixBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4), nullptr);
     return S_OK;
 }
 
 void Renderer::Render(BaseScene* scene) {
-    // this->BindLights(scene.getLights());
+    this->immediateContext->VSSetConstantBuffers(1, 1, this->worldMatrixBuffer.GetAdressOfBuffer());
     LightManager& lm = scene->GetLightManager();
     this->ShadowPass(scene->GetLightManager(), scene->GetObjects());
     lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
     lm.BindLightData(this->GetDeviceContext(), 7, 8);
 
     std::array<float, 4> clearColor{0, 0, 0, 1};
-    for (int i = 0; i < this->renderPasses; i++) {
+    for (uint32_t i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene->GetCameras()) {
-            this->Render(scene, *cam, cam->GetAdressOfUAV(), cam->GetRenderResources());
+            this->Render(scene, cam, cam->GetAdressOfUAV(), cam->GetRenderResources());
             // clear
             cam->GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
         }
     }
     // Render to backbuffer
-    this->Render(scene, scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr);
+    this->Render(scene, &scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr);
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
-    // lm.UnbindDepthTextures(this->immediateContext.Get(), 3);
+    lm.UnbindDepthTextures(this->immediateContext.Get(), 5, 6);
 
     // Present
     this->swapChain->Present(1, 0);
@@ -76,36 +72,41 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
-void Renderer::Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
+void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);
 
     rr->BindGeometryPass(this->GetDeviceContext());
-    this->BindViewAndProjMatrixes(cam);
+    this->immediateContext->VSSetConstantBuffers(1, 1, this->worldMatrixBuffer.GetAdressOfBuffer());
+    this->BindViewAndProjMatrixes(*cam);
 
     // Bind and update camera buffer
 
     // Tessellation ON
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
     this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
     this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
     this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
     this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     CameraBufferData camdata{};
-    DirectX::XMStoreFloat4x4(&camdata.viewProjection,
-                             DirectX::XMMatrixMultiplyTranspose(cam.createViewMatrix(), cam.createProjectionMatrix()));
-    XMStoreFloat3(&camdata.cameraPosition, cam.transform.GetPosition());
+    DirectX::XMStoreFloat4x4(&camdata.viewProjection, DirectX::XMMatrixMultiplyTranspose(
+                                                          cam->createViewMatrix(), cam->createProjectionMatrix()));
+    XMStoreFloat3(&camdata.cameraPosition, cam->transform.GetPosition());
     this->cameraBuffer.UpdateBuffer(this->immediateContext.Get(), &camdata);
 
     // Draw objects / Bind objects
-    for (SceneObject*& obj : scene->GetVisibleObjects(cam)) {
-        // Calculate distance to object from camera
-        float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
-            DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam.transform.GetPosition())));
-        this->tessBuffer.UpdateBuffer(this->GetDeviceContext(), &distance);
+    for (SceneObject*& obj : scene->GetVisibleObjects(*cam)) {
+        if (cam->GetOwner() != obj) {
+            // Calculate distance to object from camera
+            float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
+                DirectX::XMVectorSubtract(obj->transform.GetPosition(), cam->transform.GetPosition())));
+            this->tessBuffer.UpdateBuffer(this->GetDeviceContext(), &distance);
 
-        // Draw object
-        obj->Draw(this->device.Get(), this->immediateContext.Get());
+            // Draw object
+            DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
+            this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
+            obj->Draw(this->device.Get(), this->immediateContext.Get());
+        }
     }
 
     // Tessellation OFF
@@ -116,19 +117,22 @@ void Renderer::Render(BaseScene* scene, Camera& cam, ID3D11UnorderedAccessView**
     // Draw bounding boxes with wireframe fill mode
     this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
     for (SceneObject*& box : scene->GetBoundingBoxes()) {
+        DirectX::XMFLOAT4X4 worldMatrix = box->GetWorldMatrix();
+        this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
         box->Draw(this->device.Get(), this->immediateContext.Get());
     }
     this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     // Render particles using the particle system
     scene->GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
-    this->RenderParticles(scene->GetParticleSystem(), cam, rr);
+    this->RenderParticles(scene->GetParticleSystem(), *cam, rr);
 
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
-    this->BindLightMetaData(cam, static_cast<int>(scene->GetLightManager().GetSpotLights().size()),
+    this->BindLightMetaData(*cam, static_cast<int>(scene->GetLightManager().GetSpotLights().size()),
                             static_cast<int>(scene->GetLightManager().GetDirectionalLights().size()));
-    rr->BindLightingPass(this->GetDeviceContext());
+
     // Do lighting pass
+    rr->BindLightingPass(this->GetDeviceContext());
     this->LightingPass(UAV, vp);
 }
 
@@ -137,13 +141,14 @@ void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*> obj) {
 
     const std::vector<Light>& SpotLights = lm.GetSpotLights();
     this->GetDeviceContext()->RSSetViewports(1, &lm.GetSpotLightVP());
-
     for (const Light& light : SpotLights) {
         this->immediateContext->ClearDepthStencilView(light.GetDepthStencilVeiw(), D3D11_CLEAR_DEPTH, 1, 0);
         this->BindShadowViewAndProjection(light.CreateViewMatrix(), light.CreateProjectionMatrix());
-        this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
+        this->immediateContext->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
         for (auto& obj : obj) {
-            obj->Draw(this->device.Get(), this->immediateContext.Get());
+            DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
+            this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
+            obj->DrawMesh(this->immediateContext.Get());
         }
     }
 
@@ -154,13 +159,16 @@ void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*> obj) {
         this->BindShadowViewAndProjection(light.CreateViewMatrix(), light.CreateProjectionMatrix());
         this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, light.GetDepthStencilVeiw());
         for (auto& obj : obj) {
-            obj->Draw(this->device.Get(), this->immediateContext.Get());
+            DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
+            this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
+            obj->DrawMesh(this->immediateContext.Get());
         }
     }
 
-    this->GetDeviceContext()->OMSetRenderTargets(0, nullptr, this->rr.GetDepthStencilView());
-    this->GetDeviceContext()->PSSetShader(this->pixelShader.Get(), nullptr, 0);
-    this->GetDeviceContext()->CSSetShaderResources(3, SpotLights.size(), lm.GetAdressOfSpotlightDSSRV());
+    this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
+    this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
+    this->immediateContext->CSSetShaderResources(3, static_cast<UINT>(SpotLights.size()),
+                                                 lm.GetAdressOfSpotlightDSSRV());
 }
 
 void Renderer::BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix) {
@@ -181,6 +189,7 @@ void Renderer::Clear() {
 }
 
 HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
+
     DXGI_SWAP_CHAIN_DESC swapChainDesc               = {};
     swapChainDesc.BufferCount                        = 2;
     swapChainDesc.BufferDesc.Width                   = 0;
@@ -196,9 +205,22 @@ HRESULT Renderer::CreateDeviceAndSwapChain(const Window& window) {
     swapChainDesc.SwapEffect                         = DXGI_SWAP_EFFECT_DISCARD;
     swapChainDesc.Flags                              = 0;
 
-    return D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr,
-                                         0, D3D11_SDK_VERSION, &swapChainDesc, this->swapChain.GetAddressOf(),
-                                         this->device.GetAddressOf(), nullptr, this->immediateContext.GetAddressOf());
+    HRESULT hr =
+        D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0,
+                                      D3D11_SDK_VERSION, &swapChainDesc, this->swapChain.GetAddressOf(),
+                                      this->device.GetAddressOf(), nullptr, this->immediateContext.GetAddressOf());
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create device and swapchain, Error: " << hr << "\n";
+        return hr;
+    }
+#ifdef _DEBUG
+    ID3D11InfoQueue* iq = nullptr;
+    if (SUCCEEDED(this->device->QueryInterface(__uuidof(ID3D11InfoQueue), (void**) &iq))) {
+        iq->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
+        iq->Release();
+    }
+#endif
+    return S_OK;
 }
 
 HRESULT Renderer::SetShaders(std::string& byteDataOutput) {
@@ -307,11 +329,6 @@ HRESULT Renderer::CreateUAV() { // Vertex Shader
         },
     };
 
-    result = this->device->CreateRenderTargetView(backbuffer.Get(), nullptr, this->rtv.GetAddressOf());
-    if (FAILED(result)) {
-        return result;
-    }
-
     return this->device->CreateUnorderedAccessView(backbuffer.Get(), &desc, this->UAV.GetAddressOf());
 }
 
@@ -332,7 +349,7 @@ HRESULT Renderer::SetInputLayout(const std::string& byteCode) {
     }
 
     this->immediateContext->IASetInputLayout(this->inputLayout.Get());
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     return S_OK;
 }
@@ -407,7 +424,7 @@ void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT view
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
 
     // Do Compute
-    this->immediateContext->Dispatch(viewport.Width / 8, viewport.Height / 8, 1);
+    this->immediateContext->Dispatch(static_cast<UINT>(viewport.Width / 8), static_cast<UINT>(viewport.Height / 8), 1);
 
     ID3D11UnorderedAccessView* resetter[1] = {nullptr};
 

@@ -16,7 +16,7 @@
 class BaseScene {
   public:
     BaseScene(Window& window);
-    virtual ~BaseScene();
+    virtual ~BaseScene() {};
 
     HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
