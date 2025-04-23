@@ -32,7 +32,6 @@
     <ClCompile Include="BaseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoundingBox.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DCEM.hpp" />
@@ -43,7 +42,6 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="LightManager.hpp" />
     <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="MirrorObject.hpp" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="ParticleBuffer.hpp" />
     <ClInclude Include="ParticleSystem.hpp" />
@@ -62,6 +60,7 @@
     <ClInclude Include="BaseScene.hpp" />
     <ClInclude Include="testScene.hpp" />
     <ClInclude Include="MeshHandler.hpp" />
+    <ClInclude Include="TestScene2.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg" />

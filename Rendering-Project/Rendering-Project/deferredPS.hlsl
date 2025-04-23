@@ -42,7 +42,7 @@ static const float layerDepth = 1 / (float)parallaxSteps;
 static const float defaultAmbient = 0.05;
 PixelShaderOutput main(PixelShaderInput input)
 {
-    float3 normal;
+    float3 normal = normalize(input.normal);
     float2 samplePoint = input.uv;
     if (hasNormal)
     {
@@ -53,27 +53,17 @@ PixelShaderOutput main(PixelShaderInput input)
         float2 dUVdy = ddy(input.uv);
 
         float3 tangent = normalize(dUVdy.y * dPdx - dUVdx.y * dPdy);
-        tangent = normalize(tangent - input.normal.xyz * dot(input.normal.xyz, tangent));
+        tangent = normalize(tangent - normal.xyz * dot(normal.xyz, tangent));
         
-        float3 bitangent = cross(input.normal.xyz, tangent);
+        float3 bitangent = cross(normal.xyz, tangent);
         
         // Convert view direction to tangent space
         float3 viewDir = normalize(input.worldPosition.xyz - camPos);
-        float3x3 TBN = float3x3(tangent, bitangent, input.normal.xyz);
-        float3 viewDirTangent = mul(TBN, viewDir);
+        float3x3 TBN = float3x3(tangent, bitangent, normal.xyz);
+        float3 viewDirTangent = normalize(mul(TBN, viewDir));
         
-        
-        //PixelShaderOutput output;
-        //output.diffuse = float4(0, 0, 0, 0);
-        //output.normal = float4(normal, 0);
-        //output.position = input.worldPosition;
-        //output.ambient = float4(viewDir, 0);
-        //output.specular = float4(0, 0, 0, 0);
-
-        //return output;
         
         // Parallax
-        //float layerDepth = 1.0 / parallaxSteps;
         float2 uvOffset = float2(0, 0);
         float2 uvOffsetPrev = uvOffset;
         float currentDepth = 0.0;
@@ -105,7 +95,7 @@ PixelShaderOutput main(PixelShaderInput input)
         }
 
         // final UV to sample N and other maps
-        float2 samplePoint = input.uv + uvOffset;
+        samplePoint = input.uv + uvOffset;
                 
         float3 nSample = normalMap.Sample(samplerState, samplePoint).rgb * 2 - 1;
     
@@ -119,8 +109,8 @@ PixelShaderOutput main(PixelShaderInput input)
     else
     {
         normal = input.normal;
-    }
-
+    }    
+    
     PixelShaderOutput output;
     output.diffuse = hasDiffuse ? diffuseTexture.Sample(samplerState, samplePoint) : float4(1, 1, 1, 1);
     output.normal = float4(normal, 0);

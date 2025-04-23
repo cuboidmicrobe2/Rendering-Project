@@ -6,8 +6,8 @@
 Renderer::Renderer() {}
 
 Renderer::~Renderer() {
-    this->immediateContext->ClearState();
-    this->immediateContext->Flush();
+    // this->immediateContext->ClearState();
+    // this->immediateContext->Flush();
 }
 
 HRESULT Renderer::Init(const Window& window) {
@@ -100,7 +100,6 @@ void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView**
 
     // Bind and update camera buffer
 
-
     CameraBufferData camdata{};
     DirectX::XMStoreFloat4x4(&camdata.viewProjection, DirectX::XMMatrixMultiplyTranspose(
                                                           cam->createViewMatrix(), cam->createProjectionMatrix()));
@@ -120,7 +119,6 @@ void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView**
             this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
             this->SetTesselation(obj->GetTesselationValue());
             obj->Draw(this->device.Get(), this->immediateContext.Get());
-
         }
     }
     this->SetTesselation(false);
@@ -393,8 +391,26 @@ HRESULT Renderer::SetSamplers() {
         return result;
     }
 
+    D3D11_SAMPLER_DESC samplerDescShadow = {
+        .Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+        .AddressU       = D3D11_TEXTURE_ADDRESS_BORDER,
+        .AddressV       = D3D11_TEXTURE_ADDRESS_BORDER,
+        .AddressW       = D3D11_TEXTURE_ADDRESS_BORDER,
+        .MipLODBias     = 0,
+        .MaxAnisotropy  = 16,
+        .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+        .BorderColor    = {0, 0, 0, 0},
+        .MinLOD         = 0.0f,
+        .MaxLOD         = D3D11_FLOAT32_MAX,
+    };
+
+    result = device->CreateSamplerState(&samplerDescShadow, this->samplerStateShadows.GetAddressOf());
+    if (FAILED(result)) {
+        return result;
+    }
+
     this->immediateContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-    this->immediateContext->CSSetSamplers(0, 1, this->samplerState.GetAddressOf());
+    this->immediateContext->CSSetSamplers(0, 1, this->samplerStateShadows.GetAddressOf());
 
     return S_OK;
 }
@@ -429,7 +445,7 @@ HRESULT Renderer::SetupRasterizerStates() {
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {
     // Unbind GBuffers from writing
     // this->rr.BindLightingPass(this->immediateContext.Get());
-
+    this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     // Bind UAV to Compute
 
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
