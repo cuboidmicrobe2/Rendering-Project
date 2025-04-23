@@ -184,6 +184,7 @@
     <ClInclude Include="StructuredBuffer.hpp" />
     <ClInclude Include="SubMesh.hpp" />
     <ClInclude Include="testScene.hpp" />
+    <ClInclude Include="TestScene2.hpp" />
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />

@@ -3,7 +3,8 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh), boundingBox(mesh->GetBoundingBox()) {
+SceneObject::SceneObject(Transform transform, Mesh* mesh, bool shouldBeTesselated)
+    : transform(transform), mesh(mesh), boundingBox(mesh->GetBoundingBox()), shouldBeTesselated(shouldBeTesselated) {
     DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
     DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
     DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
@@ -20,6 +21,8 @@ void SceneObject::Update() {}
 void SceneObject::SetBoundingBox(DirectX::BoundingBox& boundingBox) { this->boundingBox = boundingBox; }
 
 DirectX::BoundingBox SceneObject::GetBoundingBox() const { return this->boundingBox; }
+
+bool SceneObject::GetTesselationValue() const { return this->shouldBeTesselated; }
 
 void SceneObject::DrawMesh(ID3D11DeviceContext* context) {
     // Bind verticies to VertexShader

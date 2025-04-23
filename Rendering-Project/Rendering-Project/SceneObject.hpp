@@ -14,7 +14,7 @@ class SceneObject {
   public:
     Transform transform;
 
-    SceneObject(Transform transform, Mesh* mesh);
+    SceneObject(Transform transform, Mesh* mesh, bool shouldBeTesselated = true);
     virtual ~SceneObject() = 0;
 
     virtual void Draw(ID3D11Device* device, ID3D11DeviceContext* context) = 0;
@@ -29,7 +29,10 @@ class SceneObject {
     void SetBoundingBox(DirectX::BoundingBox& boundingBox);
     DirectX::BoundingBox GetBoundingBox() const;
 
+    bool GetTesselationValue() const;
+
   protected:
+    bool shouldBeTesselated;
     DirectX::BoundingBox boundingBox;
     Mesh* mesh;
 };
