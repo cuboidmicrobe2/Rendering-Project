@@ -51,7 +51,6 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
 
             // Load ambient Texture if there is one
             ambientFactor = {mesh.MeshMaterial.Ka.X, mesh.MeshMaterial.Ka.Y, mesh.MeshMaterial.Ka.Z};
-            std::cout << "AMBIENT " << ambientFactor.x;
             if (!mesh.MeshMaterial.map_Ka.empty()) {
                 std::cout << "Trying to bind map_Ka\n";
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Ka;
@@ -67,7 +66,6 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
 
             // Load diffuse texture if there is one
             diffuseFactor = {mesh.MeshMaterial.Kd.X, mesh.MeshMaterial.Kd.Y, mesh.MeshMaterial.Kd.Z};
-            std::cout << "DIFFUSE " << diffuseFactor.x;
             if (!mesh.MeshMaterial.map_Kd.empty()) {
                 std::cout << "Trying to bind map_Kd\n";
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Kd;
@@ -80,8 +78,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
 
             // Load specular texture if there is one
             specularFactor = {mesh.MeshMaterial.Ks.X, mesh.MeshMaterial.Ks.Y, mesh.MeshMaterial.Ks.Z};
-            std::cout << "SPECULAR " << specularFactor.x;
-            shininess = mesh.MeshMaterial.Ns;
+            shininess      = mesh.MeshMaterial.Ns;
             if (shininess == 0) shininess = 100;
 
             if (!mesh.MeshMaterial.map_Ks.empty()) {
