@@ -16,25 +16,13 @@ class TestScene : public BaseScene {
         this->AddSimpleObject(Transform({8, 1, 8}), cubeMesh, false, false);
         this->AddSimpleObject(Transform({3, 1, 0}, 0, 20), cubeMesh, false, false);
         this->AddSimpleObject(Transform({0, 1, 3}, 0, 45), cubeMesh, false, false);
-        this->AddSimpleObject(Transform({8, 1, 8}, 0, 20), cubeMesh, false, false);
+        this->AddSimpleObject(Transform({-8, 1, 8}, 0, 20), sphereMesh, false, true, true);
 
         this->AddDCEM(Transform({-2, 1, -2}, 0, 20), basePS, DCEMPS, sphereMesh, 256, true);
 
         // floor
         this->AddSimpleObject(Transform({0, -1, 0}, DirectX::XMQuaternionIdentity(), {50, 1, 50}), floorMesh, true,
                               false);
-
-        DirectX::XMVECTOR q1 = Transform::GetCameraRotationQuaternion(90.0f, -45.0f);
-        DirectX::XMVECTOR q2 = Transform::GetCameraRotationQuaternion(-90.0f, -45.0f);
-
-        // 2) rotate your X forward vector:
-        DirectX::XMVECTOR fwd = DirectX::XMVectorSet(1, 0, 0, 0);
-        DirectX::XMVECTOR d1  = DirectX::XMVector3Rotate(fwd, q1);
-        DirectX::XMVECTOR d2  = DirectX::XMVector3Rotate(fwd, q2);
-
-        // 3) inspect the Y component:
-        float y1 = DirectX::XMVectorGetY(d1);
-        float y2 = DirectX::XMVectorGetY(d2);
 
         this->AddDirLight(Transform({0, 0, 0}, 135, 0), {0.5, 0.5, 0.5, 1}, 100, 100, sphereMesh);
 
