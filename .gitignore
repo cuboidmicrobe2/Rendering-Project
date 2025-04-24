@@ -3,9 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
-# Big bad for the git
-*.png
-*.jpg
+# Very good for git
+# *.png
+# *.jpg
 
 # User-specific files
 *.rsuser
@@ -80,7 +80,6 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
 *.iobj
 *.pch
 *.pdb
