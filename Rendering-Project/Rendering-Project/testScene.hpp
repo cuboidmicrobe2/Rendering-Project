@@ -3,9 +3,9 @@
 #include "BaseScene.hpp"
 #include "MeshHandler.hpp"
 
-class TestScene : public BaseScene {
+class CubeMappingAndLighting : public BaseScene {
   public:
-    TestScene(Window& window, ID3D11Device* device, ID3D11DeviceContext* context, MeshHandler& meshHandler,
+    CubeMappingAndLighting(Window& window, ID3D11Device* device, ID3D11DeviceContext* context, MeshHandler& meshHandler,
               ID3D11PixelShader* basePS, ID3D11PixelShader* DCEMPS)
         : BaseScene(window) {
         Mesh* sphereMesh = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
@@ -41,7 +41,7 @@ class TestScene : public BaseScene {
         SceneObject* obj = this->objects[0].get();
         obj->transform.Rotate(0, deltaTime * 1);
     }
-    ~TestScene() {}
+    ~CubeMappingAndLighting() {}
 };
 
 #endif

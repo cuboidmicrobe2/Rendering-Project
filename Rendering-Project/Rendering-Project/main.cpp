@@ -24,16 +24,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
         device = renderer.GetDeviceCOMPTR();
 
-        TestScene2 scene2(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
-                          renderer.GetPS(), renderer.GetDCEMPS());
         CoolScene coolScene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                             renderer.GetPS(), renderer.GetDCEMPS());
-        TestScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
+        CubeMappingAndLighting scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                         renderer.GetPS(), renderer.GetDCEMPS());
 
         BaseScene* activeScene = &scene;
         MSG msg                = {};
-        std::array<BaseScene*, 3> scenes{&scene, &scene2, &coolScene};
+        std::array<BaseScene*, 3> scenes{&scene, &coolScene};
 
         auto lastTime = std::chrono::high_resolution_clock::now();
         while (msg.message != WM_QUIT) {
