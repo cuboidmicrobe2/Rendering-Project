@@ -62,11 +62,11 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({5, -4.3, -10}, 0, 180), chestMesh, false, true);
 
         // Sailing boats
-        this->AddSimpleObject(Transform({35, -5.5, 45}, 0, 0, 330), boatMesh, false, false);
+        this->AddSimpleObject(Transform({35, -5.5, 45}, 0, 330), boatMesh, false, false);
         this->AddSimpleObject(Transform({40, -5.5, 0}), boatMesh, false, false);
 
         // Sun
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 100, 100, sphereMesh);
+        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 100, 100, nullptr);
 
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");

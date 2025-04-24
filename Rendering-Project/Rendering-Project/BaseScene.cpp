@@ -84,13 +84,13 @@ void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float
     }
 }
 
-void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height,
-                            Mesh* lightMesh) {
+void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height, Mesh* lightMesh) {
     DirectionalLight l(transform, color, 0, width, height);
     this->lm.AddDirectionalLight(l);
 
-    DirectX::XMVECTOR pos =
-        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget));
+    DirectX::XMVECTOR pos = DirectX::XMVectorSubtract(
+        transform.GetPosition(),
+        DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget + 10));
     transform.SetPosition(pos);
 
     if (lightMesh) {
