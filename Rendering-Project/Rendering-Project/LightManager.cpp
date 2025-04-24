@@ -105,6 +105,7 @@ HRESULT LightManager::Init(ID3D11Device* device) {
             std::cerr << "Creating srv Failed, Error: " << r << "\n";
             return r;
         }
+
         D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
         dsvDesc.Format                        = DXGI_FORMAT_D24_UNORM_S8_UINT;
         dsvDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
@@ -201,12 +202,12 @@ void LightManager::BindLightData(ID3D11DeviceContext* context, UINT SpotLightSlo
 }
 
 void LightManager::BindDepthTextures(ID3D11DeviceContext* context, UINT SpotLightSlot, UINT DirLightSlot) {
-    context->CSSetShaderResources(SpotLightSlot, this->Spotlights.size(), this->GetAdressOfSpotlightDSSRV());
-    context->CSSetShaderResources(DirLightSlot, this->directionalLights.size(), this->GetAdressOfDirlightDSSRV());
+    context->CSSetShaderResources(SpotLightSlot, 1, this->GetAdressOfSpotlightDSSRV());
+    context->CSSetShaderResources(DirLightSlot, 1, this->GetAdressOfDirlightDSSRV());
 }
 
 void LightManager::UnbindDepthTextures(ID3D11DeviceContext* context, UINT SpotLightSlot, UINT DirLightSlot) {
     ID3D11ShaderResourceView* nullsrvs[3]{};
-    context->CSSetShaderResources(SpotLightSlot, this->Spotlights.size(), nullsrvs);
-    context->CSSetShaderResources(DirLightSlot, this->directionalLights.size(), nullsrvs);
+    context->CSSetShaderResources(SpotLightSlot, 1, nullsrvs);
+    context->CSSetShaderResources(DirLightSlot, 1, nullsrvs);
 }

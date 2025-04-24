@@ -23,8 +23,8 @@ class BaseScene {
     void AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic);
     void AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size);
 
-    void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle);
-    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height);
+    void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle, Mesh* lightMesh = nullptr);
+    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height, Mesh* lightMesh = nullptr);
     LightManager& GetLightManager();
 
     std::vector<Camera*>& GetCameras();

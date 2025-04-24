@@ -35,7 +35,7 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
 
     for (const auto& obj : this->boundingBoxes) {
         obj.get()->Init(device);
-    }    
+    }
 
     return S_OK;
 }
@@ -74,14 +74,27 @@ void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11
         this->cameras.push_back(&cam);
 }
 
-void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle) {
+void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle, Mesh* lightMesh = nullptr) {
     Light l(transform, color, 0, angle);
     this->lm.AddSpotLight(l);
+
+    if (lightMesh) {
+        this->AddSimpleObject(transform, lightMesh, false, false);
+    }
 }
 
-void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height) {
+void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height,
+                            Mesh* lightMesh = nullptr) {
     DirectionalLight l(transform, color, 0, width, height);
     this->lm.AddDirectionalLight(l);
+
+    DirectX::XMVECTOR pos =
+        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), 40));
+    transform.SetPosition(pos);
+
+    if (lightMesh) {
+        this->AddSimpleObject(transform, lightMesh, false, false);
+    }
 }
 
 LightManager& BaseScene::GetLightManager() { return this->lm; }
@@ -97,7 +110,7 @@ std::vector<SceneObject*> BaseScene::GetBoundingBoxes() {
     return boxes;
 }
 
-std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) { 
+std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
     Camera frustumFOV = cam;
     frustumFOV.SetFOV(this->mainCamera.GetFOV() - 20.0f);
     // Create a frustum from the main camera's view and projection matrices
@@ -115,10 +128,10 @@ std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
     for (const auto& obj : this->staticObjects) {
         objects.emplace_back(obj.get());
     }
-    return objects; 
+    return objects;
 }
 
-std::vector<SceneObject*> BaseScene::GetObjects() { 
+std::vector<SceneObject*> BaseScene::GetObjects() {
     std::vector<SceneObject*> objects;
     objects.reserve(this->objects.size() + this->staticObjects.size());
     for (const auto& obj : this->objects) {
