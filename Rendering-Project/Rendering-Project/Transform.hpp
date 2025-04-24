@@ -29,8 +29,9 @@ class Transform {
     inline DirectX::XMVECTOR GetDirectionVector() const;
     inline DirectX::XMVECTOR GetScale() const;
 
+    static inline DirectX::XMVECTOR GetCameraRotationQuaternion(float yawDegrees, float pitchDegrees);
+    static inline DirectX::XMVECTOR GetYXRotation(float y, float x);
   private:
-    inline DirectX::XMVECTOR GetCameraRotationQuaternion(float pitch, float yaw);
 
     DirectX::XMVECTOR position;
     DirectX::XMVECTOR quaternion;
@@ -88,15 +89,32 @@ inline DirectX::XMVECTOR Transform::GetDirectionVector() const {
 
 inline DirectX::XMVECTOR Transform::GetScale() const { return this->scale; }
 
-inline DirectX::XMVECTOR Transform::GetCameraRotationQuaternion(float pitch, float yaw) {
-    // Create pitch (X-axis) and yaw (Y-axis) quaternions
-    DirectX::XMVECTOR qPitch = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), DirectX::XMConvertToRadians(pitch));
-    DirectX::XMVECTOR qYaw   = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0, 1, 0, 0), DirectX::XMConvertToRadians(yaw));
+inline DirectX::XMVECTOR Transform::GetCameraRotationQuaternion(float yawDegrees, float pitchDegrees) {
+    // Convert to radians.
+    float yawRad   = DirectX::XMConvertToRadians(yawDegrees);
+    float pitchRad = DirectX::XMConvertToRadians(pitchDegrees);
 
-    // Combine yaw and pitch: yaw * pitch (important order!)
-    DirectX::XMVECTOR orientation = DirectX::XMQuaternionMultiply(qYaw, qPitch);
+    DirectX::XMVECTOR vUp       = DirectX::XMVectorSet(0, 1, 0, 0);
+    DirectX::XMVECTOR vDefaultR = DirectX::XMVectorSet(0, 0, 1, 0);
 
-    return DirectX::XMQuaternionNormalize(orientation);
+    // Build yaw quaternion around world-up.
+    DirectX::XMVECTOR qYaw = DirectX::XMQuaternionRotationAxis(vUp, yawRad);
+
+    // Rotate the default right axis by that yaw to get the local right.
+    DirectX::XMVECTOR vRight = DirectX::XMVector3Rotate(vDefaultR, qYaw);
+
+    // Build pitch quaternion around the local right axis.
+    DirectX::XMVECTOR qPitch = DirectX::XMQuaternionRotationAxis(vRight, -pitchRad);
+
+    // Combine: first yaw, then pitch.
+    DirectX::XMVECTOR qResult = DirectX::XMQuaternionMultiply(qPitch, qYaw);
+
+    // Normalize for safety.
+    return DirectX::XMQuaternionNormalize(qResult);
+}
+
+inline DirectX::XMVECTOR Transform::GetYXRotation(float y, float x) {
+    return DirectX::XMVECTOR(); 
 }
 
 

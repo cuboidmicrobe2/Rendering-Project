@@ -24,12 +24,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
         device = renderer.GetDeviceCOMPTR();
 
-        TestScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
-                        renderer.GetPS(), renderer.GetDCEMPS());
         TestScene2 scene2(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                           renderer.GetPS(), renderer.GetDCEMPS());
         CoolScene coolScene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                             renderer.GetPS(), renderer.GetDCEMPS());
+        TestScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
+                        renderer.GetPS(), renderer.GetDCEMPS());
 
         BaseScene* activeScene = &scene;
         MSG msg                = {};

@@ -51,7 +51,7 @@ inline DirectX::XMMATRIX DirectionalLight::CreateViewMatrix() const {
 }
 
 inline DirectX::XMMATRIX DirectionalLight::CreateProjectionMatrix() const {
-    return DirectX::XMMatrixOrthographicLH(this->width, this->height, 2.f, 200.f);
+    return DirectX::XMMatrixOrthographicLH(this->width, this->height, 1.f, 200.f);
 }
 
 inline ID3D11DepthStencilView* DirectionalLight::GetDepthStencilVeiw() const { return this->depthStencilView.Get(); }

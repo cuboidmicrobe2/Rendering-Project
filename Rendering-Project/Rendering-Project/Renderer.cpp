@@ -47,8 +47,8 @@ void Renderer::Render(BaseScene* scene, float deltaTime) {
     this->immediateContext->VSSetConstantBuffers(1, 1, this->worldMatrixBuffer.GetAdressOfBuffer());
     LightManager& lm = scene->GetLightManager();
     this->ShadowPass(scene->GetLightManager(), scene->GetObjects());
-    lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
     lm.BindLightData(this->GetDeviceContext(), 7, 8);
+    lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
 
     std::array<float, 4> clearColor{0.75, 0.70, 1, 1};
     for (uint32_t i = 0; i < this->renderPasses; i++) {
@@ -177,8 +177,7 @@ void Renderer::ShadowPass(LightManager& lm, std::vector<SceneObject*> obj) {
 
     this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
     this->immediateContext->PSSetShader(this->pixelShader.Get(), nullptr, 0);
-    this->immediateContext->CSSetShaderResources(3, static_cast<UINT>(SpotLights.size()),
-                                                 lm.GetAdressOfSpotlightDSSRV());
+    this->immediateContext->CSSetShaderResources(3, 1, lm.GetAdressOfSpotlightDSSRV());
 }
 
 void Renderer::BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix) {

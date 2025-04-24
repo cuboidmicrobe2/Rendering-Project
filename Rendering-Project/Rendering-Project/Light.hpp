@@ -11,7 +11,6 @@ class Light {
     ~Light() {};
     inline HRESULT Init(ID3D11Device* device, UINT resolution, D3D11_DEPTH_STENCIL_VIEW_DESC* desc,
                         ID3D11Texture2D* depthStencil);
-    inline float GetIntesity() const { return this->intensity; }
     inline DirectX::XMVECTOR GetColor() const { return this->color; }
     Transform transform;
     inline DirectX::XMVECTOR GetDirection() const;
@@ -24,13 +23,11 @@ class Light {
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
     DirectX::XMVECTOR color;
     float angle;
-    float intensity;
-
 };
 
 inline Light::Light(Transform transform, DirectX::XMVECTOR color, float intensity,
                     float angle)
-    : transform(transform), color(color), intensity(intensity),
+    : transform(transform), color(color),
       angle(DirectX::XMConvertToRadians(angle)) {}
 
 HRESULT Light::Init(ID3D11Device* device, UINT resolution, D3D11_DEPTH_STENCIL_VIEW_DESC* desc, ID3D11Texture2D* depthStencil) {

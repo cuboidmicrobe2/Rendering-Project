@@ -39,9 +39,10 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float4 normal = float4(normalize(normalGBuffer[DTid.xy].xyz), 0);
     float4 CamToPixel = pixelPosition - float4(cameraPos, 0);
     
-    float diffuse = 0;
-    float specular = 0;
+    float4 diffuse = 0;
+    float4 specular = 0;
     float specularExponent = specularGBuffer[DTid.xy].w;
+    // Spotlights
     for (int i = 0; i < nrofLights; i++)
     {
         Light cl = lights[i];
@@ -62,14 +63,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
         if (dot(lightDir.xyz, normalize(cl.direction)) > cl.cosAngle && islit)
         {
             float intensity = (1 / dot(LightToHit, LightToHit)) * max(0.0f, dot(-lightDir, normal));
-            diffuse += intensity;
     
             float4 halfWayVector = normalize(lightDir + normalize(CamToPixel));
             float specularDot = max(dot(normal, -halfWayVector), 0);
             float4 lighting = lit(intensity, specularDot, specularExponent);
             
-            diffuse += lighting.y;
-            specular += lighting.z;
+            diffuse += lighting.y * cl.color;
+            specular += lighting.z * cl.color;
         }
     }
     
@@ -97,8 +97,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
             float specularDot = max(dot(normal, -halfWayVector), 0);
             float4 lighting = lit(diffuseIntensity, specularDot, specularExponent);
             
-            diffuse += lighting.y;
-            specular += lighting.z;
+            diffuse += lighting.y * cl.color;
+            specular += lighting.z * cl.color;
         }
     }
     float4 ambientComponent = ambientGBuffer[DTid.xy];
