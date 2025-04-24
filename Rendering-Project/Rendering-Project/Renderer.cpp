@@ -42,7 +42,8 @@ HRESULT Renderer::Init(const Window& window) {
     return S_OK;
 }
 
-void Renderer::Render(BaseScene* scene) {
+void Renderer::Render(BaseScene* scene, float deltaTime) {
+    scene->GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), deltaTime);
     this->immediateContext->VSSetConstantBuffers(1, 1, this->worldMatrixBuffer.GetAdressOfBuffer());
     LightManager& lm = scene->GetLightManager();
     this->ShadowPass(scene->GetLightManager(), scene->GetObjects());
@@ -52,13 +53,13 @@ void Renderer::Render(BaseScene* scene) {
     std::array<float, 4> clearColor{0, 0, 0, 1};
     for (uint32_t i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene->GetCameras()) {
-            this->Render(scene, cam, cam->GetAdressOfUAV(), cam->GetRenderResources());
+            this->Render(scene, cam, cam->GetAdressOfUAV(), cam->GetRenderResources(), deltaTime);
             // clear
             cam->GetRenderResources()->Clear(this->immediateContext.Get(), clearColor);
         }
     }
     // Render to backbuffer
-    this->Render(scene, &scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr);
+    this->Render(scene, &scene->GetMainCam(), this->UAV.GetAddressOf(), &this->rr, deltaTime);
 
     // clear
     this->rr.Clear(this->immediateContext.Get(), clearColor);
@@ -90,7 +91,7 @@ void Renderer::SetTesselation(bool value) {
     }
 }
 
-void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
+void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr, float deltaTime) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);
 
@@ -133,7 +134,6 @@ void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView**
     this->immediateContext->RSSetState(this->solidRasterizerState.Get());
 
     // Render particles using the particle system
-    scene->GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), 0.016f);
     this->RenderParticles(scene->GetParticleSystem(), *cam, rr);
 
     this->immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);

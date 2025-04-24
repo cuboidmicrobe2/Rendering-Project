@@ -24,8 +24,8 @@ class BaseScene {
     void AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size,
                  bool tesselate = true);
 
-    void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle);
-    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height);
+    void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle, Mesh* lightMesh = nullptr);
+    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height, Mesh* lightMesh = nullptr);
     LightManager& GetLightManager();
 
     std::vector<Camera*>& GetCameras();
@@ -37,7 +37,7 @@ class BaseScene {
 
     Camera& GetMainCam();
 
-    virtual void UpdateScene() = 0;
+    virtual void UpdateScene(float deltaTime) = 0;
 
   protected:
     Mesh cubeMesh;

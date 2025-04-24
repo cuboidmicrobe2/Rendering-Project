@@ -21,8 +21,8 @@ class TestScene : public BaseScene {
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
     }
-    void UpdateScene() override { 
-        this->mainCamera.Update(this->input);
+    void UpdateScene(float deltaTime) override { 
+        this->mainCamera.Update(this->input, deltaTime);
     }
     ~TestScene() {}
 };

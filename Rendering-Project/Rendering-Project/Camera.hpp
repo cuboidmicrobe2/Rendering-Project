@@ -122,7 +122,7 @@ class Camera {
 
     inline SceneObject* GetOwner() const;
 
-    inline void Update(InputHandler& input);
+    inline void Update(InputHandler& input, float deltaTime);
 
     inline ID3D11UnorderedAccessView** GetAdressOfUAV();
 
@@ -186,10 +186,10 @@ inline void Camera::SetFOV(float degrees) {
 
 inline float Camera::GetFOV() const { return DirectX::XMConvertToDegrees(this->verticalFOVRadians); }
 
-inline void Camera::Update(InputHandler& input) {
+inline void Camera::Update(InputHandler& input, float deltaTime) {
 
     // WASD movement
-    const float speed = 0.069f;
+    const float speed = deltaTime * 10;
     if (input.isDown('W')) {
         this->transform.Move(this->transform.GetDirectionVector(), speed);
     }

@@ -105,6 +105,7 @@ HRESULT LightManager::Init(ID3D11Device* device) {
             std::cerr << "Creating srv Failed, Error: " << r << "\n";
             return r;
         }
+
         D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
         dsvDesc.Format                        = DXGI_FORMAT_D24_UNORM_S8_UINT;
         dsvDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;

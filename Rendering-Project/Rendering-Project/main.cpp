@@ -33,24 +33,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
         BaseScene* activeScene = &scene;
         MSG msg                = {};
+        std::array<BaseScene*, 2> scenes{&scene, &scene2};
+
+        BaseScene* activeScene = &scene;
+        MSG msg                = {};
+        auto lastTime          = std::chrono::high_resolution_clock::now();
         while (msg.message != WM_QUIT) {
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float, std::ratio<1, 1>> deltaTime = (currentTime - lastTime);
+            float deltTime_f = deltaTime.count();
+            lastTime                                                 = currentTime;
             window.inputHandler.reset();
 
             if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-            if (window.inputHandler.wasPressed('1')) {
-                activeScene = &scene;
+            for (int i = 0; i < std::min(9, (int) scenes.size()); i++) {
+                if (window.inputHandler.wasPressed('1' + i)) {
+                    std::cout << '1' + i << "\n";
+                    activeScene = scenes[i];
+                }
             }
-            if (window.inputHandler.wasPressed('2')) {
-                activeScene = &scene2;
-            }
-            if (window.inputHandler.wasPressed('3')) {
-                activeScene = &coolScene;
-            }
-            activeScene->UpdateScene();
-            renderer.Render(activeScene);
+            activeScene->UpdateScene(deltTime_f);
+            renderer.Render(activeScene, deltTime_f);
         }
     }
     ID3D11Debug* debug = nullptr;
