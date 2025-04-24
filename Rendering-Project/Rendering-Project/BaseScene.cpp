@@ -53,7 +53,7 @@ void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, b
         this->quadTree.AddElement(object);
         this->quadTree.AddElement(box);
     } else {
-        this->staticObjects.emplace_back(object);
+        this->dynamicObjects.emplace_back(object);
     }
 }
 
@@ -90,7 +90,7 @@ void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float 
     this->lm.AddDirectionalLight(l);
 
     DirectX::XMVECTOR pos =
-        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), 40));
+        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget));
     transform.SetPosition(pos);
 
     if (lightMesh) {
@@ -126,7 +126,7 @@ std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
     // Get visible objects using the quadtree
     std::vector<SceneObject*> objects = this->quadTree.CheckTree(cameraFrustum);
 
-    for (const auto& obj : this->staticObjects) {
+    for (const auto& obj : this->dynamicObjects) {
         objects.emplace_back(obj.get());
     }
     return objects;
@@ -134,11 +134,11 @@ std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
 
 std::vector<SceneObject*> BaseScene::GetObjects() {
     std::vector<SceneObject*> objects;
-    objects.reserve(this->objects.size() + this->staticObjects.size());
+    objects.reserve(this->objects.size() + this->dynamicObjects.size());
     for (const auto& obj : this->objects) {
         objects.emplace_back(obj.get());
     }
-    for (const auto& obj : this->staticObjects) {
+    for (const auto& obj : this->dynamicObjects) {
         objects.emplace_back(obj.get());
     }
     return objects;
