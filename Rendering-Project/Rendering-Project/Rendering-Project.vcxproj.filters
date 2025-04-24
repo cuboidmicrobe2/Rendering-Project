@@ -58,7 +58,7 @@
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="WindowHandler.hpp" />
     <ClInclude Include="BaseScene.hpp" />
-    <ClInclude Include="testScene.hpp" />
+    <ClInclude Include="CubeAndLightScene.hpp" />
     <ClInclude Include="MeshHandler.hpp" />
     <ClInclude Include="CoolScene.hpp" />
     <ClInclude Include="TestScene2.hpp" />

@@ -184,7 +184,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="StructuredBuffer.hpp" />
     <ClInclude Include="SubMesh.hpp" />
-    <ClInclude Include="testScene.hpp" />
+    <ClInclude Include="CubeAndLightScene.hpp" />
     <ClInclude Include="TestScene2.hpp" />
     <ClInclude Include="Transform.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />

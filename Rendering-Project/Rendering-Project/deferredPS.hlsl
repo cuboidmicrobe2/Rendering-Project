@@ -84,7 +84,7 @@ PixelShaderOutput main(PixelShaderInput input)
             currentDepth += layerDepth;
             uvOffset += deltaUV;
 
-            // sample the REAL height
+            // sample the height
             heightSample = normalMap.Sample(samplerState, input.uv + uvOffset).w;
 
             // if we've passed the geometry surface
@@ -119,7 +119,7 @@ PixelShaderOutput main(PixelShaderInput input)
     output.diffuse = hasDiffuseMap ? diffuseTexture.Sample(samplerState, samplePoint) * float4(diffuseFactor, 1) : float4(diffuseFactor, 1);
     output.normal = float4(normal, 0);
     output.position = input.worldPosition;
-    output.ambient = hasAmbientMap ? ambientTexture.Sample(samplerState, samplePoint) * float4(ambientFactor, 1) : float4(ambientFactor * defaultAmbient, 1);
+    output.ambient = hasAmbientMap ? ambientTexture.Sample(samplerState, samplePoint) * float4(ambientFactor, 1) : float4(ambientFactor * defaultAmbient, 1) * (hasDiffuseMap ? diffuseTexture.Sample(samplerState, samplePoint) : float4(1, 1, 1, 1));
     output.specular = hasSpecularMap ? float4(specularTexture.Sample(samplerState, samplePoint).xyz, 1) * float4(specularFactor, shininess) : float4(1, 1, 1, 1) * float4(specularFactor, shininess);
 
     return output;

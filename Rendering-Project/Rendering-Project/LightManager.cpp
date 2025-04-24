@@ -140,7 +140,7 @@ std::vector<LightData> LightManager::GetSpotLightData() const {
 
         LightData l{
             .pos{tempPos[0], tempPos[1], tempPos[2]},
-            .intensity = this->Spotlights[i].GetIntesity(),
+            .intensity = 0,
             .color     = {tempColor[0], tempColor[1], tempColor[2], tempColor[3]},
             .direction = {tempDir[0], tempDir[1], tempDir[2]},
             .angle     = cos(this->Spotlights[i].GetAngle() / 2),
