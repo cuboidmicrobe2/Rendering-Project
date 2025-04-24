@@ -77,7 +77,6 @@ class CoolScene : public BaseScene {
         float radius             = 50;
         float angularSpeed       = 0.5;
         float rotation           = deltaTime * angularSpeed;
-        this->mainCamera.Update(this->input, deltaTime);
         SceneObject* obj = this->dynamicObjects[0].get();
         obj->transform.Rotate(0, rotation);
         DirectX::XMVECTOR pos =

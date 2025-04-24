@@ -52,7 +52,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         float sceneDepth = ndc.z;
         float mapDepth = shadowMaps.SampleLevel(shadowSampler, float3(uv, i), 0.f).r;
         
-        const float bias = 0.001f;
+        const float bias = 0.000001f;
         bool lit = (mapDepth + bias) >= sceneDepth;
         
         

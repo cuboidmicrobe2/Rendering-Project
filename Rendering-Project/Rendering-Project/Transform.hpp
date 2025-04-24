@@ -44,7 +44,8 @@ inline Transform::Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quater
 
 inline Transform::Transform(DirectX::XMVECTOR position, float roll, float pitch, float yaw, DirectX::XMVECTOR scale)
     : position(position), quaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(
-          {DirectX::XMConvertToRadians(roll), DirectX::XMConvertToRadians(pitch), DirectX::XMConvertToRadians(yaw)})),
+          {DirectX::XMConvertToRadians(roll), DirectX::XMConvertToRadians(pitch), DirectX::XMConvertToRadians(yaw)}
+    )),
       scale(scale) {}
 
 inline void Transform::SetPosition(DirectX::XMVECTOR position) { this->position = position; }
