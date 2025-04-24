@@ -33,15 +33,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
         BaseScene* activeScene = &scene;
         MSG msg                = {};
-        std::array<BaseScene*, 2> scenes{&scene, &scene2};
+        std::array<BaseScene*, 3> scenes{&scene, &scene2, &coolScene};
 
-        BaseScene* activeScene = &scene;
-        MSG msg                = {};
-        auto lastTime          = std::chrono::high_resolution_clock::now();
+        auto lastTime = std::chrono::high_resolution_clock::now();
         while (msg.message != WM_QUIT) {
-            auto currentTime = std::chrono::high_resolution_clock::now();
+            auto currentTime                                         = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float, std::ratio<1, 1>> deltaTime = (currentTime - lastTime);
-            float deltTime_f = deltaTime.count();
+            float deltTime_f                                         = deltaTime.count();
             lastTime                                                 = currentTime;
             window.inputHandler.reset();
 

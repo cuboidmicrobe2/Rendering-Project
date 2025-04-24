@@ -15,6 +15,7 @@ class CoolScene : public BaseScene {
         Mesh* chestMesh   = meshHandler.GetMesh("./CoolScene", "Chest Closed.obj", device);
         Mesh* boatMesh    = meshHandler.GetMesh("./boat", "boat.obj", device);
         Mesh* treeMesh    = meshHandler.GetMesh("./CoolScene", "Palm Tree.obj", device);
+        Mesh* sphereMesh  = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
 
         // "Sailing" boat
         this->AddSimpleObject(Transform({-45, -5.5, 10}, 0, 30), boatMesh, true, false);
@@ -50,26 +51,23 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({5, -4.3, -10}, 0, 180), chestMesh, false, true);
 
         // Sailing boats
-        this->AddSimpleObject(Transform({15, -5.5, 45}, 0, 90), boatMesh, false, false);
+        this->AddSimpleObject(Transform({35, -5.5, 45}, 0, 330), boatMesh, false, false);
         this->AddSimpleObject(Transform({40, -5.5, 0}), boatMesh, false, false);
 
         // Sun
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 1000, 1000);
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 - 45, 0), {1, 1, 1}, 1000, 1000);
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 90), {1, 1, 1}, 1000, 1000);
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, -90), {1, 1, 1}, 1000, 1000);
+        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 1000, 1000, sphereMesh);
 
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
     }
-    void UpdateScene() override {
-        this->mainCamera.Update(this->input);
-        DirectX::XMVECTOR center = {0, 0, 0};
-        float radius             = 20;
-        float angularSpeed       = 1;
+    void UpdateScene(float deltaTime) override {
+        this->mainCamera.Update(this->input, deltaTime);
+        DirectX::XMVECTOR center = {0, -5.5, 0};
+        float radius             = 50;
+        float angularSpeed       = 0.5;
         float rotation           = deltaTime * angularSpeed;
         this->mainCamera.Update(this->input, deltaTime);
-        SceneObject* obj = this->dynamicObjects[0].get();
+        SceneObject* obj = this->staticObjects[0].get();
         obj->transform.Rotate(0, rotation);
         DirectX::XMVECTOR pos =
             DirectX::XMVectorScale(DirectX::XMVector3Cross({0, 1, 0}, obj->transform.GetDirectionVector()), radius);
