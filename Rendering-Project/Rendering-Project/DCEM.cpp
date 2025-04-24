@@ -16,7 +16,7 @@ inline DirectX::XMVECTOR LookRotation(DirectX::XMVECTOR forward, DirectX::XMVECT
 }
 
 DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size,
-           bool tesselate)
+           bool tesselate, bool showTessellation)
     : cameras({
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({1, 0, 0}, {0, 1, 0}), nullptr, &this->rr, this),
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({-1, 0, 0}, {0, 1, 0}), nullptr, &this->rr,
@@ -29,7 +29,8 @@ DCEM::DCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* 
           Camera(90, 1, 1, 1000, transform.GetPosition(), LookRotation({0, 0, -1}, {0, 1, 0}), nullptr, &this->rr,
                  this),
       }),
-      SceneObject(transform, mesh, tesselate), PS(DCEMPS), normalPS(normalPS), srv(nullptr), size(size) {}
+      SceneObject(transform, mesh, tesselate, showTessellation), PS(DCEMPS), normalPS(normalPS), srv(nullptr),
+      size(size) {}
 
 void DCEM::Init(ID3D11Device* device) {
     HRESULT hr = this->rr.Init(device, this->size, this->size);

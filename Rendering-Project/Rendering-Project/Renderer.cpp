@@ -73,7 +73,7 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
-void Renderer::SetTesselation(bool value) {
+void Renderer::SetTesselation(bool value, bool visibility) {
     if (value && !this->tesselationStatus) {
         // Tessellation ON
         this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
@@ -88,6 +88,17 @@ void Renderer::SetTesselation(bool value) {
         this->immediateContext->DSSetShader(nullptr, nullptr, 0);
         this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         this->tesselationStatus = false;
+    }
+
+    if (visibility && !this->tessellationVisibility) {
+        // Visibility ON
+        this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
+        this->tessellationVisibility = true;
+
+    } else if (!visibility && this->tessellationVisibility) {
+        // Visibility OFF
+        this->immediateContext->RSSetState(this->solidRasterizerState.Get());
+        this->tessellationVisibility = false;
     }
 }
 
@@ -119,20 +130,29 @@ void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView**
             // Draw object
             DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
             this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
-            this->SetTesselation(obj->GetTesselationValue());
+
+            this->SetTesselation(obj->GetTesselationValue(), obj->GetTessellationVisibility());
+
             obj->Draw(this->device.Get(), this->immediateContext.Get());
         }
     }
-    this->SetTesselation(false);
+    this->SetTesselation(false, false);
 
-    // Draw bounding boxes with wireframe fill mode
-    this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
+    // Draw bounding boxes
+    this->SetTesselation(true, true);
     for (SceneObject*& box : scene->GetBoundingBoxes()) {
-        DirectX::XMFLOAT4X4 worldMatrix = box->GetWorldMatrix();
-        this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
-        box->Draw(this->device.Get(), this->immediateContext.Get());
+        if (box->GetTessellationVisibility()) {
+            DirectX::XMFLOAT4X4 worldMatrix = box->GetWorldMatrix();
+            this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
+
+            float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(
+                DirectX::XMVectorSubtract(box->transform.GetPosition(), cam->transform.GetPosition())));
+            this->tessBuffer.UpdateBuffer(this->GetDeviceContext(), &distance);
+
+            box->Draw(this->device.Get(), this->immediateContext.Get());
+        }
     }
-    this->immediateContext->RSSetState(this->solidRasterizerState.Get());
+    this->SetTesselation(false, false);
 
     // Render particles using the particle system
     this->RenderParticles(scene->GetParticleSystem(), *cam, rr);
