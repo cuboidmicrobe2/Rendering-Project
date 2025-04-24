@@ -45,6 +45,9 @@ class Renderer {
     void ShadowPass(LightManager& lm, std::vector<SceneObject*> obj);
     void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
+    void SetTesselation(bool value);
+    bool tesselationStatus = false;
+
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
 
@@ -54,8 +57,10 @@ class Renderer {
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
     Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
+
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerStateShadows;
 
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> wireframeRasterizerState;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> solidRasterizerState;

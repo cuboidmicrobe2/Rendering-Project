@@ -6,8 +6,8 @@
 Renderer::Renderer() {}
 
 Renderer::~Renderer() {
-    this->immediateContext->ClearState();
-    this->immediateContext->Flush();
+    // this->immediateContext->ClearState();
+    // this->immediateContext->Flush();
 }
 
 HRESULT Renderer::Init(const Window& window) {
@@ -72,6 +72,24 @@ ID3D11Device* Renderer::GetDevice() { return this->device.Get(); }
 
 ID3D11DeviceContext* Renderer::GetDeviceContext() const { return this->immediateContext.Get(); }
 
+void Renderer::SetTesselation(bool value) {
+    if (value && !this->tesselationStatus) {
+        // Tessellation ON
+        this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+        this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
+        this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
+        this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
+        this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
+        this->tesselationStatus = true;
+    } else if (!value && this->tesselationStatus) {
+        // Tessellation OFF
+        this->immediateContext->HSSetShader(nullptr, nullptr, 0);
+        this->immediateContext->DSSetShader(nullptr, nullptr, 0);
+        this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        this->tesselationStatus = false;
+    }
+}
+
 void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);
@@ -82,12 +100,6 @@ void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView**
 
     // Bind and update camera buffer
 
-    // Tessellation ON
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-    this->immediateContext->HSSetShader(this->hullShader.Get(), nullptr, 0);
-    this->immediateContext->HSSetConstantBuffers(0, 1, this->tessBuffer.GetAdressOfBuffer());
-    this->immediateContext->DSSetShader(this->domainShader.Get(), nullptr, 0);
-    this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     CameraBufferData camdata{};
     DirectX::XMStoreFloat4x4(&camdata.viewProjection, DirectX::XMMatrixMultiplyTranspose(
                                                           cam->createViewMatrix(), cam->createProjectionMatrix()));
@@ -105,14 +117,11 @@ void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView**
             // Draw object
             DirectX::XMFLOAT4X4 worldMatrix = obj->GetWorldMatrix();
             this->worldMatrixBuffer.UpdateBuffer(this->GetDeviceContext(), &worldMatrix);
+            this->SetTesselation(obj->GetTesselationValue());
             obj->Draw(this->device.Get(), this->immediateContext.Get());
         }
     }
-
-    // Tessellation OFF
-    this->immediateContext->HSSetShader(nullptr, nullptr, 0);
-    this->immediateContext->DSSetShader(nullptr, nullptr, 0);
-    this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    this->SetTesselation(false);
 
     // Draw bounding boxes with wireframe fill mode
     this->immediateContext->RSSetState(this->wireframeRasterizerState.Get());
@@ -382,8 +391,26 @@ HRESULT Renderer::SetSamplers() {
         return result;
     }
 
+    D3D11_SAMPLER_DESC samplerDescShadow = {
+        .Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+        .AddressU       = D3D11_TEXTURE_ADDRESS_BORDER,
+        .AddressV       = D3D11_TEXTURE_ADDRESS_BORDER,
+        .AddressW       = D3D11_TEXTURE_ADDRESS_BORDER,
+        .MipLODBias     = 0,
+        .MaxAnisotropy  = 16,
+        .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+        .BorderColor    = {0, 0, 0, 0},
+        .MinLOD         = 0.0f,
+        .MaxLOD         = D3D11_FLOAT32_MAX,
+    };
+
+    result = device->CreateSamplerState(&samplerDescShadow, this->samplerStateShadows.GetAddressOf());
+    if (FAILED(result)) {
+        return result;
+    }
+
     this->immediateContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-    this->immediateContext->CSSetSamplers(0, 1, this->samplerState.GetAddressOf());
+    this->immediateContext->CSSetSamplers(0, 1, this->samplerStateShadows.GetAddressOf());
 
     return S_OK;
 }
@@ -418,7 +445,7 @@ HRESULT Renderer::SetupRasterizerStates() {
 void Renderer::LightingPass(ID3D11UnorderedAccessView** UAV, D3D11_VIEWPORT viewport) {
     // Unbind GBuffers from writing
     // this->rr.BindLightingPass(this->immediateContext.Get());
-
+    this->immediateContext->PSSetConstantBuffers(1, 1, this->cameraBuffer.GetAdressOfBuffer());
     // Bind UAV to Compute
 
     this->immediateContext->CSSetUnorderedAccessViews(0, 1, UAV, nullptr);
@@ -461,7 +488,6 @@ void Renderer::RenderParticles(ParticleSystem& particleSystem, Camera& cam, Rend
     this->immediateContext->RSSetViewports(1, &viewport);
     this->immediateContext->PSSetShader(particleSystem.GetPixelShader(), nullptr, 0);
 
-    // this->immediateContext->OMSetRenderTargets(1, this->rtv.GetAddressOf(), this->rr.GetDepthStencilView());
     this->immediateContext->Draw(particleSystem.GetParticleCount(), 0);
 
     this->immediateContext->GSSetShader(nullptr, nullptr, 0);
