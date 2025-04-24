@@ -37,7 +37,7 @@ class BaseScene {
 
     Camera& GetMainCam();
 
-    virtual void UpdateScene() = 0;
+    virtual void UpdateScene(float deltaTime) = 0;
 
   protected:
     Mesh cubeMesh;

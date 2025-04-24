@@ -40,6 +40,8 @@ HRESULT ParticleSystem::InitializeParticles(ID3D11Device* device, ID3D11DeviceCo
         this->isInitialized = true;
     }
 
+    this->timeBuffer.Initialize(device, sizeof(TimeBufferData), nullptr);
+
     return result;
 }
 
@@ -80,18 +82,10 @@ void ParticleSystem::UpdateParticles(ID3D11Device* device, ID3D11DeviceContext* 
         return;
     }
 
-    // Create and update time buffer
-    struct TimeBufferData {
-        float deltaTime;
-        float padding[3];
-    } timeData;
+    TimeBufferData timeData = {.deltaTime = deltaTime};
 
-    timeData = {deltaTime, {0.0f, 0.0f, 0.0f}};
-
-    // Create constant buffer for the time
-    ConstantBuffer timeBuffer;
-    timeBuffer.Initialize(device, sizeof(TimeBufferData), &timeData);
-
+    // Update time buffer
+    this->timeBuffer.UpdateBuffer(immediateContext, &timeData);
     // Set compute shader
     immediateContext->CSSetShader(this->computeShader.Get(), nullptr, 0);
 

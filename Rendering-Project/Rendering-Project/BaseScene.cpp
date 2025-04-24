@@ -75,17 +75,17 @@ void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11
         this->cameras.push_back(&cam);
 }
 
-void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle, Mesh* lightMesh = nullptr) {
+void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle, Mesh* lightMesh) {
     Light l(transform, color, 0, angle);
     this->lm.AddSpotLight(l);
 
     if (lightMesh) {
-        this->AddSimpleObject(transform, lightMesh, false, false);
+        this->AddSimpleObject(transform, lightMesh, true, false);
     }
 }
 
 void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height,
-                            Mesh* lightMesh = nullptr) {
+                            Mesh* lightMesh) {
     DirectionalLight l(transform, color, 0, width, height);
     this->lm.AddDirectionalLight(l);
 
@@ -94,7 +94,7 @@ void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float 
     transform.SetPosition(pos);
 
     if (lightMesh) {
-        this->AddSimpleObject(transform, lightMesh, false, false);
+        this->AddSimpleObject(transform, lightMesh, true, false);
     }
 }
 
