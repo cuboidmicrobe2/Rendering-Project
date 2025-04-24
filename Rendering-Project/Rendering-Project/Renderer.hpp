@@ -16,7 +16,7 @@ class Renderer {
 
     HRESULT Init(const Window& window);
 
-    void Render(BaseScene* scene);
+    void Render(BaseScene* scene, float deltaTime);
 
     ID3D11Device* GetDevice();
     ID3D11PixelShader* GetPS() const;
@@ -30,7 +30,8 @@ class Renderer {
   private:
     void Clear();
 
-    void Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr);
+    void Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr,
+                float deltaTime);
 
     HRESULT CreateDeviceAndSwapChain(const Window& window);
     HRESULT SetInputLayout(const std::string& byteCode);

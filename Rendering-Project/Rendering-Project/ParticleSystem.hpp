@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <wrl/client.h>
+#include "ConstantBuffer.hpp"
 
 struct Particle {
     float position[3];
@@ -35,6 +36,11 @@ class ParticleSystem {
     UINT GetParticleCount() const;
 
   private:
+    struct TimeBufferData {
+        float deltaTime;
+        float padding[3];
+    };
+    ConstantBuffer timeBuffer;
     ParticleBuffer particleBuffer;
     std::unordered_map<std::string, std::string> shaderPaths;
     bool isInitialized;

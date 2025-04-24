@@ -26,24 +26,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         TestScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                         renderer.GetPS(), renderer.GetDCEMPS());
         TestScene2 scene2(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
-                         renderer.GetPS(), renderer.GetDCEMPS());
+                          renderer.GetPS(), renderer.GetDCEMPS());
+        std::array<BaseScene*, 2> scenes{&scene, &scene2};
+
         BaseScene* activeScene = &scene;
-        MSG msg = {};
+        MSG msg                = {};
+        auto lastTime          = std::chrono::high_resolution_clock::now();
         while (msg.message != WM_QUIT) {
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float, std::ratio<1, 1>> deltaTime = (currentTime - lastTime);
+            float deltTime_f = deltaTime.count();
+            lastTime                                                 = currentTime;
             window.inputHandler.reset();
 
             if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-            if (window.inputHandler.wasPressed('1')) {
-                activeScene = &scene;
+            for (int i = 0; i < std::min(9, (int) scenes.size()); i++) {
+                if (window.inputHandler.wasPressed('1' + i)) {
+                    std::cout << '1' + i << "\n";
+                    activeScene = scenes[i];
+                }
             }
-            if (window.inputHandler.wasPressed('2')) {
-                activeScene = &scene2;
-            }
-            activeScene->UpdateScene();
-            renderer.Render(activeScene);
+            activeScene->UpdateScene(deltTime_f);
+            renderer.Render(activeScene, deltTime_f);
         }
     }
     ID3D11Debug* debug = nullptr;
