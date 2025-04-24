@@ -76,11 +76,12 @@ class CoolScene : public BaseScene {
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
     }
     void UpdateScene(float deltaTime) override {
+        this->mainCamera.Update(this->input, deltaTime);
         DirectX::XMVECTOR center = {0, -5.5, 0};
         float radius             = 50;
         float angularSpeed       = 0.5;
         float rotation           = deltaTime * angularSpeed;
-        SceneObject* obj = this->dynamicObjects[0].get();
+        SceneObject* obj         = this->dynamicObjects[0].get();
         obj->transform.Rotate(0, rotation);
         DirectX::XMVECTOR pos =
             DirectX::XMVectorScale(DirectX::XMVector3Cross({0, 1, 0}, obj->transform.GetDirectionVector()), radius);

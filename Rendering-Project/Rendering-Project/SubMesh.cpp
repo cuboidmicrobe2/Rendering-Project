@@ -15,7 +15,9 @@ void SubMesh::Initialize(ID3D11Device* device, size_t startIndexValue, size_t nr
                          Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ambientTextureSRV,
                          Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseTextureSRV,
                          Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularTextureSRV,
-                         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMapTexture, float parallaxFactor) {
+                         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMapTexture, float parallaxFactor,
+                         DirectX::XMFLOAT3 ambientFactor, DirectX::XMFLOAT3 diffuseFactor,
+                         DirectX::XMFLOAT3 specularFactor, int shininess) {
     this->startIndex       = startIndexValue;
     this->nrOfIndices      = nrOfIndicesInSubMesh;
     this->ambientTexture   = ambientTextureSRV;
@@ -24,11 +26,9 @@ void SubMesh::Initialize(ID3D11Device* device, size_t startIndexValue, size_t nr
     this->normalMapTexture = normalMapTexture;
 
     PSMetaData_t metaData{
-        (bool)diffuseTextureSRV,
-        (bool)ambientTextureSRV,
-        (bool)specularTextureSRV,
-        (bool)normalMapTexture,
-        parallaxFactor,
+        diffuseFactor,  (bool) diffuseTextureSRV,  ambientFactor,           (bool) ambientTextureSRV,
+        specularFactor, (bool) specularTextureSRV, (bool) normalMapTexture, parallaxFactor,
+        shininess,
     };
 
     this->PSMetaData.Initialize(device, sizeof(PSMetaData_t), &metaData);
@@ -41,7 +41,7 @@ void SubMesh::PerformDrawCall(ID3D11DeviceContext* context) {
     context->PSSetShaderResources(2, 1, this->specularTexture.GetAddressOf());
     context->PSSetShaderResources(3, 1, this->normalMapTexture.GetAddressOf());
 
-    context->DrawIndexed((UINT)this->nrOfIndices, this->startIndex, 0);
+    context->DrawIndexed((UINT) this->nrOfIndices, this->startIndex, 0);
 }
 
 ID3D11ShaderResourceView* SubMesh::GetAmbientSRV() const { return this->ambientTexture.Get(); }
