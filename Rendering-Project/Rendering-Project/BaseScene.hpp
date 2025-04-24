@@ -49,7 +49,7 @@ class BaseScene {
 
     std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes;
     std::vector<std::unique_ptr<SceneObject>> objects;
-    std::vector<std::unique_ptr<SceneObject>> staticObjects;
+    std::vector<std::unique_ptr<SceneObject>> dynamicObjects;
     std::vector<Camera*> cameras;
 
     QuadTree quadTree;

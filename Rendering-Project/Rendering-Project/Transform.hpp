@@ -9,7 +9,7 @@ class Transform {
     inline Transform();
     inline Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion = DirectX::XMQuaternionIdentity(),
                      DirectX::XMVECTOR scale = {1, 1, 1});    
-    inline Transform(DirectX::XMVECTOR position, float pitch, float yaw,
+    inline Transform(DirectX::XMVECTOR position, float roll, float pitch, float yaw = 0,
                      DirectX::XMVECTOR scale = {1, 1, 1});
 
     inline void SetPosition(DirectX::XMVECTOR position);
@@ -42,8 +42,8 @@ inline Transform::Transform() : position({}), quaternion(DirectX::XMQuaternionId
 inline Transform::Transform(DirectX::XMVECTOR position, DirectX::XMVECTOR quaternion, DirectX::XMVECTOR scale)
     : position(position), quaternion(DirectX::XMQuaternionNormalize(quaternion)), scale(scale) {}
 
-inline Transform::Transform(DirectX::XMVECTOR position, float pitch, float yaw, DirectX::XMVECTOR scale)
-: position(position), quaternion(GetCameraRotationQuaternion(pitch, yaw)), scale(scale) {}
+inline Transform::Transform(DirectX::XMVECTOR position, float roll, float pitch, float yaw, DirectX::XMVECTOR scale)
+    : position(position), quaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector({roll, pitch, yaw})), scale(scale) {}
 
 inline void Transform::SetPosition(DirectX::XMVECTOR position) { this->position = position; }
 
