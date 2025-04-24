@@ -165,6 +165,7 @@
     <ClInclude Include="BoundingBox.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
+    <ClInclude Include="CoolScene.hpp" />
     <ClInclude Include="DCEM.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />

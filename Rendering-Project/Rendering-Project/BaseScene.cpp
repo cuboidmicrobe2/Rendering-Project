@@ -37,7 +37,7 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
 
     for (const auto& obj : this->boundingBoxes) {
         obj.get()->Init(device);
-    }    
+    }
 
     return S_OK;
 }
@@ -59,7 +59,8 @@ void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic) {
     }
 }
 
-void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size) {
+void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh,
+                        UINT size) {
     DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     SimpleObject* box =
@@ -99,9 +100,9 @@ std::vector<SceneObject*> BaseScene::GetBoundingBoxes() {
     return boxes;
 }
 
-std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) { 
+std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
     Camera frustumFOV = cam;
-    frustumFOV.SetFOV(this->mainCamera.GetFOV() - 20.0f);
+    frustumFOV.SetFOV(this->mainCamera.GetFOV());
     // Create a frustum from the main camera's view and projection matrices
     DirectX::BoundingFrustum cameraFrustum;
     DirectX::XMMATRIX proj = frustumFOV.createProjectionMatrix();
@@ -117,10 +118,10 @@ std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
     for (const auto& obj : this->staticObjects) {
         objects.emplace_back(obj.get());
     }
-    return objects; 
+    return objects;
 }
 
-std::vector<SceneObject*> BaseScene::GetObjects() { 
+std::vector<SceneObject*> BaseScene::GetObjects() {
     std::vector<SceneObject*> objects;
     objects.reserve(this->objects.size() + this->staticObjects.size());
     for (const auto& obj : this->objects) {

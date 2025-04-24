@@ -4,10 +4,13 @@
 namespace dx = DirectX;
 
 SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {
-    this->boundingBox = mesh->GetBoundingBox();
+    DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
+    DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
+    DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
 
-    this->boundingBox.Transform(this->boundingBox, 1, this->transform.GetRotationQuaternion(),
-                                this->transform.GetPosition());
+    DirectX::XMMATRIX matrix = scaleMatrix * rotationMatrix * translationMatrix;
+
+    this->boundingBox.Transform(this->boundingBox, matrix);
 }
 
 void SceneObject::Update() {

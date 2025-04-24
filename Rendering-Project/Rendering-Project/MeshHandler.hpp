@@ -1,9 +1,9 @@
-#ifndef MESH_HANDLER
-#define MESH_HANDLER
-#include <string>
+#ifndef MESH_HANDLER_HPP
+#define MESH_HANDLER_HPP
 #include "Mesh.hpp"
-#include <unordered_map>
 #include <d3d11_4.h>
+#include <string>
+#include <unordered_map>
 class MeshHandler {
   public:
     Mesh* GetMesh(const std::string& folder, const std::string& objname, ID3D11Device* device) {

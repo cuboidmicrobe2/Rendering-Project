@@ -66,6 +66,7 @@
     <ClInclude Include="BaseScene.hpp" />
     <ClInclude Include="testScene.hpp" />
     <ClInclude Include="MeshHandler.hpp" />
+    <ClInclude Include="CoolScene.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg" />

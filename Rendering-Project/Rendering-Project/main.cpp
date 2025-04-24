@@ -1,4 +1,6 @@
 #define NOMINMAX
+#include "BaseScene.hpp"
+#include "CoolScene.hpp"
 #include "DCEM.hpp"
 #include "DirectionalLight.hpp"
 #include "Mesh.hpp"
@@ -6,8 +8,6 @@
 #include "SimpleObject.hpp"
 #include "SimpleVertex.hpp"
 #include "WindowHandler.hpp"
-#include "testScene.hpp"
-#include "BaseScene.hpp"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
@@ -19,7 +19,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         return result;
     }
 
-    TestScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler, renderer.GetPS(), renderer.GetDCEMPS());
+    CoolScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler, renderer.GetPS(),
+                    renderer.GetDCEMPS());
 
     MSG msg = {};
     while (msg.message != WM_QUIT) {

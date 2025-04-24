@@ -1,17 +1,17 @@
-#ifndef BASE_SCENE
-#define BASE_SCENE
+#ifndef BASE_SCENE_HPP
+#define BASE_SCENE_HPP
 
 #include "Camera.hpp"
 #include "DirectionalLight.hpp"
 #include "Light.hpp"
 #include "LightManager.hpp"
+#include "Mesh.hpp"
 #include "ParticleSystem.hpp"
+#include "QuadTree.hpp"
 #include "SceneObject.hpp"
 #include "SimpleObject.hpp"
 #include "WindowHandler.hpp"
-#include "QuadTree.hpp"
 #include <d3d11_4.h>
-#include "Mesh.hpp"
 
 class BaseScene {
   public:
