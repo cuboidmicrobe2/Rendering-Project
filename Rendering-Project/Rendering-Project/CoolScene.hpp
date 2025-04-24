@@ -62,7 +62,7 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({5, -4.3, -10}, 0, 180), chestMesh, false, true);
 
         // Sailing boats
-        this->AddSimpleObject(Transform({35, -5.5, 45}, 0, 330), boatMesh, false, false);
+        this->AddSimpleObject(Transform({35, -5.5, 45}, 0, 0, 330), boatMesh, false, false);
         this->AddSimpleObject(Transform({40, -5.5, 0}), boatMesh, false, false);
 
         // Sun
@@ -78,7 +78,7 @@ class CoolScene : public BaseScene {
         float angularSpeed       = 0.5;
         float rotation           = deltaTime * angularSpeed;
         this->mainCamera.Update(this->input, deltaTime);
-        SceneObject* obj = this->staticObjects[0].get();
+        SceneObject* obj = this->dynamicObjects[0].get();
         obj->transform.Rotate(0, rotation);
         DirectX::XMVECTOR pos =
             DirectX::XMVectorScale(DirectX::XMVector3Cross({0, 1, 0}, obj->transform.GetDirectionVector()), radius);
