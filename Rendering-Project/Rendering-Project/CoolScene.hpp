@@ -16,6 +16,7 @@ class CoolScene : public BaseScene {
         Mesh* boatMesh    = meshHandler.GetMesh("./boat", "boat.obj", device);
         Mesh* treeMesh    = meshHandler.GetMesh("./CoolScene", "Palm Tree.obj", device);
         Mesh* sphereMesh  = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
+        Mesh* sharkMesh   = meshHandler.GetMesh("./CoolScene", "shark.obj", device);
 
         // "Sailing" boat
         this->AddSimpleObject(Transform({-45, -5.5, 10}, 0, 30), boatMesh, true, false);
@@ -58,6 +59,9 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({-40, -5.5, 0}, 0, 30), cubeMesh, false, false);
         this->AddSimpleObject(Transform({-35, -5.5, 20}, 0, 85), cubeMesh, false, false);
 
+        // Shark
+        this->AddSimpleObject(Transform({-20, -6.9, 25}, -5, 85), sharkMesh, false, false);
+
         // Treasure Chest
         this->AddSimpleObject(Transform({5, -4.3, -10}, 0, 180), chestMesh, false, true);
 
@@ -72,7 +76,6 @@ class CoolScene : public BaseScene {
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
     }
     void UpdateScene(float deltaTime) override {
-        this->mainCamera.Update(this->input, deltaTime);
         DirectX::XMVECTOR center = {0, -5.5, 0};
         float radius             = 50;
         float angularSpeed       = 0.5;
