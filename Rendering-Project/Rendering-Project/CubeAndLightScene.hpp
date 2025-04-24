@@ -1,5 +1,5 @@
-#ifndef TEST_SCENE_HPP
-#define TEST_SCENE_HPP
+#ifndef CUBE_MAPPING_AND_LIGHTING_HPP
+#define CUBE_MAPPING_AND_LIGHTING_HPP
 #include "BaseScene.hpp"
 #include "MeshHandler.hpp"
 

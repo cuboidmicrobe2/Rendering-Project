@@ -12,5 +12,5 @@ d 1.000000
 illum 2
 map_d DisplacementMap.png
 map_bump NormalMap.png
-map_ks wood.png
-map_kd wood.png
+map_Ks wood.png
+map_Kd wood.png
