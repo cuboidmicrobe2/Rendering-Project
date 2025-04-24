@@ -5,7 +5,7 @@
 
 class SimpleObject : public SceneObject {
   public:
-    SimpleObject(Transform transform, Mesh* mesh, bool tesselate = true);
+    SimpleObject(Transform transform, Mesh* mesh, bool tesselate = true, bool showTessellation = false);
     /*SimpleObject(SimpleObject&) = default;*/
     ~SimpleObject() override {}
 

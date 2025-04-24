@@ -40,14 +40,14 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
     return S_OK;
 }
 
-void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate) {
-    SimpleObject* object             = new SimpleObject(transform, mesh, tesselate);
+void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate, bool showTessellation) {
+    SimpleObject* object             = new SimpleObject(transform, mesh, tesselate, showTessellation);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     if (!dynamic) {
         SimpleObject* box =
             new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                        DirectX::XMLoadFloat3(&boundingBox.Extents)),
-                             &this->cubeMesh);
+                             &this->cubeMesh, false, false);
         this->objects.emplace_back(object);
         this->boundingBoxes.emplace_back(box);
         this->quadTree.AddElement(object);
@@ -58,13 +58,13 @@ void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, b
 }
 
 void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh,
-                        UINT size, bool tesselate) {
-    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size, tesselate);
+                        UINT size, bool tesselate, bool showTessellation) {
+    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size, tesselate, showTessellation);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),
                                    DirectX::XMLoadFloat3(&boundingBox.Extents)),
-                         &this->cubeMesh);
+                         &this->cubeMesh, false, false);
 
     this->objects.emplace_back(object);
     this->boundingBoxes.emplace_back(box);

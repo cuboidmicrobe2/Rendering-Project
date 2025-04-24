@@ -20,12 +20,14 @@ class BaseScene {
 
     HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
-    void AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate = true);
+    void AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate = true,
+                         bool showTessellation = false);
     void AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size,
-                 bool tesselate = true);
+                 bool tesselate = true, bool showTessellation = false);
 
     void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle, Mesh* lightMesh = nullptr);
-    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height, Mesh* lightMesh = nullptr);
+    void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height,
+                     Mesh* lightMesh = nullptr);
     LightManager& GetLightManager();
 
     std::vector<Camera*>& GetCameras();

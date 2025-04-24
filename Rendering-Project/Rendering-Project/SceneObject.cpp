@@ -3,12 +3,13 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform, Mesh* mesh, bool shouldBeTesselated)
-    : transform(transform), mesh(mesh), boundingBox(mesh->GetBoundingBox()), shouldBeTesselated(shouldBeTesselated) {
+SceneObject::SceneObject(Transform transform, Mesh* mesh, bool shouldBeTesselated, bool showTessellation)
+    : transform(transform), mesh(mesh), boundingBox(mesh->GetBoundingBox()), shouldBeTesselated(shouldBeTesselated),
+      showTessellation(showTessellation) {
     DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
     DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
     DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
-    
+
     DirectX::XMMATRIX matrix = scaleMatrix * rotationMatrix * translationMatrix;
 
     this->boundingBox.Transform(this->boundingBox, matrix);
@@ -23,6 +24,8 @@ void SceneObject::SetBoundingBox(DirectX::BoundingBox& boundingBox) { this->boun
 DirectX::BoundingBox SceneObject::GetBoundingBox() const { return this->boundingBox; }
 
 bool SceneObject::GetTesselationValue() const { return this->shouldBeTesselated; }
+
+bool SceneObject::GetTessellationVisibility() const { return this->showTessellation; }
 
 void SceneObject::DrawMesh(ID3D11DeviceContext* context) {
     // Bind verticies to VertexShader

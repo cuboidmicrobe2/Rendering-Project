@@ -1,12 +1,12 @@
 #ifndef RENDERER
 #define RENDERER
+#include "BaseScene.hpp"
 #include "Camera.hpp"
 #include "Gbuffer.hpp"
 #include "LightManager.hpp"
+#include "MeshHandler.hpp"
 #include "StructuredBuffer.hpp"
 #include "WindowHandler.hpp"
-#include "BaseScene.hpp"
-#include "MeshHandler.hpp"
 #include <d3d11_4.h>
 
 class Renderer {
@@ -25,8 +25,8 @@ class Renderer {
 
     MeshHandler meshHandler;
 
-    
     Microsoft::WRL::ComPtr<ID3D11Device> GetDeviceCOMPTR() { return this->device; }
+
   private:
     void Clear();
 
@@ -46,8 +46,9 @@ class Renderer {
     void ShadowPass(LightManager& lm, std::vector<SceneObject*> obj);
     void BindShadowViewAndProjection(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix);
 
-    void SetTesselation(bool value);
-    bool tesselationStatus = false;
+    void SetTesselation(bool value, bool visibility);
+    bool tesselationStatus      = false;
+    bool tessellationVisibility = false;
 
     HRESULT SetShaders(std::string& byteDataOutput);
     HRESULT CreateUAV();
