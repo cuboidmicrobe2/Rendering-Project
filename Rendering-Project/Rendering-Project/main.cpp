@@ -27,9 +27,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         TestScene scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                         renderer.GetPS(), renderer.GetDCEMPS());
         TestScene2 scene2(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
-                         renderer.GetPS(), renderer.GetDCEMPS());
+                          renderer.GetPS(), renderer.GetDCEMPS());
+        CoolScene coolScene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
+                            renderer.GetPS(), renderer.GetDCEMPS());
+
         BaseScene* activeScene = &scene;
-        MSG msg = {};
+        MSG msg                = {};
         while (msg.message != WM_QUIT) {
             window.inputHandler.reset();
 
@@ -42,6 +45,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             }
             if (window.inputHandler.wasPressed('2')) {
                 activeScene = &scene2;
+            }
+            if (window.inputHandler.wasPressed('3')) {
+                activeScene = &coolScene;
             }
             activeScene->UpdateScene();
             renderer.Render(activeScene);

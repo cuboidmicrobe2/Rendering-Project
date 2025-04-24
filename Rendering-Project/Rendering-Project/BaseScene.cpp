@@ -3,7 +3,7 @@
 
 BaseScene::BaseScene(Window& window)
     : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr),
-      lm(256, 8192), quadTree({100.0f, 100.0f, 100.0f, 0.0f}, 6, 8) {}
+      lm(256, 8192), quadTree({100.0f, 100.0f, 100.0f, 0.0f}, 7, 25) {}
 
 HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
     // Load the particle shaders

@@ -201,12 +201,12 @@ void LightManager::BindLightData(ID3D11DeviceContext* context, UINT SpotLightSlo
 }
 
 void LightManager::BindDepthTextures(ID3D11DeviceContext* context, UINT SpotLightSlot, UINT DirLightSlot) {
-    context->CSSetShaderResources(SpotLightSlot, this->Spotlights.size(), this->GetAdressOfSpotlightDSSRV());
-    context->CSSetShaderResources(DirLightSlot, this->directionalLights.size(), this->GetAdressOfDirlightDSSRV());
+    context->CSSetShaderResources(SpotLightSlot, 1, this->GetAdressOfSpotlightDSSRV());
+    context->CSSetShaderResources(DirLightSlot, 1, this->GetAdressOfDirlightDSSRV());
 }
 
 void LightManager::UnbindDepthTextures(ID3D11DeviceContext* context, UINT SpotLightSlot, UINT DirLightSlot) {
     ID3D11ShaderResourceView* nullsrvs[3]{};
-    context->CSSetShaderResources(SpotLightSlot, this->Spotlights.size(), nullsrvs);
-    context->CSSetShaderResources(DirLightSlot, this->directionalLights.size(), nullsrvs);
+    context->CSSetShaderResources(SpotLightSlot, 1, nullsrvs);
+    context->CSSetShaderResources(DirLightSlot, 1, nullsrvs);
 }
