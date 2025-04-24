@@ -8,19 +8,23 @@ class TestScene : public BaseScene {
     TestScene(Window& window, ID3D11Device* device, ID3D11DeviceContext* context, MeshHandler& meshHandler,
               ID3D11PixelShader* basePS, ID3D11PixelShader* DCEMPS)
         : BaseScene(window) {
-        Mesh* sphereMesh = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
-        Mesh* boatMesh   = meshHandler.GetMesh("./boat", "boat.obj", device);
+        //Mesh* sphereMesh = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
+        //Mesh* boatMesh   = meshHandler.GetMesh("./boat", "boat.obj", device);
         Mesh* cubeMesh   = meshHandler.GetMesh("./NPCube2", "cube.obj", device);
 
-        this->AddDCEM(Transform({20, 3, 0}), basePS, DCEMPS, sphereMesh, 256);
+        //this->AddDCEM(Transform({20, 3, 0}), basePS, DCEMPS, sphereMesh, 128);
+        //this->AddDCEM(Transform({17, 3, 0}), basePS, DCEMPS, sphereMesh, 128);
         this->AddDirLight(Transform({0, 0, 0}, 90 + 45, 0), {1, 1, 1}, 100, 100);
-        this->AddSimpleObject(Transform({20, 0, 0}), boatMesh, false);
-        this->AddSimpleObject(Transform({10, 0, 0}), cubeMesh, false);
+        //this->AddSimpleObject(Transform({20, 0, 0}), boatMesh, false, false);
+        this->AddSimpleObject(Transform({10, 0, 0}), cubeMesh, false, false);
 
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
     }
-    void UpdateScene() override { this->mainCamera.Update(this->input); }
+    void UpdateScene() override { 
+        this->mainCamera.Update(this->input);
+    }
+    ~TestScene() {}
 };
 
 #endif

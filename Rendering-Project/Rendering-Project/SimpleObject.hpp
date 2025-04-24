@@ -5,8 +5,10 @@
 
 class SimpleObject : public SceneObject {
   public:
-    SimpleObject(Transform transform, Mesh* mesh);
-    SimpleObject(SimpleObject&) = default;
+    SimpleObject(Transform transform, Mesh* mesh, bool tesselate = true);
+    /*SimpleObject(SimpleObject&) = default;*/
+    ~SimpleObject() override {}
+
     void Draw(ID3D11Device* device, ID3D11DeviceContext* context) override;
     void Init(ID3D11Device* device) override;
 

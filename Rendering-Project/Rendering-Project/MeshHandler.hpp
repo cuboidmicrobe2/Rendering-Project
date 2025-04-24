@@ -6,6 +6,8 @@
 #include <unordered_map>
 class MeshHandler {
   public:
+    MeshHandler() {}
+    ~MeshHandler() {}
     Mesh* GetMesh(const std::string& folder, const std::string& objname, ID3D11Device* device) {
         std::string key = folder + "/" + objname;
         auto it         = this->meshes.find(key);

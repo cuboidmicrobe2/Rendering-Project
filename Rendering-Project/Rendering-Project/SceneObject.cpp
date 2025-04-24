@@ -3,27 +3,36 @@
 #include <iostream>
 namespace dx = DirectX;
 
-SceneObject::SceneObject(Transform transform, Mesh* mesh) : transform(transform), mesh(mesh) {
+SceneObject::SceneObject(Transform transform, Mesh* mesh, bool shouldBeTesselated)
+    : transform(transform), mesh(mesh), boundingBox(mesh->GetBoundingBox()), shouldBeTesselated(shouldBeTesselated) {
     DirectX::XMMATRIX scaleMatrix       = DirectX::XMMatrixScalingFromVector(this->transform.GetScale());
     DirectX::XMMATRIX rotationMatrix    = DirectX::XMMatrixRotationQuaternion(this->transform.GetRotationQuaternion());
     DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->transform.GetPosition());
-
+    
     DirectX::XMMATRIX matrix = scaleMatrix * rotationMatrix * translationMatrix;
 
     this->boundingBox.Transform(this->boundingBox, matrix);
 }
 
-void SceneObject::Update() {
-    // static float scale = 1;
-    // this->transform.Rotate(0, 0.01, 0);
-    // this->transform.Move(DirectX::XMVectorScale(this->transform.GetDirectionVector(), 0.1));
-    // this->transform.SetScale(DirectX::XMVectorSet(scale, scale, scale, 1));
-    // scale += 0.001;
-}
+SceneObject::~SceneObject() {}
+
+void SceneObject::Update() {}
 
 void SceneObject::SetBoundingBox(DirectX::BoundingBox& boundingBox) { this->boundingBox = boundingBox; }
 
 DirectX::BoundingBox SceneObject::GetBoundingBox() const { return this->boundingBox; }
+
+bool SceneObject::GetTesselationValue() const { return this->shouldBeTesselated; }
+
+void SceneObject::DrawMesh(ID3D11DeviceContext* context) {
+    // Bind verticies to VertexShader
+    this->mesh->BindMeshBuffers(context);
+
+    // Draw all submeshes
+    for (size_t i = 0; i < this->mesh->GetNrOfSubMeshes(); i++) {
+        this->mesh->PerformSubMeshDrawCall(context, i);
+    }
+}
 
 DirectX::XMFLOAT4X4 SceneObject::GetWorldMatrix() const {
     // Create the scaling, rotation, and translation matrices

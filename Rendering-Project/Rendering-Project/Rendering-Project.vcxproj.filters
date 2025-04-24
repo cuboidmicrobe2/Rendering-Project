@@ -15,7 +15,6 @@
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DCEM.cpp" />
-    <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -24,7 +23,6 @@
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SimpleObject.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
@@ -34,11 +32,9 @@
     <ClCompile Include="BaseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoundingBox.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
     <ClInclude Include="DCEM.hpp" />
-    <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Gbuffer.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
@@ -46,14 +42,12 @@
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="LightManager.hpp" />
     <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="MirrorObject.hpp" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="ParticleBuffer.hpp" />
     <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="QuadTree.hpp" />
     <ClInclude Include="ReadFile.hpp" />
     <ClInclude Include="Renderer.hpp" />
-    <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
     <ClInclude Include="SimpleObject.hpp" />
     <ClInclude Include="SimpleVertex.hpp" />
@@ -67,6 +61,7 @@
     <ClInclude Include="testScene.hpp" />
     <ClInclude Include="MeshHandler.hpp" />
     <ClInclude Include="CoolScene.hpp" />
+    <ClInclude Include="TestScene2.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="slimepfp.jpg" />

@@ -7,8 +7,8 @@ cbuffer Camera : register(b0)
 struct DomainShaderOutput
 {
     float4 position : SV_POSITION;
-    float3 worldPosition : WORLD_POSITION;
-    float3 normal : NORMAL;
+    float4 worldPosition : WORLD_POSITION;
+    float4 normal : NORMAL;
     float2 uv : UV;
 };
 
@@ -45,10 +45,10 @@ DomainShaderOutput main(HS_CONSTANT_DATA_OUTPUT input, float3 barycentric : SV_D
         phongPosition += barycentric[i] * pointOnTangetPlane;
     }
     
-    output.worldPosition = lerp(linearPosition, phongPosition, 0.7f);
-    output.normal = normalize(patch[0].normal * barycentric.x + patch[1].normal * barycentric.y + patch[2].normal * barycentric.z);
+    output.worldPosition = float4(lerp(linearPosition, phongPosition, 0.7f), 1);
+    output.normal = float4(normalize(patch[0].normal * barycentric.x + patch[1].normal * barycentric.y + patch[2].normal * barycentric.z), 0);
     output.uv = patch[0].uv * barycentric.x + patch[1].uv * barycentric.y + patch[2].uv * barycentric.z;
-    output.position = mul(float4(output.worldPosition, 1), vp);
+    output.position = mul(output.worldPosition, vp);
 
     return output;
 }

@@ -5,8 +5,6 @@ BaseScene::BaseScene(Window& window)
     : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr),
       lm(256, 8192), quadTree({100.0f, 100.0f, 100.0f, 0.0f}, 6, 8) {}
 
-BaseScene::~BaseScene() {}
-
 HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
     // Load the particle shaders
     HRESULT result = this->particleSystem.LoadShaders(device, immediateContext);
@@ -42,8 +40,8 @@ HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateCont
     return S_OK;
 }
 
-void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic) {
-    SimpleObject* object             = new SimpleObject(transform, mesh);
+void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate) {
+    SimpleObject* object             = new SimpleObject(transform, mesh, tesselate);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     if (!dynamic) {
         SimpleObject* box =
@@ -60,8 +58,8 @@ void BaseScene::AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic) {
 }
 
 void BaseScene::AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh,
-                        UINT size) {
-    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size);
+                        UINT size, bool tesselate) {
+    DCEM* object                     = new DCEM(transform, normalPS, DCEMPS, mesh, size, tesselate);
     DirectX::BoundingBox boundingBox = object->GetBoundingBox();
     SimpleObject* box =
         new SimpleObject(Transform(DirectX::XMLoadFloat3(&boundingBox.Center), DirectX::XMQuaternionIdentity(),

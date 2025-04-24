@@ -16,12 +16,13 @@
 class BaseScene {
   public:
     BaseScene(Window& window);
-    virtual ~BaseScene();
+    virtual ~BaseScene() {};
 
     HRESULT Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
-    void AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic);
-    void AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size);
+    void AddSimpleObject(Transform transform, Mesh* mesh, bool dynamic, bool tesselate = true);
+    void AddDCEM(Transform transform, ID3D11PixelShader* normalPS, ID3D11PixelShader* DCEMPS, Mesh* mesh, UINT size,
+                 bool tesselate = true);
 
     void AddSpotLight(Transform transform, DirectX::XMVECTOR color, float angle);
     void AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height);
