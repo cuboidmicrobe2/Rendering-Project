@@ -23,7 +23,7 @@ class SubMesh {
                     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularTextureSRV,
                     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMapTexture, float parallaxFactor,
                     DirectX::XMFLOAT3 ambientFactor, DirectX::XMFLOAT3 diffuseFactor, DirectX::XMFLOAT3 specularFactor,
-                    int shininess);
+                    float shininess);
 
     void PerformDrawCall(ID3D11DeviceContext* context);
 
@@ -54,7 +54,7 @@ class SubMesh {
         int hasSpecularMap;
         int hasNormal;
         float parallaxFactor;
-        int shininess;
+        float shininess;
         int padding;
     };
 };

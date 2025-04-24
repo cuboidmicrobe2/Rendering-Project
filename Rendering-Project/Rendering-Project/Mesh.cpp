@@ -45,7 +45,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             DirectX::XMFLOAT3 ambientFactor;
             DirectX::XMFLOAT3 diffuseFactor;
             DirectX::XMFLOAT3 specularFactor;
-            int shininess = 100;
+            float shininess = 100;
 
             std::cout << mesh.MeshMaterial.map_Ka << "\n";
 
@@ -81,7 +81,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             // Load specular texture if there is one
             specularFactor = {mesh.MeshMaterial.Ks.X, mesh.MeshMaterial.Ks.Y, mesh.MeshMaterial.Ks.Z};
             std::cout << "SPECULAR " << specularFactor.x;
-            shininess = mesh.MeshMaterial.illum;
+            shininess = mesh.MeshMaterial.Ns;
             if (shininess == 0) shininess = 100;
 
             if (!mesh.MeshMaterial.map_Ks.empty()) {

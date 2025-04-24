@@ -17,7 +17,7 @@ void SubMesh::Initialize(ID3D11Device* device, size_t startIndexValue, size_t nr
                          Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularTextureSRV,
                          Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMapTexture, float parallaxFactor,
                          DirectX::XMFLOAT3 ambientFactor, DirectX::XMFLOAT3 diffuseFactor,
-                         DirectX::XMFLOAT3 specularFactor, int shininess) {
+                         DirectX::XMFLOAT3 specularFactor, float shininess) {
     this->startIndex       = startIndexValue;
     this->nrOfIndices      = nrOfIndicesInSubMesh;
     this->ambientTexture   = ambientTextureSRV;

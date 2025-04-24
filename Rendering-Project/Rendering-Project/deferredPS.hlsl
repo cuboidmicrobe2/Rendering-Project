@@ -31,7 +31,7 @@ cbuffer MetaData : register(b0)
     int hasSpecularMap;
     int hasNormal;
     float parallaxHeightScale;
-    int shininess;
+    float shininess;
     float padding;
 }
 cbuffer CameraData : register(b1)
@@ -116,10 +116,10 @@ PixelShaderOutput main(PixelShaderInput input)
     }
     
     PixelShaderOutput output;
-    output.diffuse = hasDiffuseMap ? diffuseTexture.Sample(samplerState, samplePoint) * float4(diffuseFactor, 1) : float4(1, 1, 1, 1) * float4(diffuseFactor, 1);
+    output.diffuse = hasDiffuseMap ? diffuseTexture.Sample(samplerState, samplePoint) * float4(diffuseFactor, 1) : float4(diffuseFactor, 1);
     output.normal = float4(normal, 0);
     output.position = input.worldPosition;
-    output.ambient = hasAmbientMap ? ambientTexture.Sample(samplerState, samplePoint) * float4(ambientFactor, 1) : float4(1, 1, 1, 1) * float4(ambientFactor, 1);
+    output.ambient = hasAmbientMap ? ambientTexture.Sample(samplerState, samplePoint) * float4(ambientFactor, 1) : float4(ambientFactor * defaultAmbient, 1);
     output.specular = hasSpecularMap ? float4(specularTexture.Sample(samplerState, samplePoint).xyz, 1) * float4(specularFactor, shininess) : float4(1, 1, 1, 1) * float4(specularFactor, shininess);
 
     return output;
