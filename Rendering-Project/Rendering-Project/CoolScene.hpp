@@ -25,9 +25,20 @@ class CoolScene : public BaseScene {
                               false);
 
         // Palm Trees
-        this->AddSimpleObject(Transform({2.4, -4.3, -11}, 0, 180), treeMesh, false, true);
-        this->AddSimpleObject(Transform({2.4, -4.3, 20}, 0, 180), treeMesh, false, true);
-        this->AddSimpleObject(Transform({20.4, -4.3, -11}, 0, 180), treeMesh, false, true);
+        this->AddSimpleObject(Transform({2.4, -4.3, -11}, 0, 32), treeMesh, false, true);
+        this->AddSimpleObject(Transform({2.4, -4.3, 20}, 0, 56), treeMesh, false, true);
+        this->AddSimpleObject(Transform({20.4, -4.3, -11}, 0, 323), treeMesh, false, true);
+        this->AddSimpleObject(Transform({22.4, -4.3, -9}, 0, 34), treeMesh, false, true);
+        this->AddSimpleObject(Transform({20.4, -4.3, -8}, 0, 180), treeMesh, false, true);
+        this->AddSimpleObject(Transform({20.4, -4.3, 11}, 0, 76), treeMesh, false, true);
+        this->AddSimpleObject(Transform({22.4, -4.3, 9}, 0, 180), treeMesh, false, true);
+        this->AddSimpleObject(Transform({20.4, -4.3, 8}, 0, 43), treeMesh, false, true);
+        this->AddSimpleObject(Transform({10.4, -4.3, 11}, 0, 76), treeMesh, false, true);
+        this->AddSimpleObject(Transform({12.4, -4.3, 9}, 0, 12), treeMesh, false, true);
+        this->AddSimpleObject(Transform({10.4, -4.3, 8}, 0, 54), treeMesh, false, true);
+        this->AddSimpleObject(Transform({-10, -4.3, -11}, 0, 98), treeMesh, false, true);
+        this->AddSimpleObject(Transform({-12, -4.3, -9}, 0, 76), treeMesh, false, true);
+        this->AddSimpleObject(Transform({-10, -4.3, -8}, 0, 76), treeMesh, false, true);
 
         // Ocean
         this->AddSimpleObject(Transform({0, -6, 0}, DirectX::XMQuaternionIdentity(), {50, 0, 50}), waterMesh, true,
@@ -55,7 +66,7 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({40, -5.5, 0}), boatMesh, false, false);
 
         // Sun
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 1000, 1000, sphereMesh);
+        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 100, 100, sphereMesh);
 
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
