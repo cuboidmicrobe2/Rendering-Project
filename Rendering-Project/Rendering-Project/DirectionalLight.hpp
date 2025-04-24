@@ -6,6 +6,7 @@
 
 class DirectionalLight {
   public:
+    static const int distanceFromTarget = 100;
     inline DirectionalLight(Transform transform, DirectX::XMVECTOR color, float intensity, float width, float height);
     ~DirectionalLight() {};
     inline HRESULT Init(ID3D11Device* device, UINT resolution, D3D11_DEPTH_STENCIL_VIEW_DESC* desc,
@@ -32,7 +33,7 @@ inline DirectionalLight::DirectionalLight(Transform transform, DirectX::XMVECTOR
       color(color), intensity(intensity), width(width), height(height) {
 
     DirectX::XMVECTOR pos =
-        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), 40));
+        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), this->distanceFromTarget));
     this->transform.SetPosition(pos);
 }
 
@@ -50,7 +51,7 @@ inline DirectX::XMMATRIX DirectionalLight::CreateViewMatrix() const {
 }
 
 inline DirectX::XMMATRIX DirectionalLight::CreateProjectionMatrix() const {
-    return DirectX::XMMatrixOrthographicLH(this->width, this->height, 0.1f, 200.f);
+    return DirectX::XMMatrixOrthographicLH(this->width, this->height, 2.f, 1000.f);
 }
 
 inline ID3D11DepthStencilView* DirectionalLight::GetDepthStencilVeiw() const { return this->depthStencilView.Get(); }
