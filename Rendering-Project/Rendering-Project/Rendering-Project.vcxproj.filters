@@ -60,6 +60,7 @@
     <ClInclude Include="BaseScene.hpp" />
     <ClInclude Include="testScene.hpp" />
     <ClInclude Include="MeshHandler.hpp" />
+    <ClInclude Include="CoolScene.hpp" />
     <ClInclude Include="TestScene2.hpp" />
   </ItemGroup>
   <ItemGroup>

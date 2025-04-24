@@ -23,12 +23,16 @@ struct PixelShaderOutput
 
 cbuffer MetaData : register(b0)
 {
-    int hasDiffuse;
-    int hasAmbient;
-    int hasSpecular;
+    float3 diffuseFactor;
+    int hasDiffuseMap;
+    float3 ambientFactor;
+    int hasAmbientMap;
+    float3 specularFactor;
+    int hasSpecularMap;
     int hasNormal;
     float parallaxHeightScale;
-    float3 padding;
+    float shininess;
+    float padding;
 }
 cbuffer CameraData : register(b1)
 {
@@ -38,8 +42,8 @@ cbuffer CameraData : register(b1)
 }
 
 static const int parallaxSteps = 16;
-static const float layerDepth = 1 / (float)parallaxSteps;
-static const float defaultAmbient = 0.05;
+static const float layerDepth = 1 / (float) parallaxSteps;
+static const float defaultAmbient = 0.1;
 PixelShaderOutput main(PixelShaderInput input)
 {
     float3 normal = normalize(input.normal);
@@ -109,14 +113,14 @@ PixelShaderOutput main(PixelShaderInput input)
     else
     {
         normal = input.normal;
-    }    
+    }
     
     PixelShaderOutput output;
-    output.diffuse = hasDiffuse ? diffuseTexture.Sample(samplerState, samplePoint) : float4(1, 1, 1, 1);
+    output.diffuse = hasDiffuseMap ? diffuseTexture.Sample(samplerState, samplePoint) * float4(diffuseFactor, 1) : float4(diffuseFactor, 1);
     output.normal = float4(normal, 0);
     output.position = input.worldPosition;
-    output.ambient = hasAmbient ? ambientTexture.Sample(samplerState, samplePoint) : hasDiffuse ? output.diffuse * defaultAmbient : float4(defaultAmbient, defaultAmbient, defaultAmbient, 1);
-    output.specular = hasSpecular ? specularTexture.Sample(samplerState, samplePoint) : float4(1, 1, 1, 1);
+    output.ambient = hasAmbientMap ? ambientTexture.Sample(samplerState, samplePoint) * float4(ambientFactor, 1) : float4(ambientFactor * defaultAmbient, 1);
+    output.specular = hasSpecularMap ? float4(specularTexture.Sample(samplerState, samplePoint).xyz, 1) * float4(specularFactor, shininess) : float4(1, 1, 1, 1) * float4(specularFactor, shininess);
 
     return output;
 }

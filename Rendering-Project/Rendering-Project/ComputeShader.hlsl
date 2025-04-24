@@ -41,6 +41,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float diffuse = 0;
     float specular = 0;
+    float specularExponent = specularGBuffer[DTid.xy].w;
     for (int i = 0; i < nrofLights; i++)
     {
         Light cl = lights[i];
@@ -52,20 +53,23 @@ void main(uint3 DTid : SV_DispatchThreadID)
         float sceneDepth = ndc.z;
         float mapDepth = shadowMaps.SampleLevel(shadowSampler, float3(uv, i), 0.f).r;
         
-        const float bias = 0.001f;
-        bool lit = (mapDepth + bias) >= sceneDepth;
+        const float bias = 0.000001f;
+        bool islit = (mapDepth + bias) >= sceneDepth;
         
         
         float4 LightToHit = pixelPosition - float4(cl.pos, 0);
         float4 lightDir = normalize(LightToHit);
-        if (dot(lightDir.xyz, normalize(cl.direction)) > cl.cosAngle && lit)
+        if (dot(lightDir.xyz, normalize(cl.direction)) > cl.cosAngle && islit)
         {
             float intensity = (1 / dot(LightToHit, LightToHit)) * max(0.0f, dot(-lightDir, normal));
             diffuse += intensity;
     
             float4 halfWayVector = normalize(lightDir + normalize(CamToPixel));
             float specularDot = max(dot(normal, -halfWayVector), 0);
-            specular += pow(specularDot, 100);            
+            float4 lighting = lit(intensity, specularDot, specularExponent);
+            
+            diffuse += lighting.y;
+            specular += lighting.z;
         }
     }
     
@@ -82,17 +86,19 @@ void main(uint3 DTid : SV_DispatchThreadID)
         float mapDepth = DirShadowMaps.SampleLevel(shadowSampler, float3(uv, i), 0.f).r;
         
         const float bias = 0.005f;
-        bool lit = (mapDepth + bias) >= sceneDepth;
+        bool isLit = (mapDepth + bias) >= sceneDepth;
         
-        if (lit)
+        if (isLit)
         {
             float4 lightDir = float4(normalize(cl.direction), 0);
-            float intensity =  max(0.0f, dot(-lightDir, normal));
-            diffuse += intensity;
+            float diffuseIntensity =  max(0.0f, dot(-lightDir, normal));
     
             float4 halfWayVector = normalize(lightDir + normalize(CamToPixel));
             float specularDot = max(dot(normal, -halfWayVector), 0);
-            specular += pow(specularDot, 100);
+            float4 lighting = lit(diffuseIntensity, specularDot, specularExponent);
+            
+            diffuse += lighting.y;
+            specular += lighting.z;
         }
     }
     float4 ambientComponent = ambientGBuffer[DTid.xy];

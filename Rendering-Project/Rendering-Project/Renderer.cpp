@@ -50,7 +50,7 @@ void Renderer::Render(BaseScene* scene, float deltaTime) {
     lm.BindDepthTextures(this->GetDeviceContext(), 5, 6);
     lm.BindLightData(this->GetDeviceContext(), 7, 8);
 
-    std::array<float, 4> clearColor{0, 0, 0, 1};
+    std::array<float, 4> clearColor{0.75, 0.70, 1, 1};
     for (uint32_t i = 0; i < this->renderPasses; i++) {
         for (auto& cam : scene->GetCameras()) {
             this->Render(scene, cam, cam->GetAdressOfUAV(), cam->GetRenderResources(), deltaTime);
@@ -91,7 +91,8 @@ void Renderer::SetTesselation(bool value) {
     }
 }
 
-void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr, float deltaTime) {
+void Renderer::Render(BaseScene* scene, Camera* cam, ID3D11UnorderedAccessView** UAV, RenderingResources* rr,
+                      float deltaTime) {
     D3D11_VIEWPORT vp = rr->GetViewPort();
     this->immediateContext->RSSetViewports(1, &vp);
 

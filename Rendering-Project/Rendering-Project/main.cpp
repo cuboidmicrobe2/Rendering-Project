@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include "BaseScene.hpp"
+#include "CoolScene.hpp"
 #include "DCEM.hpp"
 #include "DirectionalLight.hpp"
 #include "Mesh.hpp"
@@ -27,15 +28,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
                         renderer.GetPS(), renderer.GetDCEMPS());
         TestScene2 scene2(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                           renderer.GetPS(), renderer.GetDCEMPS());
-        std::array<BaseScene*, 2> scenes{&scene, &scene2};
+        CoolScene coolScene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
+                            renderer.GetPS(), renderer.GetDCEMPS());
 
         BaseScene* activeScene = &scene;
         MSG msg                = {};
-        auto lastTime          = std::chrono::high_resolution_clock::now();
+        std::array<BaseScene*, 3> scenes{&scene, &scene2, &coolScene};
+
+        auto lastTime = std::chrono::high_resolution_clock::now();
         while (msg.message != WM_QUIT) {
-            auto currentTime = std::chrono::high_resolution_clock::now();
+            auto currentTime                                         = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float, std::ratio<1, 1>> deltaTime = (currentTime - lastTime);
-            float deltTime_f = deltaTime.count();
+            float deltTime_f                                         = deltaTime.count();
             lastTime                                                 = currentTime;
             window.inputHandler.reset();
 

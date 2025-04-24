@@ -12,7 +12,7 @@
 
 namespace fs = std::filesystem;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> LoadNormal(ID3D11Device* device, const std::string& filename,
-                                     const std::string& filenameDisp);
+                                                            const std::string& filenameDisp);
 
 Mesh::Mesh(ID3D11Device* device, const std::string& folderpath, const std::string& objname) {
     this->Initialize(device, folderpath, objname);
@@ -42,10 +42,15 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularSrv = nullptr;
             Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMap   = nullptr;
             float parallaxFactor                                         = 0;
+            DirectX::XMFLOAT3 ambientFactor;
+            DirectX::XMFLOAT3 diffuseFactor;
+            DirectX::XMFLOAT3 specularFactor;
+            float shininess = 100;
 
             std::cout << mesh.MeshMaterial.map_Ka << "\n";
 
             // Load ambient Texture if there is one
+            ambientFactor = {mesh.MeshMaterial.Ka.X, mesh.MeshMaterial.Ka.Y, mesh.MeshMaterial.Ka.Z};
             if (!mesh.MeshMaterial.map_Ka.empty()) {
                 std::cout << "Trying to bind map_Ka\n";
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Ka;
@@ -60,6 +65,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             }
 
             // Load diffuse texture if there is one
+            diffuseFactor = {mesh.MeshMaterial.Kd.X, mesh.MeshMaterial.Kd.Y, mesh.MeshMaterial.Kd.Z};
             if (!mesh.MeshMaterial.map_Kd.empty()) {
                 std::cout << "Trying to bind map_Kd\n";
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Kd;
@@ -71,6 +77,10 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             }
 
             // Load specular texture if there is one
+            specularFactor = {mesh.MeshMaterial.Ks.X, mesh.MeshMaterial.Ks.Y, mesh.MeshMaterial.Ks.Z};
+            shininess      = mesh.MeshMaterial.Ns;
+            if (shininess == 0) shininess = 100;
+
             if (!mesh.MeshMaterial.map_Ks.empty()) {
                 std::cout << "Trying to bind map_Ks\n";
                 std::string path = folderpath + "/" + mesh.MeshMaterial.map_Ks;
@@ -95,7 +105,7 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
 
             // Initialize and add submesh
             submesh.Initialize(device, meshStartIndex, mesh.Indices.size(), ambientSrv, diffuseSrv, specularSrv,
-                               normalMap, parallaxFactor);
+                               normalMap, parallaxFactor, ambientFactor, diffuseFactor, specularFactor, shininess);
 
             this->subMeshes.emplace_back(std::move(submesh));
 

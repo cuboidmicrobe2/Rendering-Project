@@ -3,7 +3,7 @@
 
 BaseScene::BaseScene(Window& window)
     : input(window.inputHandler), mainCamera(90, 16.f / 9.f, 1, 1000, {0, 0, -10}, {0, 0, 1}, nullptr, nullptr),
-      lm(256, 8192), quadTree({100.0f, 100.0f, 100.0f, 0.0f}, 6, 8) {}
+      lm(256, 8192), quadTree({100.0f, 100.0f, 100.0f, 0.0f}, 7, 25) {}
 
 HRESULT BaseScene::Init(ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
     // Load the particle shaders
@@ -84,13 +84,13 @@ void BaseScene::AddSpotLight(Transform transform, DirectX::XMVECTOR color, float
     }
 }
 
-void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height,
-                            Mesh* lightMesh) {
+void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float width, float height, Mesh* lightMesh) {
     DirectionalLight l(transform, color, 0, width, height);
     this->lm.AddDirectionalLight(l);
 
-    DirectX::XMVECTOR pos =
-        DirectX::XMVectorSubtract(transform.GetPosition(), DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget));
+    DirectX::XMVECTOR pos = DirectX::XMVectorSubtract(
+        transform.GetPosition(),
+        DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget + 10));
     transform.SetPosition(pos);
 
     if (lightMesh) {
@@ -113,7 +113,7 @@ std::vector<SceneObject*> BaseScene::GetBoundingBoxes() {
 
 std::vector<SceneObject*> BaseScene::GetVisibleObjects(Camera& cam) {
     Camera frustumFOV = cam;
-    frustumFOV.SetFOV(this->mainCamera.GetFOV() - 20.0f);
+    frustumFOV.SetFOV(this->mainCamera.GetFOV());
     // Create a frustum from the main camera's view and projection matrices
     DirectX::BoundingFrustum cameraFrustum;
     DirectX::XMMATRIX proj = frustumFOV.createProjectionMatrix();

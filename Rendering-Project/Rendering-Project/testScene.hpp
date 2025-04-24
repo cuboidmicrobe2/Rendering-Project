@@ -1,6 +1,7 @@
-#ifndef TEST_SCENE
-#define TEST_SCENE
+#ifndef TEST_SCENE_HPP
+#define TEST_SCENE_HPP
 #include "BaseScene.hpp"
+#include "MeshHandler.hpp"
 
 class TestScene : public BaseScene {
   public:
@@ -16,7 +17,6 @@ class TestScene : public BaseScene {
         this->AddDirLight(Transform({0, 0, 0}, 90 + 45, 0), {1, 1, 1}, 100, 100);
         //this->AddSimpleObject(Transform({20, 0, 0}), boatMesh, false, false);
         this->AddSimpleObject(Transform({10, 0, 0}), cubeMesh, false, false);
-
 
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");

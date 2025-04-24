@@ -162,6 +162,7 @@
     <ClInclude Include="BaseScene.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ConstantBuffer.hpp" />
+    <ClInclude Include="CoolScene.hpp" />
     <ClInclude Include="DCEM.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Gbuffer.hpp" />
