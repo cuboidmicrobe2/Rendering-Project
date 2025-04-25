@@ -112,14 +112,17 @@ Dynamic Cube environment mapping is implemented by having a object contain six c
 
 ## Frustum culling using a quadtree
 
-Cool text and all.
+The frustum culling system efficiently excludes objects outside the camera's view using hierarchical spatial testing to minimize rendering overhead and improve performance.
 
 ### Core Components
 
 - The culling system consists of three elements:
   - QuadTree Structure
+    - Spatially organizes scene objects in hierarchical quadrants for efficient visibility queries.
   - Bounding Volume Testing
+    - Uses simple geometric shapes to approximate object boundaries for fast intersection tests with the view frustum.
   - Hierarchical Culling
+    - Tests scene visibility from top down, eliminating entire branches early when parent nodes are outside the view frustum.
 
 ### Pipeline Flow
 
@@ -147,9 +150,13 @@ Cool text and all.
 
 - The system implements several optimizations:
   - Early Rejection
+    - Entire branches of the quadtree are skipped if their bounding boxes don't intersect the frustum.
   - Spatial Coherence
+    - Objects that are close together are grouped in the same node, improving cache efficiency.
   - Hierachical Testing
+    - Tests start with broad node boundaries before testing individual objects.
   - Minimal Per-Frame Cost
+    - The quadtree structure is built once at initialization, only traversal happens per frame.
 
 ## GPU-based billboarded particle system
 
