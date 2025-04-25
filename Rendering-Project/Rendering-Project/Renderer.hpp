@@ -106,11 +106,17 @@ class Renderer {
         float padding[3];
     };
 
+    struct RenderingMode {
+        int mode = 0;
+        float _padding[3]{};
+    } renderingMode;
+
     ConstantBuffer metadataBuffer;
     ConstantBuffer viewProjBuffer;
     ConstantBuffer cameraBuffer;
     ConstantBuffer tessBuffer;
     ConstantBuffer worldMatrixBuffer;
+    ConstantBuffer renderingModeBuffer;
 };
 
 #endif

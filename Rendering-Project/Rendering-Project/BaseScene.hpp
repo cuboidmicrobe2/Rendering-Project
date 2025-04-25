@@ -13,6 +13,12 @@
 #include "WindowHandler.hpp"
 #include <d3d11_4.h>
 
+namespace RenderingModes {
+enum RenderingMode {
+    Standard, Diffuse, Normals, Ambient, Specular, position
+};
+}
+
 class BaseScene {
   public:
     BaseScene(Window& window);
@@ -41,7 +47,11 @@ class BaseScene {
 
     virtual void UpdateScene(float deltaTime) = 0;
 
+    RenderingModes::RenderingMode GetRenderingMode() const { return this->renderingMode; }
+    void SetRenderingMode(RenderingModes::RenderingMode mode) { this->renderingMode = mode; }
+
   protected:
+    RenderingModes::RenderingMode renderingMode = RenderingModes::Standard;
     Mesh cubeMesh;
 
     LightManager lm;

@@ -39,10 +39,16 @@ HRESULT Renderer::Init(const Window& window) {
     this->cameraBuffer.Initialize(this->device.Get(), sizeof(CameraBufferData), nullptr);
     this->tessBuffer.Initialize(this->device.Get(), sizeof(TessellationData), nullptr);
     this->worldMatrixBuffer.Initialize(this->device.Get(), sizeof(DirectX::XMFLOAT4X4), nullptr);
+    this->renderingModeBuffer.Initialize(this->device.Get(), sizeof(this->renderingMode), &this->renderingMode);
     return S_OK;
 }
 
 void Renderer::Render(BaseScene* scene, float deltaTime) {
+    if (scene->GetRenderingMode() != this->renderingMode.mode) {
+        this->renderingMode.mode = scene->GetRenderingMode();
+        this->renderingModeBuffer.UpdateBuffer(this->immediateContext.Get(), &this->renderingMode);
+        this->immediateContext->CSSetConstantBuffers(10, 1, this->renderingModeBuffer.GetAdressOfBuffer());
+    }
     scene->GetParticleSystem().UpdateParticles(this->device.Get(), this->immediateContext.Get(), deltaTime);
     this->immediateContext->VSSetConstantBuffers(1, 1, this->worldMatrixBuffer.GetAdressOfBuffer());
     LightManager& lm = scene->GetLightManager();
