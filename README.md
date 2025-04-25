@@ -60,6 +60,8 @@ The [BaseScene](./Rendering-Project/Rendering-Project/BaseScene.hpp) class makes
 
 ## Deferred rendering
 
+Deferred rendering simply means that the lighting calculations are rendered after the main pipeline is finished in a seperate compute shader pass, this means that everything not in the viewfrustrum has been culled and leads to more efficient lighting calculations.
+
 ## Shadow mapping
 
 Shadow mapping is implemented by having each light make a view/projection matrix that it sends to the Vertex Shader in a shadow pass, during this pass nothing else is bound to the pipeline and the output is only the depthstencil that is then saved on a Texture2DArray on the same index as the light. This is then passed along to the compute shader that can then check if something is in shadow or not.
