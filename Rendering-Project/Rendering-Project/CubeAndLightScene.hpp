@@ -26,7 +26,7 @@ class CubeMappingAndLighting : public BaseScene {
 
         this->AddDirLight(Transform({0, 0, 0}, 135, 0), {0.5, 0.5, 0.5, 1}, 100, 100, sphereMesh);
 
-        this->AddSpotLight(Transform({0, 8, -8}, 45, 0, 0, {.1, .1, .1}), {0, 0, 20, 1}, 80, sphereMesh);
+        this->AddSpotLight(Transform({0, 8, -8}, 45, 0, 0, {.1, .1, .1}), {0, 0, 30, 1}, 80, sphereMesh);
         this->AddSpotLight(Transform({-8, 8, 0}, Transform::GetCameraRotationQuaternion(90, -45), {.1, .1, .1}),
                            {20, 0, 0, 1}, 80, sphereMesh);
 

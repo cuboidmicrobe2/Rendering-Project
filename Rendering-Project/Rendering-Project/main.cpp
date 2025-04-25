@@ -7,7 +7,6 @@
 #include "Renderer.hpp"
 #include "SimpleObject.hpp"
 #include "SimpleVertex.hpp"
-#include "TestScene2.hpp"
 #include "WindowHandler.hpp"
 #include "CubeAndLightScene.hpp"
 
