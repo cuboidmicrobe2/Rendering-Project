@@ -83,6 +83,37 @@ The system provides a wireframe visualization mode that shows the tessellated ge
 ## Dynamic cube environment mapping
 
 ## Frustum culling using a quadtree
+Cool text and all.
+
+### Core Components
+- The culling system consists of three elements:
+    - QuadTree Structure
+    - Bounding Volume Testing
+    - Hierarchical Culling
+
+### Pipeline Flow
+- The frustum culling pipeline follows this sequence:
+    - Scene Organization
+        - Each object is placed in appropriate nodes based on its bounding box.
+        - Node are subdivided when they contain too many objects.
+        - Dynamic objects are tracked separately.
+
+    - Frustum Generation
+        - Using the camera's view and projection matrices.
+        - Transforming the frustum from view space to world space.
+        - Creating a DirectX::BoundingFrustum object for intersection tests.
+
+    - Visibility Determination
+        - Tests node bouning boxes against the frustum for quick elimination.
+        - Checks individual object bounding boxes for potentially visible nodes.
+        - Builds a list of visible objects to be rendered.
+        - Dynamic objects are excluded from culling.
+### Optimization Techniques
+- The system implements several optimizations:
+    - Early Rejection
+    - Spatial Coherence
+    - Hierachical Testing
+    - Minimal Per-Frame Cost
 
 ## GPU-based billboarded particle system
 The particle system is a GPU-accelerated system that simulates and renders thousands of particles using compute shaders and the graphics pipeline.
