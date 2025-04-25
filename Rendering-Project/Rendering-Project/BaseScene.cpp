@@ -90,7 +90,7 @@ void BaseScene::AddDirLight(Transform transform, DirectX::XMVECTOR color, float 
 
     DirectX::XMVECTOR pos = DirectX::XMVectorSubtract(
         transform.GetPosition(),
-        DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget + 10));
+        DirectX::XMVectorScale(transform.GetDirectionVector(), DirectionalLight::distanceFromTarget));
     transform.SetPosition(pos);
 
     if (lightMesh) {

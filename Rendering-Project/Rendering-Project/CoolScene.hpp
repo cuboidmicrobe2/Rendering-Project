@@ -11,12 +11,13 @@ class CoolScene : public BaseScene {
         Mesh* cubeMesh    = meshHandler.GetMesh("./CoolScene", "cube.obj", device);
         Mesh* volcanoMesh = meshHandler.GetMesh("./CoolScene", "1230 Volcano.obj", device);
         Mesh* groundMesh  = meshHandler.GetMesh("./CoolScene", "Ground.obj", device);
-        Mesh* waterMesh   = meshHandler.GetMesh("./CoolScene", "CUPIC_OCEAN.obj", device);
         Mesh* chestMesh   = meshHandler.GetMesh("./CoolScene", "Chest Closed.obj", device);
         Mesh* boatMesh    = meshHandler.GetMesh("./boat", "boat.obj", device);
         Mesh* treeMesh    = meshHandler.GetMesh("./CoolScene", "Palm Tree.obj", device);
         Mesh* sphereMesh  = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
         Mesh* sharkMesh   = meshHandler.GetMesh("./CoolScene", "shark.obj", device);
+
+        Mesh* blueCube = meshHandler.GetMesh("./BlueCube", "cube.obj", device);
 
         // "Sailing" boat
         this->AddSimpleObject(Transform({-45, -5.5, 10}, 0, 30), boatMesh, true, false);
@@ -42,7 +43,7 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({-10, -4.3, -8}, 0, 76), treeMesh, false, false);
 
         // Ocean
-        this->AddSimpleObject(Transform({0, -6, 0}, DirectX::XMQuaternionIdentity(), {50, 0, 50}), waterMesh, true,
+        this->AddSimpleObject(Transform({0, -7, 0}, DirectX::XMQuaternionIdentity(), {1000, 1, 1000}), blueCube, true,
                               false);
 
         // Volcano
@@ -70,7 +71,8 @@ class CoolScene : public BaseScene {
         this->AddSimpleObject(Transform({40, -5.5, 0}), boatMesh, false, false);
 
         // Sun
-        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 100, 100, nullptr);
+        Mesh* sphere = meshHandler.GetMesh("./sphere", "icoSphere.obj", device);
+        this->AddDirLight(Transform({1.7, -4, 2}, 90 + 45, 0), {1, 1, 1}, 100, 100, sphere);
 
         HRESULT hr = this->Init(device, context);
         if (FAILED(hr)) throw std::runtime_error("Failed to initialize scene!");
