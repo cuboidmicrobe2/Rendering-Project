@@ -13,6 +13,7 @@
 namespace fs = std::filesystem;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> LoadNormal(ID3D11Device* device, const std::string& filename,
                                                             const std::string& filenameDisp);
+void CreateDefaultTexture(ID3D11Device* device, ID3D11ShaderResourceView** viewOut);
 
 Mesh::Mesh(ID3D11Device* device, const std::string& folderpath, const std::string& objname) {
     this->Initialize(device, folderpath, objname);
@@ -46,8 +47,22 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
             DirectX::XMFLOAT3 diffuseFactor;
             DirectX::XMFLOAT3 specularFactor;
             float shininess = 100;
-
+            Microsoft::WRL::ComPtr<ID3D11Resource> diffuseTexture;
             std::cout << mesh.MeshMaterial.map_Ka << "\n";
+
+            // Load diffuse texture if there is one
+            diffuseFactor = {mesh.MeshMaterial.Kd.X, mesh.MeshMaterial.Kd.Y, mesh.MeshMaterial.Kd.Z};
+            if (!mesh.MeshMaterial.map_Kd.empty()) {
+                std::cout << "Trying to bind map_Kd\n";
+                std::string path = folderpath + "/" + mesh.MeshMaterial.map_Kd;
+                std::wstring wpath(path.begin(), path.end());
+                HRESULT createShaderResult = DirectX::CreateWICTextureFromFile(
+                    device, wpath.c_str(), diffuseTexture.GetAddressOf(), diffuseSrv.GetAddressOf());
+
+                if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
+            } else {
+                CreateDefaultTexture(device, diffuseSrv.GetAddressOf());
+            }
 
             // Load ambient Texture if there is one
             ambientFactor = {mesh.MeshMaterial.Ka.X, mesh.MeshMaterial.Ka.Y, mesh.MeshMaterial.Ka.Z};
@@ -62,18 +77,8 @@ void Mesh::Initialize(ID3D11Device* device, const std::string& folderpath, const
                     std::cerr << createShaderResult << "\n";
                     throw std::runtime_error("failed to load ambient texture");
                 }
-            }
-
-            // Load diffuse texture if there is one
-            diffuseFactor = {mesh.MeshMaterial.Kd.X, mesh.MeshMaterial.Kd.Y, mesh.MeshMaterial.Kd.Z};
-            if (!mesh.MeshMaterial.map_Kd.empty()) {
-                std::cout << "Trying to bind map_Kd\n";
-                std::string path = folderpath + "/" + mesh.MeshMaterial.map_Kd;
-                std::wstring wpath(path.begin(), path.end());
-                HRESULT createShaderResult =
-                    DirectX::CreateWICTextureFromFile(device, wpath.c_str(), nullptr, diffuseSrv.GetAddressOf());
-
-                if (FAILED(createShaderResult)) throw std::runtime_error("failed to load diffuse texture");
+            } else {
+                ambientSrv = diffuseSrv;
             }
 
             // Load specular texture if there is one
@@ -235,6 +240,38 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> LoadNormal(ID3D11Device* device
     }
 
     return srv; // caller is responsible for releasing
+}
+
+void CreateDefaultTexture(ID3D11Device* device, ID3D11ShaderResourceView** viewOut) {
+    UINT32 colorData[4] = {
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+    };
+    D3D11_TEXTURE2D_DESC texDesc = {};
+    texDesc.Width                = 2;
+    texDesc.Height               = 2;
+    texDesc.MipLevels            = 1;
+    texDesc.ArraySize            = 1;
+    texDesc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texDesc.SampleDesc.Count     = 1;
+    texDesc.Usage                = D3D11_USAGE_IMMUTABLE;
+    texDesc.BindFlags            = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_SUBRESOURCE_DATA initData = {};
+    initData.pSysMem                = colorData;
+    initData.SysMemPitch            = 2 * sizeof(UINT32); // Row size: 2 texels
+
+    ID3D11Texture2D* pTexture = nullptr;
+    HRESULT hr                = device->CreateTexture2D(&texDesc, &initData, &pTexture);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create default texture (very bad) Error: " << hr << "\n";
+        throw std::runtime_error("Couldn't create default texture");
+    }
+
+    device->CreateShaderResourceView(pTexture, nullptr, viewOut);
+    pTexture->Release();
 }
 
 DirectX::BoundingBox Mesh::GetBoundingBox() const { return this->boundingBox; }
