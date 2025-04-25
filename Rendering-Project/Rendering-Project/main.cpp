@@ -27,7 +27,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
         BaseScene* activeScene = &scene;
         MSG msg                = {};
-        std::array<BaseScene*, 3> scenes{&scene, &coolScene};
+        std::array<BaseScene*, 2> scenes{&scene, &coolScene};
 
         auto lastTime = std::chrono::high_resolution_clock::now();
         while (msg.message != WM_QUIT) {
@@ -41,10 +41,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-            for (int i = 0; i < std::min(9, (int) scenes.size()); i++) {
+            for (int i = 0; i < std::min(3, (int) scenes.size()); i++) {
                 if (window.inputHandler.wasPressed('1' + i)) {
                     std::cout << '1' + i << "\n";
                     activeScene = scenes[i];
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                if (window.inputHandler.wasPressed('4' + i)) {
+                    activeScene->SetRenderingMode(RenderingModes::RenderingMode(i));
                 }
             }
             activeScene->UpdateScene(deltTime_f);
