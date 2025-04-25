@@ -37,7 +37,7 @@ This segment displays the keybinds for the window and what techniques are found 
 - The culling frustum has been made smaller so the culling effect can be seen during runtime.
 
 ### GPU-based billboarded particle system
-- Can be seen as the smoke effect from the volcano in Scene 2.
+- Can be seen used for the smoke effect from the volcano in Scene 2.
 
 ## Camera
 
@@ -49,17 +49,17 @@ This segment displays the keybinds for the window and what techniques are found 
 
 ## Tessellation
 Level of detail using tessellation.
-### Core components
+### Core Components
 - Object Configuration
     - SceneObject instances can be created with tessellation enabled or disabled with the constructor parameters "shouldBeTessellated" and "showTessellation".
 - Distance-Based Tessellation
     - The renderer calculates distance between camera and objects and passes this data to the hull shader to determine the tessellation factors for the objects.
-- [Hull Shader](TessellationHS.hlsl)
+- [Hull Shader](./Rendering-Project/Rendering-Project/TessellationHS.hlsl)
     - Determines tessellation levels with these features:
         - Uses distance-based level of detail (15.0 at close range, 0.01 at 50+ units).
         - Implements "fractional_odd" partitioning for smooth transitions.
         - Configures triangle patches with clockwise winding with "triangle_cw".
-- [Domain Shader](TessellationDS.hlsl)
+- [Domain Shader](./Rendering-Project/Rendering-Project/TessellationDS.hlsl)
     - Places new vertices using Phong tessellation:
         - Calculates both linear interpolation positions and Phong positions.
         - Blends between linear and Phong tessellation (70% Phong bias).
@@ -85,3 +85,21 @@ The system provides a wireframe visualization mode that shows the tessellated ge
 ## Frustum culling using a quadtree
 
 ## GPU-based billboarded particle system
+The particle system is a GPU-accelerated system that simulates and renders thousands of particles using compute shaders and the graphics pipeline.
+
+### Core Components
+- The particle system consists of four parts:
+    - Data Structure
+    - GPU-Based Simulation
+    - Billboard Generation
+    - Procedural Effects
+
+### Simulation Pipeline
+- The particle simulation happens entirely on the GPU through these stages:
+    - [Compute Shader](./Rendering-Project/Rendering-Project/ParticleCS.hlsl)
+        - Applies random forces for natural movement.
+    - [Vertex Shader](./Rendering-Project/Rendering-Project/ParticleVS.hlsl)
+    - [Geometry Shader](./Rendering-Project/Rendering-Project/ParticleGS.hlsl)
+    - [Pixel Shader](./Rendering-Project/Rendering-Project/ParticlePS.hlsl) 
+
+### Integration with Rendering
