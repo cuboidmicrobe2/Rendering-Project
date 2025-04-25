@@ -13,7 +13,6 @@
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-    Microsoft::WRL::ComPtr<ID3D11Device> device;
     {
         Window window(hInstance, nCmdShow);
         Renderer renderer;
@@ -21,8 +20,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         if (FAILED(result)) {
             return result;
         }
-        device = renderer.GetDeviceCOMPTR();
-
         CoolScene coolScene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
                             renderer.GetPS(), renderer.GetDCEMPS());
         CubeMappingAndLighting scene(window, renderer.GetDevice(), renderer.GetDeviceContext(), renderer.meshHandler,
@@ -53,11 +50,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             activeScene->UpdateScene(deltTime_f);
             renderer.Render(activeScene, deltTime_f);
         }
-    }
-    ID3D11Debug* debug = nullptr;
-    if (SUCCEEDED(device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug)))) {
-        debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL | D3D11_RLDO_IGNORE_INTERNAL); // D3D11_RLDO_IGNORE_INTERNAL
-        debug->Release();
     }
     return 0;
 }
