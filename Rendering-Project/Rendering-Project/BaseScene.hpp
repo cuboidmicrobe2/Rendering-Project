@@ -15,7 +15,7 @@
 
 namespace RenderingModes {
 enum RenderingMode {
-    Standard, Diffuse, Normals, Ambient, Specular, position
+    Standard, Diffuse, Normals, Ambient, Specular, Position
 };
 }
 
