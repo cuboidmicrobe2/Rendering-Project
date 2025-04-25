@@ -129,7 +129,7 @@ The frustum culling system efficiently excludes objects outside the camera's vie
   - Scene Organization
 
     - Each object is placed in appropriate nodes based on its bounding box.
-    - Node are subdivided when they contain too many objects.
+    - Nodes are subdivided when they contain too many objects.
     - Dynamic objects are tracked separately.
 
   - Frustum Generation
