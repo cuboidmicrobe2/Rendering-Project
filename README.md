@@ -1,4 +1,43 @@
 # Rendering-Project
+School project by Sebastian Einarsson and Simon F. Nilsson.
+
+## Showcase
+This segment displays the keybinds for the window and what techniques are found in each scene.
+### Controls
+- WASD
+    - Standard movement
+- SPACE
+    - Up
+- CTRL
+    - Down
+- 1
+    - Switches to Scene 1.
+- 2
+    - Switches to Scene 2.
+- E
+    - Pauses the mouse movement on the camera.
+- ESC
+    - Closes down the application.
+- F11
+    - Fullscreen toggle
+
+### Deferred rendering
+- Everything is rendered with this technique.
+
+### Shadow mapping
+- Can be seen on all objects in both Scene 1 and 2.
+
+### Tessellation
+- Can be seen on the sphere in Scene 1.
+- Can be seen on the volcano in Scene 2.
+
+### Dynamic cube environment mapping
+
+### Frustum culling using a quadtree
+- The culling frustum has been made smaller so the culling effect can be seen during runtime.
+
+### GPU-based billboarded particle system
+- Can be seen as the smoke effect from the volcano in Scene 2.
 
 ## Camera
 
