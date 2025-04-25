@@ -98,8 +98,25 @@ The particle system is a GPU-accelerated system that simulates and renders thous
 - The particle simulation happens entirely on the GPU through these stages:
     - [Compute Shader](./Rendering-Project/Rendering-Project/ParticleCS.hlsl)
         - Applies random forces for natural movement.
+        - Updates position based on velocities.
+        - Manages particle lifecycle with automatic respawning.
+        - Runs in thread groups of 32 particles.
     - [Vertex Shader](./Rendering-Project/Rendering-Project/ParticleVS.hlsl)
+        - Retrieves particle position and lifetime.
+        - Calculates particle size based on remaining lifetime.
+        - Passes data to the geometry shader.
     - [Geometry Shader](./Rendering-Project/Rendering-Project/ParticleGS.hlsl)
+        - Generates a quad for each particle.
+        - Orients billboards to always face the camera.
+        - Sets up texture coordinates and color based on particle lifetime.
+        - Outputs two triangles per particle.
     - [Pixel Shader](./Rendering-Project/Rendering-Project/ParticlePS.hlsl) 
+        - Creates patterns based on texture coordinates.
+        - Applies solf edge falloff for natural appearance.
+        - Outputs color data compatible with the deferred rendering pipeline.
 
 ### Integration with Rendering
+- The following steps explain how the particle system interacts with the renderer:
+    - The renderer calls UpdateParticles() to run the compute shader simulation that updates the particles.
+    - A separate draw call handles the particles during the regular scene rendering.
+    - The system temporarily switches pipeline states for particles then reverts for normal geometry.
