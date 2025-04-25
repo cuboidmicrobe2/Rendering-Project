@@ -86,7 +86,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         float mapDepth = DirShadowMaps.SampleLevel(shadowSampler, float3(uv, i), 0.f).r;
         
         const float bias = 0.005f;
-        bool isLit = (mapDepth + bias) >= sceneDepth;
+        bool isLit = (mapDepth + bias) >= sceneDepth || mapDepth == 1;
         
         if (isLit)
         {

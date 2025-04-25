@@ -270,7 +270,11 @@ void CreateDefaultTexture(ID3D11Device* device, ID3D11ShaderResourceView** viewO
         throw std::runtime_error("Couldn't create default texture");
     }
 
-    device->CreateShaderResourceView(pTexture, nullptr, viewOut);
+    hr = device->CreateShaderResourceView(pTexture, nullptr, viewOut);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create srv, Error: " << hr << "\n";
+        throw std::runtime_error("Couldn't create srv");
+    }
     pTexture->Release();
 }
 
