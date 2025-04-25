@@ -151,7 +151,7 @@ The frustum culling system efficiently excludes objects outside the camera's vie
     - Entire branches of the quadtree are skipped if their bounding boxes don't intersect the frustum.
   - Spatial Coherence
     - Objects that are close together are grouped in the same node, improving cache efficiency.
-  - Hierachical Testing
+  - Hierarchical Testing
     - Tests start with broad node boundaries before testing individual objects.
   - Minimal Per-Frame Cost
     - The quadtree structure is built once at initialization, only traversal happens per frame.
