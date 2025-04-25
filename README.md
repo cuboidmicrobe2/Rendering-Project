@@ -107,8 +107,7 @@ The system provides a wireframe visualization mode that shows the tessellated ge
 The OBJ parser is downloaded from [github](https://github.com/Bly7/OBJ-Loader) we use this to get all the vertex data and the textures that are bound to the object. We then use the directXTK WicLoader to load most textures. Only the normalmap and parallax map is loaded in another function since the WicLoader does some sRGB correction that breaks normal maps and parallax maps.
 ## Dynamic cube environment mapping
 
-Dynamic Cube environment mapping is implemented by having a object contain six cameras, one in each direction that then writes the render output to the cubes Texture2DArray. After that, when the cube itself is drawn from another camera it swapps pixel shader to [DCEMPS](./Rendering-Project/Rendering-Project/DCEM.hpp) that samples a cube texture using the reflection vector between the camera view and the object surface. After it has finished drawing it swapps back to the original Pixel shader.
-
+Dynamic Cube environment mapping is implemented by having an object contain six cameras, one in each direction that then writes the render output to the cubes Texture2DArray. After that, when the cube itself is drawn from another camera it swaps pixel shader to [DCEMPS](./Rendering-Project/Rendering-Project/DCEM.hpp) that samples a cube texture using the reflection vector between the camera view and the object surface. After it has finished drawing it swaps back to the original Pixel shader.
 ## Frustum culling using a quadtree
 
 The frustum culling system efficiently excludes objects outside the camera's view using hierarchical spatial testing to minimize rendering overhead and improve performance.
