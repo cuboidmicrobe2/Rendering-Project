@@ -187,7 +187,7 @@ The particle system is a GPU-accelerated system that simulates and renders thous
     - Outputs two triangles per particle.
   - [Pixel Shader](./Rendering-Project/Rendering-Project/ParticlePS.hlsl)
     - Creates patterns based on texture coordinates.
-    - Applies solf edge falloff for natural appearance.
+    - Applies soft edge falloff for natural appearance.
     - Outputs color data compatible with the deferred rendering pipeline.
 
 ### Integration with Rendering
